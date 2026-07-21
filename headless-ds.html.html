@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Once, Configure for Many — Chalhoub Group Headless Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0b;
+  --bg-panel: rgba(255,255,255,0.035);
+  --ink:#f3f0ea;
+  --muted:#9a97a1;
+  --muted-2:#66636d;
+  --line: rgba(243,240,234,0.11);
+  --line-soft: rgba(243,240,234,0.06);
+  --violet:#8f7dff;
+  --violet-deep:#4d3fa8;
+  --amber:#ff9354;
+  --serif: 'Fraunces', serif;
+  --sans: 'Inter', -apple-system, sans-serif;
+}
+*{ box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+html{ scroll-behavior:smooth; }
+body{
+  margin:0; background:var(--bg); color:var(--ink); font-family:var(--sans);
+  font-size:18px; line-height:1.2; overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:1; opacity:.05; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+a{ color:inherit; text-decoration:none; }
+p{ margin:0; }
+::selection{ background:var(--violet); color:#fff; }
+a:focus-visible, button:focus-visible{ outline:2px solid var(--violet); outline-offset:3px; }
+@media (prefers-reduced-motion: reduce){ *{ animation:none !important; transition:none !important; } html{scroll-behavior:auto;} }
+
+.container{ max-width:1280px; margin:0 auto; padding:0 32px; position:relative; z-index:2; }
+@media(max-width:700px){ .container{ padding:0 22px; } }
+
+.eyebrow{ font-family:var(--sans); font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:10px; }
+.eyebrow::before{ content:''; width:16px; height:1px; background:var(--violet); }
+
+h1,h2,h3,h4{ font-family:var(--serif); font-weight:500; margin:0; letter-spacing:0em; }
+em{ font-style:italic; font-weight:400; color:var(--violet); }
+
+/* word-split animation */
+.split-wrap{ overflow:hidden; display:inline-block; }
+.word{ display:inline-block; overflow:hidden; vertical-align:top; }
+.word-inner{ display:inline-block; transform:translateY(115%); opacity:0; transition:transform .7s cubic-bezier(.2,.8,.2,1), opacity .7s ease; }
+.split-wrap.in .word-inner{ transform:translateY(0); opacity:1; }
+
+.fade{ opacity:0; transform:translateY(16px); transition:opacity .7s ease, transform .7s ease; }
+.fade.in{ opacity:1; transform:translateY(0); }
+
+/* ============ NAV ============ */
+#nav{
+  position:fixed; top:0; left:0; width:100%; z-index:300; height:64px; display:flex; align-items:center;
+  background:rgba(10,10,11,0.7); backdrop-filter:blur(14px); border-bottom:1px solid var(--line-soft);
+}
+#nav .container{ display:flex; align-items:center; justify-content:space-evenly;gap: 56px; }
+.logo{ font-family:var(--serif); font-style:regular; font-size:16px; color:var(--ink); }
+.nav-links{ display:flex; gap:30px; list-style:none; margin:0; padding:0; }
+.nav-links a{ font-size:13px; color:var(--muted); position:relative; padding:4px 0; transition:color .2s ease; }
+.nav-links a::after{ content:''; position:absolute; left:0; bottom:0; width:0; height:1px; background:var(--ink); transition:width .25s ease; }
+.nav-links a:hover, .nav-links a.active{ color:var(--ink); }
+.nav-links a.active::after, .nav-links a:hover::after{ width:100%; }
+.cta-pill{ font-size:12.5px; padding:9px 18px; border-radius:20px; border:1px solid var(--line); color:var(--ink); transition:background .2s ease, border-color .2s ease; white-space:nowrap; }
+.cta-pill:hover{ background:var(--ink); color:var(--bg); border-color:var(--ink); }
+@media(max-width:820px){ .nav-links{ display:none; } }
+body{ padding-top:64px; }
+
+/* ============ HERO ============ */
+#hero{ padding:120px 0 70px; position:relative; }
+.hero-bg-line{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:1200px; max-width:200%; height:600px; z-index:0; opacity:.5; pointer-events:none;
+  background: radial-gradient(closest-side, rgba(143,125,255,.16), transparent 70%), radial-gradient(closest-side at 70% 30%, rgba(255,147,84,.12), transparent 70%); filter:blur(20px); }
+.hero-inner{ max-width:900px; }
+#hero h1{ font-size:clamp(42px,7.4vw,92px); line: height 1.1px;; }
+#hero .sub{ margin-top:16px; max-width:600px; font-size:20px; color:var(--muted); line-height:1.6; }
+.hero-cta-row{ display:flex; gap:14px; margin-top:40px; flex-wrap:wrap; }
+.btn-primary{ font-size:14px; padding:13px 26px; border-radius:24px; background:var(--ink); color:var(--bg); font-weight:500; transition:transform .2s ease, background .2s ease; }
+.btn-primary:hover{ transform:translateY(-2px); background:var(--violet); color:#fff; }
+.btn-ghost{ font-size:14px; padding:13px 26px; border-radius:24px; border:1px solid var(--line); color:var(--ink); transition:border-color .2s ease, background .2s ease; }
+.btn-ghost:hover{ border-color:var(--ink); background:var(--bg-panel); }
+
+/* ============ MARQUEE ============ */
+#marquee{ padding:34px 0; border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft); overflow:hidden; }
+.marquee-track{ display:flex; gap:56px; width:max-content; animation:scroll-x 26s linear infinite; }
+.marquee-track span{ font-family:var(--serif); font-style:regular; font-size:18px; color:var(--muted-2); white-space:nowrap; }
+@keyframes scroll-x{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+
+/* ============ SECTION SHELL ============ */
+.section{ padding:130px 0; border-bottom:1px solid var(--line-soft); position:relative; }
+.section-head{ max-width:680px; }
+.section-head h2{ font-size:clamp(30px,4.4vw,52px); line-height:1.1; margin-top:16px; }
+.section-head .lede{ margin-top:20px; font-size:16.5px; color:var(--muted); max-width:560px; line-height:1.6; }
+
+/* ============ STAT ROW ============ */
+.stat-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-soft); margin-top:64px; border:1px solid var(--line-soft); }
+@media(max-width:760px){ .stat-row{ grid-template-columns:1fr; } }
+.stat-cell{ background:var(--bg); padding:34px 28px; }
+.stat-num{ font-family:var(--serif); font-size:clamp(34px,4vw,52px); font-weight:600; }
+.stat-lbl{ margin-top:10px; font-size:14px; color:var(--muted); max-width:220px; line-height:1.5; }
+.stat-src{ margin-top:8px; font-size:10.5px; color:var(--muted-2); text-transform:uppercase; letter-spacing:.06em; }
+
+/* ============ CHIP CLOUD ============ */
+.chip-cloud{ display:flex; flex-wrap:wrap; gap:10px; margin-top:56px; }
+.chip{ font-size:13px; padding:9px 17px; border-radius:20px; border:1px solid var(--line); color:var(--muted); }
+.chip.core{ border-color:var(--violet); color:var(--ink); background:rgba(143,125,255,.12); }
+
+/* ============ DITHER PANEL ============ */
+.dither{ position:relative; overflow:hidden; }
+.dither::before{
+  content:''; position:absolute; inset:0; opacity:.5;
+  background-image: radial-gradient(rgba(143,125,255,.5) 1px, transparent 1.3px);
+  background-size:7px 7px;
+  mask-image: radial-gradient(circle at 30% 40%, black 0%, transparent 65%);
+}
+
+/* ============ PROBLEM GRID ============ */
+.problem-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-soft); margin-top:64px; border:1px solid var(--line-soft); }
+@media(max-width:860px){ .problem-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:560px){ .problem-grid{ grid-template-columns:1fr; } }
+.problem-cell{ background:var(--bg); padding:30px 26px; transition:background .3s ease; }
+.problem-cell:hover{ background:var(--bg-panel); }
+.problem-cell .idx{ font-size:11px; color:var(--muted-2); font-family:var(--sans); }
+.problem-cell h3{ font-family:var(--serif); font-weight:500; font-size:18px; margin-top:14px; }
+.problem-cell p{ font-size:13.5px; color:var(--muted); margin-top:10px; line-height:1.55; }
+
+/* ============ CASE ROW ============ */
+.case-row{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line-soft); margin-top:64px; border:1px solid var(--line-soft); }
+@media(max-width:860px){ .case-row{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){ .case-row{ grid-template-columns:1fr; } }
+.case-cell{ background:var(--bg); padding:28px 24px; min-height:190px; display:flex; flex-direction:column; }
+.case-cell .tag{ font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--violet); }
+.case-cell h4{ font-family:var(--serif); font-size:17px; margin-top:12px; font-weight:500; }
+.case-cell p{ font-size:14px; color:var(--muted); margin-top:10px; flex:1; line-height:1.55; }
+.brand-tags{ display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.brand-tags span{ font-size:12px; padding:3px 9px; border-radius:10px; border:1px solid var(--line); color:var(--muted-2); }
+
+/* ============ MARGIN QUOTE ============ */
+.margin-note{ margin-top:80px; max-width:760px; border-left:1px solid var(--amber); padding-left:28px; }
+.margin-note p{ font-family:var(--serif); font-size:clamp(20px,2.6vw,28px); font-weight:400; font-style:italic; line-height:1.5; }
+.margin-note span{ display:block; font-size:11px; color:var(--muted-2); margin-top:14px; letter-spacing:.08em; text-transform:uppercase; font-family:var(--sans); }
+
+/* ============ STACK ============ */
+.stack-wrap{ margin-top:72px; }
+.stack{ display:flex; flex-direction:column; gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); max-width:760px; }
+.plate{
+  display:flex; align-items:center; gap:20px; padding:20px 26px; background:var(--bg);
+  opacity:0; transform:translateX(-14px); transition:opacity .5s ease, transform .5s ease;
+}
+.plate.in{ opacity:1; transform:translateX(0); }
+.plate:first-child{ background:rgba(143,125,255,.08); }
+.plate .p-name{ font-family:var(--serif); font-weight:500; font-size:16px; min-width:200px; }
+.plate .p-desc{ font-size:14px; color:var(--muted); }
+
+/* ============ STAIRS ============ */
+.stairs{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); margin-top:56px; }
+@media(max-width:700px){ .stairs{ grid-template-columns:repeat(2,1fr); } }
+.stair{ background:var(--bg); padding:26px 20px; }
+.stair:first-child{ background:rgba(255,147,84,.08); }
+.stair .code{ font-size:16px; color:var(--amber); font-weight:600; letter-spacing:.06em; }
+.stair h5{ font-family:var(--serif); font-weight:500; font-size:16px; margin-top:10px; }
+.stair p{ font-size:14px; color:var(--muted); margin-top:8px; line-height:1.5; }
+
+/* ============ FLOW ============ */
+.flow{ display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-top:56px; }
+.flow-pill{ font-size:12.5px; padding:10px 18px; border-radius:18px; border:1px solid var(--line); color:var(--ink); }
+.flow-sep{ color:var(--muted-2); }
+
+/* ============ ROLES ============ */
+.role-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); margin-top:56px; }
+@media(max-width:860px){ .role-row{ grid-template-columns:repeat(3,1fr); } }
+@media(max-width:520px){ .role-row{ grid-template-columns:repeat(2,1fr); } }
+.role-cell{ background:var(--bg); padding:22px 14px; text-align:center; }
+.role-cell .badge{ font-family:var(--serif); font-style:italic; font-size:16px; color:var(--violet); }
+.role-cell h5{ font-size:14px; font-family:var(--sans); font-weight:600; margin-top:10px; }
+.role-cell p{ font-size:14px; color:var(--muted-2); margin-top:5px; line-height:1.4; }
+
+.tagline-block{ margin-top:88px; padding:44px 0; border-top:1px solid var(--line-soft); border-bottom:1px solid var(--line-soft); text-align:center; }
+.tagline-block h3{ font-size:clamp(26px,3.6vw,42px); font-style:italic; color:var(--violet); }
+
+/* ============ KPI ============ */
+.kpi-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-soft); border:1px solid var(--line-soft); margin-top:64px; }
+@media(max-width:860px){ .kpi-row{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){ .kpi-row{ grid-template-columns:1fr; } }
+.kpi-cell{ background:var(--bg); padding:32px 26px; }
+.kpi-num{ font-family:var(--serif); font-size:clamp(28px,3.2vw,40px); color:var(--amber); }
+.kpi-lbl{ margin-top:10px; font-size:14px; color:var(--muted); line-height:1.5; }
+
+.principle{ margin-top:80px; max-width:820px; }
+.principle p{ font-family:var(--serif); font-size:clamp(20px,2.6vw,28px); line-height:1.55; }
+
+/* ============ CLOSE ============ */
+#close .refs{ margin-top:48px; display:flex; flex-direction:column; gap:14px; }
+#close .refs a{ font-size:14px; color:var(--muted); border-bottom:1px solid transparent; transition:border-color .2s ease, color .2s ease; }
+#close .refs a:hover{ color:var(--ink); border-color:var(--line); }
+
+footer{ padding:40px 0 50px; text-align:center; }
+footer p{ font-size:12px; color:var(--muted-2); }
+footer a.top{ display:inline-block; margin-bottom:16px; font-size:13px; color:var(--muted); }
+footer a.top:hover{ color:var(--ink); }
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="container">
+    <a class="logo" href="#hero">Headless Design System </a>
+    <ul class="nav-links">
+      <li><a href="#context" data-nav>Context</a></li>
+      <li><a href="#challenges" data-nav>Challenges</a></li>
+      <li><a href="#lessons" data-nav>Lessons</a></li>
+      <li><a href="#solution" data-nav>Solution</a></li>
+      <li><a href="#success" data-nav>Success</a></li>
+    </ul>
+    <a class="cta-pill" href="#solution">View the system</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<section id="hero">
+  <div class="hero-bg-line"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="eyebrow fade">Chalhoub Group · Headless Commerce · Product And Design · Case Study</div>
+      <h1 style="margin-top:20px;">
+        <span class="split-wrap" data-split><span class="word"><span class="word-inner">Design</span></span> <span class="word"><span class="word-inner">once,</span></span><br><span class="word"><span class="word-inner"><em>configure</em></span></span> <span class="word"><span class="word-inner">for</span></span> <span class="word"><span class="word-inner">many.</span></span></span>
+      </h1>
+      <p class="sub fade">FACES is the first brand to validate a shared design system built to scale across every brand that follows.</p>
+      <div class="hero-cta-row fade">
+        <a class="btn-primary" href="#solution">See the architecture</a>
+        <a class="btn-ghost" href="#success">View outcomes</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MARQUEE ================= -->
+<section id="marquee">
+  <div class="marquee-track" id="marqueeTrack">
+    <span>FACES</span><span>Tanagra</span><span>Swarovski</span><span>Lacoste</span><span>Tory Burch</span><span>Guess</span><span>The Deal</span><span>GAP Group</span>
+    <span>Michael Kors</span><span>Jacquemus</span><span>AXEL Arigato</span><span>TUMI</span><span>GAP</span><span>Athleta</span><span>Banana Republic</span><span>Tryano</span>
+  </div>
+</section>
+
+<!-- ================= 01 CONTEXT ================= -->
+<section id="context" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow fade">01 — Context</div>
+      <h2 class="fade">A platform migration is also a design <em>opportunity</em>.</h2>
+      <p class="lede fade">Chalhoub Group is moving from a monolithic commerce platform to headless architecture — freeing teams to ship faster without rebuilding the whole stack for every change.</p>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-cell fade"><div class="stat-num"><span class="countup" data-target="8.4" data-suffix="%" data-prefix="+">0</span></div><div class="stat-lbl">Retail conversion lift from 0.1s faster mobile load</div><div class="stat-src">Deloitte × Google</div></div>
+      <div class="stat-cell fade"><div class="stat-num"><span class="countup" data-target="9.2" data-suffix="%" data-prefix="+">0</span></div><div class="stat-lbl">Average order value, same speed gain</div><div class="stat-src">Deloitte × Google</div></div>
+      <div class="stat-cell fade"><div class="stat-num">20 min</div><div class="stat-lbl">Campaign publishing time, down from weeks</div><div class="stat-src">Contentful, Clover</div></div>
+    </div>
+
+    <p class="lede fade" style="margin-top:60px; max-width:600px;">For Design, this isn't a simple migration. It requires one shared architecture connecting seven disciplines:</p>
+    <div class="chip-cloud">
+      <span class="chip core fade">Design tokens</span>
+      <span class="chip fade">UI components</span>
+      <span class="chip fade">White-label UX patterns</span>
+      <span class="chip fade">Contentful CMS modules</span>
+      <span class="chip fade">Brand themes</span>
+      <span class="chip fade">Production code</span>
+      <span class="chip fade">Accessibility &amp; localization</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 CHALLENGES ================= -->
+<section id="challenges" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow fade">02 — Challenges</div>
+      <h2 class="fade">Seven ways fragmentation <em>compounds</em>.</h2>
+      <p class="lede fade">Design teams have worked across brands and squads in silos — solving the same problems repeatedly, with no shared reference point.</p>
+    </div>
+
+    <div class="problem-grid">
+      <div class="problem-cell fade"><div class="idx">01</div><h2>Designers work in silos</h3><p>Buttons, cards, nav, checkout — the same components look and behave differently across brand teams.</p></div>
+      <div class="problem-cell fade"><div class="idx">02</div><h2>No source of truth</h3><p>No central place shows the latest approved component, its variants, owner, or lifecycle status.</p></div>
+      <div class="problem-cell fade"><div class="idx">03</div><h2>Unclear ownership</h3><p>No defined system owner or contribution model — local needs quietly become permanent variants.</p></div>
+      <div class="problem-cell fade"><div class="idx">04</div><h2>Design ≠ production</h3><p>Figma and coded components evolve separately, creating QA gaps and lower design-to-code confidence.</p></div>
+      <div class="problem-cell fade"><div class="idx">05</div><h2>Variations accumulate</h3><p>New requirements spawn new variants with no framework to decide: shared, themed, or true exception.</p></div>
+      <div class="problem-cell fade"><div class="idx">06</div><h2>CMS disconnected</h3><p>Content modules built apart from components become either too rigid, or too open to misuse.</p></div>
+    </div>
+    <div class="problem-grid" style="margin-top:1px;">
+      <div class="problem-cell fade" style="grid-column:1/-1;"><div class="idx">07</div><h2>Edge cases, repeated</h3><p>RTL, Arabic, accessibility and empty/error states get solved per-project instead of built once — quality depends on which squad happened to touch it.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 03 LESSONS ================= -->
+<section id="lessons" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow fade">03 — Lessons</div>
+      <h2 class="fade">Duplication was never the real <em>problem</em>.</h2>
+      <p class="lede fade">Four prior efforts point to the same root cause: missing shared architecture, governance, and a reliable design-to-code process.</p>
+    </div>
+
+    <div class="case-row">
+      <div class="case-cell fade"><div class="tag">Case 01</div><h2>OMS</h4><p>Fragmented across brand implementations — local fixes created inconsistent journeys and duplicate functionality.</p></div>
+      <div class="case-cell fade"><div class="tag">Case 02</div><h2>Cart · Checkout · Account</h4><p>Shared customer needs, built differently every time — where one configurable framework would have done.</p></div>
+      <div class="case-cell fade"><div class="tag">Case 03</div><h2>Owned Brands</h4><p>Meant to share assets — one-off components emerged anyway without early governance.</p><div class="brand-tags"><span>FACES</span><span>Tanagra</span><span>The Deal</span></div></div>
+      <div class="case-cell fade"><div class="tag">Case 04</div><h2>Partner Brands</h4><p>Composable by design, same functionality, but misaligned squads surfaced defects late, at QA and UAT.</p><div class="brand-tags"><span>AXEL Arigato</span><span>TUMI</span><span>GAP</span><span>Athleta</span><span>Banana Republic</span></div></div>
+    </div>
+
+    <div class="stat-row" style="margin-top:56px;">
+      <div class="stat-cell fade"><div class="stat-num"><span class="countup" data-target="70" data-prefix="~" data-suffix="%">0</span></div><div class="stat-lbl">of e-commerce carts are abandoned industry-wide</div><div class="stat-src">Baymard Institute</div></div>
+      <div class="stat-cell fade"><div class="stat-num"><span class="countup" data-target="35" data-prefix="~" data-suffix="%">0</span></div><div class="stat-lbl">potential conversion gain from better checkout design</div><div class="stat-src">Baymard Institute</div></div>
+    </div>
+
+    <div class="margin-note fade">
+      <p>"A scalable headless platform cannot be achieved if every brand continues to design and develop its experiences independently."</p>
+      <span>Core lesson</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 04 SOLUTION ================= -->
+<section id="solution" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow fade">04 — Solution</div>
+      <h2 class="fade">One layered architecture, built <em>alongside</em> FACES.</h2>
+      <p class="lede fade">Structure and behavior stay shared. Brand difference comes only through tokens, configuration, content and approved composition.</p>
+    </div>
+
+    <div class="stack-wrap">
+      <div class="stack" id="stack">
+        <div class="plate"><span class="p-name">Brand Themes</span><span class="p-desc">Color, type, imagery, density, visual expression — per brand</span></div>
+        <div class="plate"><span class="p-name">Page Layouts</span><span class="p-desc">Approved compositions — home, PLP, PDP, cart, checkout, account</span></div>
+        <div class="plate"><span class="p-name">CMS Modules</span><span class="p-desc">Editor-configurable heroes, banners, carousels, category grids</span></div>
+        <div class="plate"><span class="p-name">UX Patterns</span><span class="p-desc">Search, discovery, auth, cart, checkout, error recovery</span></div>
+        <div class="plate"><span class="p-name">Core UI Components</span><span class="p-desc">Buttons, inputs, cards, nav, dialogs, tabs, feedback</span></div>
+        <div class="plate"><span class="p-name">Foundations</span><span class="p-desc">Tokens, grid, spacing, type roles, radius, elevation, motion</span></div>
+      </div>
+    </div>
+
+    <p class="lede fade" style="margin-top:80px; max-width:600px;">Map broadly. Build deliberately. Only validated, near-term needs get built during the pilot.</p>
+    <div class="stairs">
+      <div class="stair fade"><div class="code">P0</div><h5>Foundation</h5><p>Required across every brand</p></div>
+      <div class="stair fade"><div class="code">P1</div><h5>FACES Pilot</h5><p>Required for approved journeys</p></div>
+      <div class="stair fade"><div class="code">P2</div><h5>Near-Term Scale</h5><p>Defined now, built when needed</p></div>
+      <div class="stair fade"><div class="code">P3</div><h5>Brand Exception</h5><p>Stays outside core until proven</p></div>
+    </div>
+
+    <p class="lede fade" style="margin-top:80px; max-width:600px;">Design, code and documentation stay connected end to end.</p>
+    <div class="flow fade">
+      <div class="flow-pill">Figma variables</div><span class="flow-sep">→</span>
+      <div class="flow-pill">Engineering contracts</div><span class="flow-sep">→</span>
+      <div class="flow-pill">Production library</div><span class="flow-sep">→</span>
+      <div class="flow-pill">Storybook</div><span class="flow-sep">→</span>
+      <div class="flow-pill">Code Connect</div><span class="flow-sep">→</span>
+      <div class="flow-pill">Headless site</div>
+    </div>
+
+    <p class="lede fade" style="margin-top:80px; max-width:600px;">Ownership is explicit, across every discipline.</p>
+    <div class="role-row">
+      <div class="role-cell fade"><div class="badge">Zainab / Ruairi</div><h2>Principal Sponsor</h5><p>Strategic direction</p></div>
+      <div class="role-cell fade"><div class="badge">Erwin Superable</div><h2>System Owner</h5><p>Architecture &amp; standards</p></div>
+      <div class="role-cell fade"><div class="badge">Charles / Yousra</div><h2>White Label Authors</h5><p>Build &amp; document</p></div>
+      <div class="role-cell fade"><div class="badge">Aya / Francesco</div><h2>Product / Brand Design</h5><p>Apply &amp; surface gaps</p></div>
+      <div class="role-cell fade"><div class="badge">Mindera / Chalhoub Tech</div><h2>Engineering</h5><p>Implementation &amp; release</p></div>
+      <div class="role-cell fade"><div class="badge">FACES Business</div><h2>Content Teams</h5><p>Editorial quality</p></div>
+    </div>
+
+    <div class="tagline-block fade"><h3>"Design once, configure for many."</h3></div>
+  </div>
+</section>
+
+<!-- ================= 05 SUCCESS ================= -->
+<section id="success" class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow fade">05 — Success</div>
+      <h2 class="fade">Not how many components. How much <em>reuse</em>.</h2>
+      <p class="lede fade">A second brand should adopt FACES journeys mostly through theming and configuration — proof the system scales beyond its pilot.</p>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi-cell fade"><div class="kpi-num"><span class="countup" data-target="80" data-prefix="≥" data-suffix="%">0</span></div><div class="kpi-lbl">FACES interfaces using approved shared assets</div></div>
+      <div class="kpi-cell fade"><div class="kpi-num"><span class="countup" data-target="90" data-prefix="≥" data-suffix="%">0</span></div><div class="kpi-lbl">Design-to-code parity across audited components</div></div>
+      <div class="kpi-cell fade"><div class="kpi-num"><span class="countup" data-target="100" data-suffix="%">0</span></div><div class="kpi-lbl">Released components fully documented</div></div>
+      <div class="kpi-cell fade"><div class="kpi-num">Zero</div><div class="kpi-lbl">Critical accessibility issues at release</div></div>
+      <div class="kpi-cell fade"><div class="kpi-num"><span class="countup" data-target="10" data-prefix="&lt;" data-suffix="%">0</span></div><div class="kpi-lbl">Pilot components needing FACES-only overrides</div></div>
+      <div class="kpi-cell fade"><div class="kpi-num">Tokens</div><div class="kpi-lbl">Primary path for second-brand adoption</div></div>
+    </div>
+
+    <div class="principle fade">
+      <p>When a new requirement appears, the question isn't <em>"do we need a new component?"</em> — it's <em>"is this reuse, configuration, composition, extension, CMS control, or a true brand exception?"</em></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CLOSE ================= -->
+<section id="close" class="section" style="border-bottom:none;">
+  <div class="container">
+    <div class="section-head">
+      <div class="eyebrow fade">06 — Close</div>
+      <h2 class="fade">The system is the migration's real <em>deliverable</em>.</h2>
+      <p class="lede fade">Used as a deliberate pilot, FACES lets Chalhoub Group build a foundation that supports every brand that follows — with shared logic, controlled flexibility, and real alignment between Design, Engineering and Content.</p>
+  </div>
+  <div class="refs fade">
+      <a href="https://chalhoub.atlassian.net/wiki/x/AwAPeAE" target="_blank" rel="noopener">
+Building a Multi-Brand Design System for Headless Commerce
+
+
+</a>
+      <a href="https://chalhoub.atlassian.net/wiki/x/LoDhdwE" target="_blank" rel="noopener">
+FACES Headless Product Roadmap & Stakeholder Engagement Plan
+
+
+</a>
+</section>
+
+<footer>
+  <div class="container">
+    <a class="top" href="#hero">Back to top ↑</a>
+    <p>Headless Design System For Chalhoub Group · FACES Pilot · Product Design Case Study</p>
+  </div>
+</footer>
+
+<script>
+// split text into animated words
+document.querySelectorAll('[data-split]').forEach(el=>{});
+
+const splitEls = document.querySelectorAll('.split-wrap');
+const splitObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const words = entry.target.querySelectorAll('.word-inner');
+      words.forEach((w,i)=>{ w.style.transitionDelay = (i*55)+'ms'; });
+      entry.target.classList.add('in');
+      splitObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.2 });
+splitEls.forEach(el=>splitObserver.observe(el));
+
+// fade reveal
+const fadeEls = document.querySelectorAll('.fade');
+const fadeObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){ entry.target.classList.add('in'); fadeObserver.unobserve(entry.target); }
+  });
+}, { threshold:0.15 });
+fadeEls.forEach(el=>fadeObserver.observe(el));
+
+// stack plates stagger
+const plates = document.querySelectorAll('.plate');
+const plateObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const idx = Array.from(plates).indexOf(entry.target);
+      setTimeout(()=>entry.target.classList.add('in'), idx*90);
+      plateObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold:0.3 });
+plates.forEach(p=>plateObserver.observe(p));
+
+// count-up numbers
+const countEls = document.querySelectorAll('.countup');
+const countObserver = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const el = entry.target;
+      const target = parseFloat(el.dataset.target);
+      const prefix = el.dataset.prefix || '';
+      const suffix = el.dataset.suffix || '';
+      const isDecimal = el.dataset.target.includes('.');
+      const duration = 1300;
+      const start = performance.now();
+      function tick(now){
+        const p = Math.min((now-start)/duration, 1);
+        const eased = 1 - Math.pow(1-p, 3);
+        const val = target*eased;
+        el.textContent = prefix + (isDecimal ? val.toFixed(1) : Math.round(val)) + suffix;
+        if(p<1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+      countObserver.unobserve(el);
+    }
+  });
+}, { threshold:0.5 });
+countEls.forEach(el=>countObserver.observe(el));
+
+// scrollspy
+const navLinks = document.querySelectorAll('[data-nav]');
+const sections = Array.from(navLinks).map(a => document.querySelector(a.getAttribute('href')));
+const spy = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      const id = '#' + entry.target.id;
+      navLinks.forEach(a=>a.classList.toggle('active', a.getAttribute('href')===id));
+    }
+  });
+}, { rootMargin:'-40% 0px -55% 0px', threshold:0 });
+sections.forEach(s=>{ if(s) spy.observe(s); });
+</script>
+</body>
+</html>
