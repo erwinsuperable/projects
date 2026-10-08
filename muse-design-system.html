@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUSE Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   MUSE DESIGN TOKENS — extracted from Figma variables
+   ============================================================ */
+:root{
+  /* Base ramps */
+  --loyalty-900:#15203B; --loyalty-800:#1F304D; --loyalty-700:#2F4466; --loyalty-600:#435E85;
+  --loyalty-500:#5D79A1; --loyalty-400:#7F96B8; --loyalty-300:#A4B5CE; --loyalty-200:#C3CEDF;
+  --loyalty-100:#E2E7F0; --loyalty-50:#F7FAFF;
+  --steel-900:#192226; --steel-800:#33444C; --steel-700:#4C6672; --steel-600:#668898; --steel-500:#7FAABE;
+  --steel-400:#99BBCB; --steel-300:#B2CCD8; --steel-200:#CCDDE5; --steel-100:#E5EEF2; --steel-50:#EFF8FC;
+  --sapphire-900:#040822; --sapphire-800:#070F44; --sapphire-700:#0B1766; --sapphire-600:#0E1E88; --sapphire-500:#1226AA;
+  --sapphire-400:#4151BB; --sapphire-300:#717DCC; --sapphire-200:#A0A8DD; --sapphire-100:#D0D4EE; --sapphire-50:#EEF0FF;
+  --seagreen-900:#001A13; --seagreen-800:#003427; --seagreen-700:#004D3A; --seagreen-600:#00674E; --seagreen-500:#008161;
+  --seagreen-400:#339A81; --seagreen-300:#66B3A0; --seagreen-200:#99CDC0; --seagreen-100:#CCE6DF; --seagreen-50:#E8FAF5;
+  --redorange-900:#280D02; --redorange-800:#501903; --redorange-700:#782605; --redorange-600:#A03206; --redorange-500:#C83F08;
+  --redorange-400:#D36539; --redorange-300:#DE8C6B; --redorange-200:#E9B29C; --redorange-100:#F4D9CE; --redorange-50:#FDEFE9;
+  --scarlet-900:#230006; --scarlet-800:#46000D; --scarlet-700:#6A0013; --scarlet-600:#8D001A; --scarlet-500:#B00020;
+  --scarlet-400:#C0334D; --scarlet-300:#D06679; --scarlet-200:#DF99A6; --scarlet-100:#EFCCD2; --scarlet-50:#FFEFF2;
+  --gold-500:#DAA520; --silver-500:#AFB1B7; --silver-800:#464749; --bronze-500:#AE5520;
+
+  /* Semantic — foreground */
+  --fg-title-default:var(--loyalty-900); --fg-title-muted:var(--loyalty-700); --fg-title-emphasis:#fff;
+  --fg-body-default:var(--loyalty-900); --fg-body-muted:var(--loyalty-700); --fg-body-subtle:var(--loyalty-500); --fg-body-emphasis:#fff;
+  --fg-icon-default:var(--loyalty-900); --fg-icon-muted:var(--loyalty-400); --fg-icon-emphasis:#fff;
+  /* Semantic — surfaces */
+  --bg-default:#fff; --bg-muted:var(--loyalty-100); --bg-subtle:var(--loyalty-50); --bg-emphasis:var(--loyalty-900);
+  --stroke-default:var(--loyalty-100); --stroke-muted:var(--loyalty-50); --stroke-emphasis:var(--loyalty-900);
+  --divider-default:var(--loyalty-100);
+  /* Functional */
+  --fg-info:var(--sapphire-600); --fg-warning:var(--redorange-600); --fg-success:var(--seagreen-600); --fg-danger:var(--scarlet-600);
+  --bg-info:var(--sapphire-50); --bg-warning:var(--redorange-50); --bg-success:var(--seagreen-50); --bg-danger:var(--scarlet-50);
+  /* Buttons */
+  --btn-primary-bg:var(--loyalty-900); --btn-primary-bg-hover:var(--loyalty-700); --btn-primary-bg-pressed:var(--loyalty-500); --btn-primary-bg-disabled:var(--loyalty-100);
+  --btn-secondary-stroke:var(--loyalty-800); --btn-secondary-bg-hover:var(--loyalty-900); --btn-secondary-bg-pressed:var(--loyalty-500); --btn-secondary-bg-disabled:var(--loyalty-100);
+  --btn-contrast-bg:#fff; --btn-contrast-bg-hover:var(--loyalty-50); --btn-contrast-bg-pressed:var(--loyalty-100);
+  /* Inputs & controls */
+  --input-stroke:var(--loyalty-200); --input-stroke-hover:var(--loyalty-300); --input-stroke-active:var(--loyalty-900);
+  --input-stroke-error:var(--scarlet-500); --input-bg-error:var(--scarlet-50); --input-bg-disabled:var(--loyalty-50);
+  --control-stroke:var(--loyalty-200); --control-stroke-hover:var(--loyalty-400); --control-stroke-selected:var(--loyalty-900);
+  --card-stroke:var(--loyalty-100); --card-stroke-hover:var(--loyalty-300); --card-stroke-pressed:var(--loyalty-700);
+
+  /* Spacing */
+  --sp-3xs:2px; --sp-2xs:4px; --sp-xs:8px; --sp-sm:12px; --sp-md:14px; --sp-lg:16px; --sp-xl:18px;
+  --sp-2xl:20px; --sp-4xl:24px; --sp-5xl:28px; --sp-6xl:32px; --sp-7xl:40px; --sp-8xl:48px; --sp-9xl:56px; --sp-10xl:64px; --sp-12xl:80px;
+  /* Radius */
+  --r-xs:2px; --r-sm:4px; --r-md:8px; --r-lg:16px; --r-xl:24px; --r-2xl:32px; --r-max:9999px;
+  /* Elevation */
+  --shadow-flat:0 1px 2px rgba(0,0,0,.05);
+  --shadow-xs:0 1px 2px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.08);
+  --shadow-sm:0 2px 4px -1px rgba(0,0,0,.04),0 4px 6px -1px rgba(0,0,0,.08);
+  --shadow-md:0 0 30px rgba(0,0,0,.10);
+  --shadow-lg:0 10px 10px -5px rgba(0,0,0,.04),0 20px 25px -5px rgba(0,0,0,.10);
+  --shadow-xl:0 25px 50px -12px rgba(0,0,0,.16);
+  --shadow-inner:inset 0 2px 4px rgba(0,0,0,.06);
+  /* Type */
+  --font-serif:'Playfair Display',Georgia,serif;
+  --font-sans:'Mulish',-apple-system,sans-serif;
+}
+
+/* ============================================================
+   DOC SITE CHROME — built from the tokens above
+   ============================================================ */
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{font-family:var(--font-sans);font-size:16px;line-height:1.5;color:var(--fg-body-default);background:var(--bg-default)}
+::selection{background:var(--loyalty-200)}
+
+.layout{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+.sidebar{border-right:1px solid var(--divider-default);padding:var(--sp-6xl) var(--sp-4xl);position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg-default)}
+.sidebar .mark{font-family:var(--font-serif);font-weight:600;font-size:28px;letter-spacing:.02em;color:var(--fg-title-default);display:block;margin-bottom:var(--sp-2xs)}
+.sidebar .mark-sub{font-size:12px;color:var(--fg-body-subtle);display:block;margin-bottom:var(--sp-7xl)}
+.nav-group{margin-bottom:var(--sp-4xl)}
+.nav-group h4{font-size:12px;font-weight:600;color:var(--fg-body-subtle);margin-bottom:var(--sp-xs);letter-spacing:.04em}
+.nav-group a{display:block;font-size:14px;line-height:1;color:var(--fg-body-muted);text-decoration:none;padding:7px var(--sp-sm);margin-left:calc(-1 * var(--sp-sm));border-radius:var(--r-sm)}
+.nav-group a:hover{background:var(--bg-subtle);color:var(--fg-body-default)}
+.nav-group a.active{background:var(--bg-muted);color:var(--fg-title-default);font-weight:600}
+.nav-group a:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:1px}
+
+main{max-width:1060px;padding:0 var(--sp-9xl) var(--sp-12xl)}
+
+/* Hero */
+.hero{padding:var(--sp-12xl) 0 var(--sp-9xl);border-bottom:1px solid var(--divider-default)}
+.hero h1{font-family:var(--font-serif);font-weight:600;font-size:56px;line-height:64px;color:var(--fg-title-default);max-width:15ch}
+.hero p{margin-top:var(--sp-lg);font-size:18px;line-height:26px;color:var(--fg-body-muted);max-width:52ch}
+.hero .ramp-band{display:flex;height:10px;border-radius:var(--r-max);overflow:hidden;margin-top:var(--sp-7xl);max-width:560px}
+.hero .ramp-band span{flex:1}
+.hero .meta{margin-top:var(--sp-sm);font-size:12px;color:var(--fg-body-subtle)}
+
+/* Sections */
+section{padding-top:var(--sp-10xl);scroll-margin-top:var(--sp-4xl)}
+section>h2{font-family:var(--font-serif);font-weight:600;font-size:32px;line-height:40px;color:var(--fg-title-default)}
+section>.lede{margin-top:var(--sp-xs);color:var(--fg-body-muted);max-width:60ch}
+h3.sub{font-family:var(--font-sans);font-weight:600;font-size:18px;margin:var(--sp-7xl) 0 var(--sp-lg);color:var(--fg-title-default)}
+.note{font-size:13px;line-height:1.55;color:var(--fg-body-subtle);max-width:62ch;margin-top:var(--sp-sm)}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85em;background:var(--bg-subtle);border:1px solid var(--stroke-default);padding:1px 5px;border-radius:var(--r-sm);color:var(--fg-body-muted)}
+
+/* Specimen frame: the canvas on which live components sit */
+.canvas{border:1px solid var(--stroke-default);border-radius:var(--r-md);padding:var(--sp-6xl);display:flex;flex-wrap:wrap;gap:var(--sp-lg);align-items:center;background:var(--bg-default)}
+.canvas.dark{background:var(--bg-emphasis)}
+.canvas.subtle{background:var(--bg-subtle)}
+.canvas + .canvas{margin-top:var(--sp-sm)}
+.canvas .cap{width:100%;font-size:12px;color:var(--fg-body-subtle);margin:calc(-1*var(--sp-sm)) 0 var(--sp-2xs)}
+.canvas.dark .cap{color:var(--loyalty-300)}
+
+/* Token tables */
+table.tokens{width:100%;border-collapse:collapse;font-size:14px;margin-top:var(--sp-lg)}
+table.tokens th{text-align:left;font-weight:600;color:var(--fg-body-subtle);font-size:12px;padding:var(--sp-xs) var(--sp-sm);border-bottom:1px solid var(--stroke-emphasis)}
+table.tokens td{padding:var(--sp-xs) var(--sp-sm);border-bottom:1px solid var(--divider-default);color:var(--fg-body-muted);vertical-align:middle}
+table.tokens td:first-child{color:var(--fg-body-default)}
+.dot{display:inline-block;width:14px;height:14px;border-radius:var(--r-sm);border:1px solid rgba(0,0,0,.08);vertical-align:-2px;margin-right:8px}
+
+/* Color grid */
+.ramp{margin-top:var(--sp-4xl)}
+.ramp h4{font-size:14px;font-weight:600;margin-bottom:var(--sp-xs)}
+.ramp .cells{display:grid;grid-template-columns:repeat(10,1fr);border-radius:var(--r-md);overflow:hidden;border:1px solid var(--stroke-default)}
+.cell{height:72px;padding:var(--sp-xs);display:flex;flex-direction:column;justify-content:flex-end;cursor:pointer;font-size:11px;line-height:1.3;border:0;font-family:var(--font-sans);text-align:left;position:relative}
+.cell b{font-weight:600}
+.cell:focus-visible{outline:2px solid #fff;outline-offset:-4px}
+.cell .copied{position:absolute;inset:0;display:grid;place-items:center;background:rgba(21,32,59,.85);color:#fff;font-size:11px;opacity:0;transition:opacity .15s}
+.cell.did-copy .copied{opacity:1}
+
+/* Typography specimens */
+.type-row{display:grid;grid-template-columns:220px 1fr;gap:var(--sp-4xl);padding:var(--sp-lg) 0;border-bottom:1px solid var(--divider-default);align-items:baseline}
+.type-row .spec{font-size:12px;color:var(--fg-body-subtle);line-height:1.6}
+.type-row .spec b{color:var(--fg-body-muted);font-weight:600;display:block}
+
+/* Spacing & radius scales */
+.scale-row{display:grid;grid-template-columns:130px 60px 1fr;gap:var(--sp-lg);align-items:center;padding:6px 0;font-size:13px;color:var(--fg-body-muted)}
+.scale-row .bar{height:14px;background:var(--loyalty-300);border-radius:var(--r-xs)}
+.radius-grid{display:flex;flex-wrap:wrap;gap:var(--sp-lg);margin-top:var(--sp-lg)}
+.radius-chip{width:120px;height:88px;background:var(--bg-subtle);border:1px solid var(--loyalty-300);display:flex;align-items:flex-end;padding:var(--sp-xs);font-size:12px;color:var(--fg-body-muted)}
+.elev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--sp-4xl);margin-top:var(--sp-lg)}
+.elev-chip{background:#fff;border-radius:var(--r-md);height:96px;display:flex;align-items:flex-end;padding:var(--sp-sm);font-size:12px;color:var(--fg-body-muted)}
+
+/* ============================================================
+   LIVE COMPONENTS — implemented from MUSE tokens
+   ============================================================ */
+
+/* Buttons (button-cta) */
+.btn{font-family:var(--font-sans);font-weight:600;border-radius:var(--r-max);border:1px solid transparent;cursor:pointer;display:inline-flex;align-items:center;gap:var(--sp-xs);transition:background .12s,border-color .12s;white-space:nowrap}
+.btn:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:2px}
+.btn.lg{height:56px;padding:0 var(--sp-4xl);font-size:16px}
+.btn.md{height:48px;padding:0 var(--sp-2xl);font-size:16px}
+.btn.sm{height:40px;padding:0 var(--sp-lg);font-size:14px}
+.btn.primary{background:var(--btn-primary-bg);color:var(--fg-body-emphasis)}
+.btn.primary:hover{background:var(--btn-primary-bg-hover)}
+.btn.primary:active{background:var(--btn-primary-bg-pressed)}
+.btn.primary:disabled{background:var(--btn-primary-bg-disabled);color:var(--fg-body-subtle);cursor:not-allowed}
+.btn.secondary{background:transparent;border-color:var(--btn-secondary-stroke);color:var(--fg-body-default)}
+.btn.secondary:hover{background:var(--btn-secondary-bg-hover);color:#fff}
+.btn.secondary:active{background:var(--btn-secondary-bg-pressed);color:#fff;border-color:transparent}
+.btn.secondary:disabled{background:var(--btn-secondary-bg-disabled);border-color:transparent;color:var(--fg-body-subtle);cursor:not-allowed}
+.btn.contrast{background:var(--btn-contrast-bg);color:var(--fg-body-default)}
+.btn.contrast:hover{background:var(--btn-contrast-bg-hover)}
+.btn.contrast:active{background:var(--btn-contrast-bg-pressed)}
+.btn.contrast:disabled{background:var(--loyalty-100);color:var(--fg-body-subtle);cursor:not-allowed}
+.btn .spinner{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Icon buttons */
+.ibtn{border-radius:var(--r-max);border:1px solid transparent;cursor:pointer;display:inline-grid;place-items:center;transition:background .12s;background:transparent;color:var(--fg-icon-default)}
+.ibtn:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:2px}
+.ibtn.sm{width:32px;height:32px}.ibtn.md{width:40px;height:40px}.ibtn.lg{width:48px;height:48px}
+.ibtn svg{width:20px;height:20px}
+.ibtn.primary{background:#fff;border-color:var(--btn-secondary-stroke)}
+.ibtn.primary:hover{background:var(--loyalty-100)}
+.ibtn.primary:active{background:var(--loyalty-900);color:#fff}
+.ibtn.primary:disabled{background:var(--loyalty-50);border-color:transparent;color:var(--fg-icon-muted);cursor:not-allowed}
+.ibtn.ghost{color:#fff}
+.ibtn.ghost:hover{background:rgba(255,255,255,.1)}
+.ibtn.ghost:active{background:rgba(255,255,255,.1)}
+
+/* Pills */
+.pill{height:32px;padding:0 var(--sp-md);border-radius:var(--r-max);border:1px solid var(--loyalty-900);background:transparent;font-family:var(--font-sans);font-size:14px;color:var(--fg-body-default);cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .12s}
+.pill:hover{background:var(--loyalty-100);border-color:var(--loyalty-800)}
+.pill:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:2px}
+.pill[aria-pressed="true"]{background:var(--loyalty-900);color:#fff}
+.pill.error{border-color:var(--fg-danger);color:var(--fg-danger);background:var(--bg-danger)}
+.pill:disabled{background:var(--loyalty-50);border-color:var(--loyalty-100);color:var(--fg-body-subtle);cursor:not-allowed}
+
+/* Banner tag */
+.bannertag{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 var(--sp-xs);border-radius:var(--r-sm);font-size:12px;font-weight:600}
+.bannertag.translucent{background:rgba(21,32,59,.4);color:#fff;backdrop-filter:blur(4px)}
+.bannertag.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.7)}
+.bannertag.lg{height:32px;padding:0 var(--sp-sm);font-size:14px}
+
+/* Text field */
+.field{display:flex;flex-direction:column;gap:6px;width:280px}
+.field label{font-size:14px;font-weight:600;color:var(--fg-body-default)}
+.field .box{position:relative;display:flex;align-items:center}
+.field input{width:100%;height:48px;padding:0 var(--sp-md);font:400 16px var(--font-sans);color:var(--fg-body-default);background:#fff;border:1px solid var(--input-stroke);border-radius:var(--r-md);transition:border-color .12s}
+.field input::placeholder{color:var(--fg-body-subtle)}
+.field input:hover{border-color:var(--input-stroke-hover)}
+.field input:focus{border-color:var(--input-stroke-active);outline:none}
+.field.error input{border-color:var(--input-stroke-error);background:var(--input-bg-error)}
+.field input:disabled{background:var(--input-bg-disabled);border-color:var(--loyalty-100);color:var(--fg-body-subtle);cursor:not-allowed}
+.field .helper{font-size:12px;color:var(--fg-body-subtle)}
+.field.error .helper{color:var(--fg-danger)}
+.field .clear{position:absolute;right:10px;border:0;background:none;cursor:pointer;color:var(--fg-icon-muted);font-size:16px;line-height:1;padding:4px;display:none}
+.field.has-value .clear{display:block}
+
+/* Selection controls */
+.toggle{position:relative;width:52px;height:32px;border-radius:var(--r-max);border:1px solid var(--control-stroke);background:var(--loyalty-100);cursor:pointer;transition:background .15s;flex:none}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:var(--shadow-xs);transition:transform .15s}
+.toggle[aria-checked="true"]{background:var(--loyalty-900);border-color:var(--loyalty-900)}
+.toggle[aria-checked="true"]::after{transform:translateX(20px)}
+.toggle:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:2px}
+.ctl-row{display:flex;align-items:center;gap:var(--sp-sm);font-size:14px}
+input[type=checkbox].mcheck,input[type=radio].mradio{appearance:none;width:20px;height:20px;border:1.5px solid var(--control-stroke);background:#fff;cursor:pointer;display:inline-grid;place-items:center;flex:none}
+input[type=checkbox].mcheck{border-radius:var(--r-sm)}
+input[type=radio].mradio{border-radius:50%}
+.mcheck:hover,.mradio:hover{border-color:var(--control-stroke-hover)}
+.mcheck:checked,.mradio:checked{border-color:var(--control-stroke-selected);background:var(--loyalty-900)}
+.mcheck:checked::after{content:"";width:10px;height:6px;border:2px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translateY(-1px)}
+.mcheck:indeterminate{border-color:var(--control-stroke-selected);background:var(--loyalty-900)}
+.mcheck:indeterminate::after{content:"";width:10px;height:2px;background:#fff}
+.mradio:checked::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+.mcheck:disabled,.mradio:disabled{border-color:var(--loyalty-100);background:var(--loyalty-50);cursor:not-allowed}
+.mcheck:focus-visible,.mradio:focus-visible,.seg:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:2px}
+
+/* Segmented */
+.segmented{display:inline-flex;background:var(--loyalty-100);border-radius:var(--r-max);padding:3px}
+.seg{border:0;background:transparent;height:34px;padding:0 var(--sp-2xl);border-radius:var(--r-max);font:600 14px var(--font-sans);color:var(--fg-body-muted);cursor:pointer}
+.seg[aria-selected="true"]{background:#fff;color:var(--fg-title-default);box-shadow:var(--shadow-xs)}
+
+/* Accordion */
+.accordion{border-top:1px solid var(--divider-default)}
+.acc-item{border-bottom:1px solid var(--divider-default)}
+.acc-head{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;padding:var(--sp-2xl) var(--sp-2xs);font:600 18px/1.3 var(--font-sans);color:var(--fg-title-default);cursor:pointer;text-align:left}
+.acc-head:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:-2px}
+.acc-head .chev{transition:transform .2s;color:var(--fg-icon-default);flex:none;margin-left:var(--sp-lg)}
+.acc-item.open .chev{transform:rotate(180deg)}
+.acc-body{overflow:hidden;max-height:0;transition:max-height .25s ease}
+.acc-body p{padding:0 var(--sp-2xs) var(--sp-2xl);color:var(--fg-body-muted);font-size:14px;line-height:1.6;max-width:64ch}
+
+/* Alerts */
+.alert{display:flex;gap:var(--sp-sm);align-items:flex-start;padding:var(--sp-md) var(--sp-lg);border-radius:var(--r-md);font-size:14px;line-height:1.45;width:100%;max-width:560px}
+.alert .ic{flex:none;width:20px;height:20px;margin-top:1px}
+.alert b{display:block;font-size:14px}
+.alert.info{background:var(--bg-info);color:var(--fg-info)}
+.alert.success{background:var(--bg-success);color:var(--fg-success)}
+.alert.warning{background:var(--bg-warning);color:var(--fg-warning)}
+.alert.critical{background:var(--bg-danger);color:var(--fg-danger)}
+.alert .close{margin-left:auto;border:0;background:none;cursor:pointer;color:inherit;font-size:16px;line-height:1;padding:2px}
+.alert.inline{border-radius:var(--r-sm);padding:var(--sp-xs) var(--sp-sm)}
+.snackbar{position:fixed;left:50%;bottom:32px;transform:translate(-50%,20px);background:var(--loyalty-900);color:#fff;padding:var(--sp-md) var(--sp-2xl);border-radius:var(--r-md);box-shadow:var(--shadow-lg);font-size:14px;display:flex;gap:var(--sp-lg);align-items:center;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:50}
+.snackbar.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.snackbar button{background:none;border:0;color:var(--loyalty-300);font-weight:600;cursor:pointer;font-size:14px}
+
+/* Cards */
+.mcard{width:240px;border:1px solid var(--card-stroke);border-radius:var(--r-xl);box-shadow:var(--shadow-md);overflow:hidden;background:#fff;cursor:pointer;transition:border-color .12s;text-align:left;padding:0;font-family:var(--font-sans)}
+.mcard:hover{border-color:var(--card-stroke-hover)}
+.mcard:active{border-color:var(--card-stroke-pressed)}
+.mcard:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:2px}
+.mcard .media{aspect-ratio:1/1;position:relative;display:flex;align-items:flex-start;padding:var(--sp-xs)}
+.mcard .media.r169{aspect-ratio:16/9}
+.mcard .body{padding:var(--sp-md) var(--sp-lg) var(--sp-lg)}
+.mcard .body h5{font:600 16px/1.3 var(--font-sans);color:var(--fg-title-default)}
+.mcard .body p{font-size:13px;color:var(--fg-body-subtle);margin-top:4px}
+.grad-loyalty{background:linear-gradient(135deg,var(--loyalty-600),var(--loyalty-800) 60%,var(--loyalty-900))}
+.grad-gold{background:linear-gradient(135deg,#E3C498,var(--gold-500) 55%,#7D5E32)}
+.grad-steel{background:linear-gradient(135deg,var(--steel-300),var(--steel-600))}
+.grad-red{background:linear-gradient(135deg,#C10330,#750000)}
+
+/* Avatar */
+.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font:600 16px var(--font-sans);color:#fff;overflow:hidden;flex:none}
+.avatar.noimg{background:var(--loyalty-100);color:var(--fg-body-muted)}
+
+/* Popover */
+.pop-wrap{position:relative;display:inline-block}
+.popover{position:absolute;bottom:calc(100% + 12px);left:50%;transform:translateX(-50%);background:var(--loyalty-900);color:#fff;padding:var(--sp-sm) var(--sp-lg);border-radius:var(--r-md);font-size:13px;width:220px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .15s}
+.popover::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:7px solid transparent;border-top-color:var(--loyalty-900)}
+.pop-wrap.open .popover{opacity:1;pointer-events:auto}
+
+/* List tab */
+.list-tab{display:flex;align-items:center;gap:var(--sp-lg);width:100%;max-width:420px;padding:var(--sp-2xl) var(--sp-lg);background:#fff;border:0;border-bottom:1px solid var(--divider-default);cursor:pointer;font-family:var(--font-sans);text-align:left;transition:background .12s}
+.list-tab:hover{background:var(--loyalty-50)}
+.list-tab:focus-visible{outline:2px solid var(--loyalty-500);outline-offset:-2px}
+.list-tab .t{flex:1}
+.list-tab .t b{display:block;font-size:16px;color:var(--fg-title-default)}
+.list-tab .t span{font-size:13px;color:var(--fg-body-subtle)}
+
+/* Bottom nav */
+.bottom-nav{display:flex;justify-content:space-around;align-items:center;width:375px;max-width:100%;background:#fff;border:1px solid var(--stroke-default);border-radius:var(--r-max);padding:var(--sp-xs) var(--sp-lg);box-shadow:var(--shadow-md)}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;cursor:pointer;font:600 10px var(--font-sans);color:var(--loyalty-800);padding:6px 10px;border-radius:var(--r-md)}
+.bnav-item svg{width:22px;height:22px}
+.bnav-item[aria-current="true"]{color:var(--loyalty-900)}
+.bnav-item[aria-current="true"] .lbl::after{content:"";display:block;width:4px;height:4px;border-radius:50%;background:var(--loyalty-900);margin:2px auto 0}
+.bnav-item:focus-visible{outline:2px solid var(--loyalty-500)}
+.bnav-qr{width:48px;height:48px;border-radius:50%;background:var(--loyalty-900);color:#fff;display:grid;place-items:center;border:0;cursor:pointer;margin-top:-24px;box-shadow:var(--shadow-sm)}
+
+/* Header mock */
+.hdr{width:375px;max-width:100%;background:#fff;border:1px solid var(--stroke-default);border-radius:var(--r-lg);padding:var(--sp-sm) var(--sp-lg);display:flex;align-items:center;gap:var(--sp-sm)}
+.hdr .title{font-family:var(--font-serif);font-weight:600;font-size:20px;color:var(--fg-title-default);flex:1}
+.tier-pill{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 var(--sp-sm) 0 4px;border-radius:var(--r-max);border:1px solid var(--stroke-default);font:600 13px var(--font-sans);background:#fff}
+.tier-badge{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#E3C498,var(--gold-500),#7D5E32)}
+
+/* Barcode */
+.barcode{background:#fff;padding:var(--sp-lg);border:1px solid var(--stroke-default);border-radius:var(--r-md);display:inline-flex;flex-direction:column;gap:6px;align-items:center}
+.barcode .lines{width:244px;height:48px;background:repeating-linear-gradient(90deg,var(--loyalty-900) 0 2px,transparent 2px 4px,var(--loyalty-900) 4px 7px,transparent 7px 9px,var(--loyalty-900) 9px 10px,transparent 10px 14px)}
+.barcode .num{font-size:10px;letter-spacing:.35em;color:var(--fg-body-muted)}
+
+/* Grid demo */
+.grid-demo{display:grid;grid-template-columns:repeat(12,1fr);gap:8px;margin-top:var(--sp-lg)}
+.grid-demo div{background:var(--loyalty-100);border-radius:var(--r-xs);height:56px;display:grid;place-items:center;font-size:11px;color:var(--fg-body-subtle)}
+
+
+/* Code-ready documentation additions */
+.codewrap{margin-top:var(--sp-lg);border:1px solid var(--stroke-default);border-radius:var(--r-md);overflow:hidden}
+.codewrap .bar{display:flex;justify-content:space-between;align-items:center;background:var(--bg-subtle);border-bottom:1px solid var(--stroke-default);padding:6px 6px 6px var(--sp-md);font-size:12px;color:var(--fg-body-subtle)}
+.copy-btn{border:1px solid var(--stroke-default);background:#fff;border-radius:var(--r-sm);font:600 12px var(--font-sans);color:var(--fg-body-muted);padding:4px 10px;cursor:pointer}
+.copy-btn:hover{background:var(--loyalty-100)}
+.copy-btn:focus-visible{outline:2px solid var(--loyalty-500)}
+.codewrap pre{margin:0;padding:var(--sp-lg);overflow-x:auto;background:var(--loyalty-900)}
+.codewrap code{display:block;background:none;border:0;padding:0;font:400 13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;color:#E2E7F0;white-space:pre}
+details.devdoc{margin-top:var(--sp-lg)}
+details.devdoc summary{cursor:pointer;font:600 14px var(--font-sans);color:var(--fg-body-muted);padding:var(--sp-xs) 0;list-style:none;display:inline-flex;align-items:center;gap:8px}
+details.devdoc summary::before{content:"";width:8px;height:8px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin-top:-2px}
+details.devdoc[open] summary::before{transform:rotate(45deg)}
+details.devdoc summary::-webkit-details-marker{display:none}
+.api-badge{display:inline-block;font:600 11px var(--font-sans);padding:2px 7px;border-radius:var(--r-sm);background:var(--bg-info);color:var(--fg-info)}
+.a11y{margin-top:var(--sp-md);padding:var(--sp-sm) var(--sp-lg);border-left:2px solid var(--seagreen-500);background:var(--bg-success);border-radius:0 var(--r-sm) var(--r-sm) 0;font-size:13px;line-height:1.55;color:var(--seagreen-700);max-width:640px}
+.gs-files{display:flex;gap:var(--sp-sm);flex-wrap:wrap;margin-top:var(--sp-lg)}
+.gs-file{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--stroke-default);border-radius:var(--r-md);padding:var(--sp-xs) var(--sp-md);font-size:13px;color:var(--fg-body-muted);background:var(--bg-subtle)}
+
+.guide{margin-top:var(--sp-lg);border:1px solid var(--stroke-default);border-radius:var(--r-md);padding:var(--sp-lg) var(--sp-2xl);background:var(--bg-subtle)}
+.guide h4{font:600 14px var(--font-sans);color:var(--fg-title-default);margin-bottom:var(--sp-xs)}
+.guide ul{margin:0 0 0 18px;font-size:13px;line-height:1.65;color:var(--fg-body-muted)}
+.guide ul+h4{margin-top:var(--sp-lg)}
+.mod-tag{display:inline-block;font:600 11px var(--font-sans);background:var(--loyalty-900);color:#fff;border-radius:var(--r-sm);padding:2px 7px;margin-right:8px}
+footer{margin-top:var(--sp-12xl);padding-top:var(--sp-6xl);border-top:1px solid var(--divider-default);font-size:13px;color:var(--fg-body-subtle)}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;border-right:0;border-bottom:1px solid var(--divider-default)}
+  main{padding:0 var(--sp-2xl) var(--sp-10xl)}
+  .hero h1{font-size:40px;line-height:48px}
+  .ramp .cells{grid-template-columns:repeat(5,1fr)}
+  .type-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="sidebar" aria-label="Design system navigation">
+  <span class="mark">MUSE</span>
+  <span class="mark-sub">Design System · v1 · Live</span>
+  <div class="nav-group">
+    <h4>Start</h4>
+    <a href="#getting-started">Getting started</a>
+  </div>
+  <div class="nav-group">
+    <h4>Foundations</h4>
+    <a href="#colors">Color</a>
+    <a href="#typography">Typography</a>
+    <a href="#spacing">Spacing</a>
+    <a href="#radius">Radius</a>
+    <a href="#elevation">Elevation</a>
+    <a href="#grid">Responsive grid</a>
+  </div>
+  <div class="nav-group">
+    <h4>Components</h4>
+    <a href="#buttons">Buttons</a>
+    <a href="#icon-buttons">Icon buttons</a>
+    <a href="#pills">Pills</a>
+    <a href="#textfields">Text fields</a>
+    <a href="#controls">Selection controls</a>
+    <a href="#segmented">Segmented control</a>
+    <a href="#accordion">Accordion</a>
+    <a href="#actionmenu">Action menu</a>
+    <a href="#alerts">Alerts</a>
+    <a href="#bannertag">Banner tag</a>
+    <a href="#aspect">Aspect ratio</a>
+    <a href="#cards">Cards</a>
+    <a href="#modules">Content modules</a>
+    <a href="#avatar">Avatar</a>
+    <a href="#popover">Popover</a>
+    <a href="#listtab">List tab</a>
+    <a href="#navigation">Navigation</a>
+    <a href="#barcode">Barcode</a>
+  </div>
+</nav>
+
+<main>
+<header class="hero">
+  <h1>One system, every MUSE surface</h1>
+  <p>The complete token and component language for the MUSE loyalty experience across App, Web, and mConnect. Every example on this page is a working implementation of the extracted Figma tokens — hover, press, toggle, and copy them. Usage guidelines, anatomy, and content rules are transcribed from the source documentation pages.</p>
+  <div class="ramp-band" aria-hidden="true">
+    <span style="background:var(--loyalty-900)"></span><span style="background:var(--loyalty-700)"></span><span style="background:var(--loyalty-500)"></span><span style="background:var(--loyalty-300)"></span><span style="background:var(--loyalty-100)"></span><span style="background:var(--gold-500)"></span><span style="background:var(--seagreen-500)"></span><span style="background:var(--redorange-500)"></span><span style="background:var(--scarlet-500)"></span>
+  </div>
+  <p class="meta">Playfair Display 600 · Mulish 400/600 · 6 token collections · 40+ components</p>
+</header>
+
+<section id="getting-started">
+  <h2>Getting started</h2>
+  <p class="lede">Two files ship with this site: <code>muse-tokens.css</code> (drop-in CSS custom properties, three layers: base ramps → semantic aliases → scales) and <code>muse-tokens.json</code> (W3C Design Tokens format for Style Dictionary, Tokens Studio, or any token pipeline). Bind product code to the <em>semantic</em> layer only — raw ramp steps are an implementation detail of the theme.</p>
+  <div class="gs-files"><span class="gs-file">muse-tokens.css · CSS custom properties</span><span class="gs-file">muse-tokens.json · W3C design tokens</span></div>
+  <h3 class="sub">Use the CSS tokens directly</h3>
+  <div class="codewrap"><div class="bar"><span>HTML + CSS</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;link rel=&quot;stylesheet&quot; href=&quot;muse-tokens.css&quot;&gt;
+
+&lt;style&gt;
+  .offer-title { font: var(--muse-app-title-sm); color: var(--muse-fg-title-default); }
+  .offer-card  { background: var(--muse-card-bg-default);
+                 border: 1px solid var(--muse-card-stroke-default);
+                 border-radius: var(--muse-radius-md);
+                 padding: var(--muse-space-lg);
+                 box-shadow: var(--muse-shadow-xs); }
+&lt;/style&gt;</code></pre></div>
+  <h3 class="sub">Build native platforms from the JSON</h3>
+  <div class="codewrap"><div class="bar"><span>Style Dictionary</span><button class="copy-btn" type="button">Copy</button></div><pre><code>// style-dictionary.config.js — build platform outputs from muse-tokens.json
+import StyleDictionary from &#x27;style-dictionary&#x27;;
+
+export default {
+  source: [&#x27;muse-tokens.json&#x27;],
+  platforms: {
+    css:    { transformGroup: &#x27;css&#x27;,     buildPath: &#x27;dist/&#x27;, files: [{ destination: &#x27;tokens.css&#x27;,  format: &#x27;css/variables&#x27; }] },
+    ios:    { transformGroup: &#x27;ios&#x27;,     buildPath: &#x27;dist/&#x27;, files: [{ destination: &#x27;Tokens.swift&#x27;, format: &#x27;ios-swift/class.swift&#x27; }] },
+    android:{ transformGroup: &#x27;android&#x27;, buildPath: &#x27;dist/&#x27;, files: [{ destination: &#x27;tokens.xml&#x27;,  format: &#x27;android/resources&#x27; }] }
+  }
+};</code></pre></div>
+  <h3 class="sub">Or map onto Tailwind</h3>
+  <div class="codewrap"><div class="bar"><span>tailwind.config.js</span><button class="copy-btn" type="button">Copy</button></div><pre><code>// tailwind.config.js — map MUSE tokens onto Tailwind scales
+export default {
+  theme: {
+    extend: {
+      colors: {
+        loyalty: { 50:&#x27;#F7FAFF&#x27;,100:&#x27;#E2E7F0&#x27;,200:&#x27;#C3CEDF&#x27;,300:&#x27;#A4B5CE&#x27;,400:&#x27;#7F96B8&#x27;,
+                   500:&#x27;#5D79A1&#x27;,600:&#x27;#435E85&#x27;,700:&#x27;#2F4466&#x27;,800:&#x27;#1F304D&#x27;,900:&#x27;#15203B&#x27; },
+        success:&#x27;#00674E&#x27;, info:&#x27;#0E1E88&#x27;, warning:&#x27;#A03206&#x27;, danger:&#x27;#8D001A&#x27;
+      },
+      fontFamily: { serif:[&#x27;&quot;Playfair Display&quot;&#x27;,&#x27;serif&#x27;], sans:[&#x27;Mulish&#x27;,&#x27;sans-serif&#x27;] },
+      borderRadius: { xs:&#x27;2px&#x27;, sm:&#x27;4px&#x27;, md:&#x27;8px&#x27;, lg:&#x27;16px&#x27;, xl:&#x27;24px&#x27;, &#x27;2xl&#x27;:&#x27;32px&#x27; }
+    }
+  }
+}</code></pre></div>
+  <p class="note">Web headings and grid variables (<code>--muse-web-h1-size</code> … <code>--muse-grid-gutter</code>) are responsive: the CSS file re-declares them inside min-width media queries at 376 / 769 / 1025px, so components that reference them adapt with no extra code.</p>
+</section>
+
+
+<!-- ============ COLOR ============ -->
+<section id="colors">
+  <h2>Color</h2>
+  <p class="lede">Nine base ramps feed a semantic layer of ~120 aliases. Designs and code bind to the semantic tokens, never to raw ramp steps. Click any swatch to copy its hex.</p>
+  <div id="ramps"></div>
+
+  <h3 class="sub">Semantic tokens</h3>
+  <table class="tokens">
+    <thead><tr><th>Token</th><th>Resolves to</th><th>Use for</th></tr></thead>
+    <tbody id="semantic-rows"></tbody>
+  </table>
+  <p class="note">Full mapping (foreground, background, stroke, divider, per-component button/pill/card/input/control tokens) lives in the token reference document. The rows above are the working surface most designs need.</p>
+</section>
+
+<!-- ============ TYPOGRAPHY ============ -->
+<section id="typography">
+  <h2>Typography</h2>
+  <p class="lede">Playfair Display SemiBold carries titles; Mulish carries everything else at two weights, 400 and 600. Arabic surfaces switch to FrutigerLT Arabic with Avenir Arabic as secondary.</p>
+
+  <h3 class="sub">App scale</h3>
+  <div>
+    <div class="type-row"><div class="spec"><b>title-lg</b>Playfair 600 · 40/48</div><div style="font:600 40px/48px var(--font-serif)">Rewards, refined</div></div>
+    <div class="type-row"><div class="spec"><b>title-md</b>Playfair 600 · 32/40</div><div style="font:600 32px/40px var(--font-serif)">Rewards, refined</div></div>
+    <div class="type-row"><div class="spec"><b>title-sm</b>Playfair 600 · 24/32</div><div style="font:600 24px/32px var(--font-serif)">Rewards, refined</div></div>
+    <div class="type-row"><div class="spec"><b>subheading-lg</b>Mulish 600 · 22/26</div><div style="font:600 22px/26px var(--font-sans)">Your points, everywhere you shop</div></div>
+    <div class="type-row"><div class="spec"><b>label-lg / strong</b>Mulish 400/600 · 16/20</div><div style="font:400 16px/20px var(--font-sans)">Earn 10 points per dollar at partner brands. <b style="font-weight:600">See partners</b></div></div>
+    <div class="type-row"><div class="spec"><b>paragraph-md</b>Mulish 400 · 14/16</div><div style="font:400 14px/16px var(--font-sans);max-width:52ch">Points post to your account within 24 hours of purchase and can be redeemed at checkout in-store or online.</div></div>
+    <div class="type-row"><div class="spec"><b>caption-lg</b>Mulish 600 · 12/14</div><div style="font:600 12px/14px var(--font-sans);color:var(--fg-body-subtle)">Valid until 31 December</div></div>
+  </div>
+
+  <h3 class="sub">Responsive web headings</h3>
+  <table class="tokens">
+    <thead><tr><th>Style</th><th>lg ≥1025</th><th>md 769–1024</th><th>sm 376–768</th><th>xs ≤375</th></tr></thead>
+    <tbody>
+      <tr><td>heading-1</td><td>56/64</td><td>48/56</td><td>40/48</td><td>32/40</td></tr>
+      <tr><td>heading-2</td><td>48/56</td><td>40/48</td><td>32/40</td><td>24/32</td></tr>
+      <tr><td>heading-3</td><td>40/48</td><td>32/40</td><td>24/32</td><td>22/26</td></tr>
+      <tr><td>heading-4</td><td>28/40</td><td>24/32</td><td>22/24</td><td>20/22</td></tr>
+      <tr><td>heading-5</td><td>24/28</td><td>22/24</td><td>20/22</td><td>18/20</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============ SPACING ============ -->
+<section id="spacing">
+  <h2>Spacing</h2>
+  <p class="lede">A 27-step scale from 2 to 144. Steps through 24px move in small increments for fine control inside components; above 24px the scale steps by 8s for layout rhythm.</p>
+  <div id="spacing-scale" style="margin-top:var(--sp-lg)"></div>
+</section>
+
+<!-- ============ RADIUS ============ -->
+<section id="radius">
+  <h2>Radius</h2>
+  <p class="lede">Cards and inputs sit at radius-md; sheets and media at radius-lg and above; buttons and pills use radius-max for a fully rounded profile.</p>
+  <div class="radius-grid">
+    <div class="radius-chip" style="border-radius:0">none · 0</div>
+    <div class="radius-chip" style="border-radius:2px">xs · 2</div>
+    <div class="radius-chip" style="border-radius:4px">sm · 4</div>
+    <div class="radius-chip" style="border-radius:8px">md · 8</div>
+    <div class="radius-chip" style="border-radius:16px">lg · 16</div>
+    <div class="radius-chip" style="border-radius:24px">xl · 24</div>
+    <div class="radius-chip" style="border-radius:32px">2xl · 32</div>
+    <div class="radius-chip" style="border-radius:9999px">max · 9999</div>
+  </div>
+</section>
+
+<!-- ============ ELEVATION ============ -->
+<section id="elevation">
+  <h2>Elevation</h2>
+  <p class="lede">Seven shadow levels plus an inner shadow. Flat through sm suit resting cards; md and above are reserved for overlays, sheets, and floating navigation.</p>
+  <div class="elev-grid">
+    <div class="elev-chip" style="box-shadow:var(--shadow-flat)">flat</div>
+    <div class="elev-chip" style="box-shadow:var(--shadow-xs)">xs</div>
+    <div class="elev-chip" style="box-shadow:var(--shadow-sm)">sm</div>
+    <div class="elev-chip" style="box-shadow:var(--shadow-md)">md</div>
+    <div class="elev-chip" style="box-shadow:var(--shadow-lg)">lg</div>
+    <div class="elev-chip" style="box-shadow:var(--shadow-xl)">xl</div>
+    <div class="elev-chip" style="box-shadow:var(--shadow-inner)">inner</div>
+  </div>
+</section>
+
+<!-- ============ GRID ============ -->
+<section id="grid">
+  <h2>Responsive grid</h2>
+  <p class="lede">Four breakpoints govern the web layout. Columns, margins, and gutters step down together; this very grid is the lg configuration.</p>
+  <table class="tokens">
+    <thead><tr><th></th><th>lg</th><th>md</th><th>sm</th><th>xs</th></tr></thead>
+    <tbody>
+      <tr><td>Viewport</td><td>1025–1440</td><td>769–1024</td><td>376–768</td><td>0–375</td></tr>
+      <tr><td>Columns</td><td>12</td><td>8</td><td>8</td><td>4</td></tr>
+      <tr><td>Margin</td><td>40</td><td>24</td><td>16</td><td>16</td></tr>
+      <tr><td>Gutter</td><td>32</td><td>24</td><td>16</td><td>16</td></tr>
+    </tbody>
+  </table>
+  <div class="grid-demo" aria-hidden="true">
+    <div>1</div><div>2</div><div>3</div><div>4</div><div>5</div><div>6</div><div>7</div><div>8</div><div>9</div><div>10</div><div>11</div><div>12</div>
+  </div>
+</section>
+
+<!-- ============ BUTTONS ============ -->
+<section id="buttons">
+  <h2>Buttons</h2>
+  <p class="lede">Three CTA types across three sizes and five states. App, Web, and mConnect ship separate component sets in Figma with the same grammar — one implementation covers them in code. Hover and press these; they respond with the real state tokens.</p>
+
+  <div class="canvas">
+    <p class="cap">Primary — large / medium / small, plus validating and disabled</p>
+    <button class="btn primary lg">Redeem points</button>
+    <button class="btn primary md">Redeem points</button>
+    <button class="btn primary sm">Redeem</button>
+    <button class="btn primary md"><span class="spinner" aria-hidden="true"></span>Validating</button>
+    <button class="btn primary md" disabled>Redeem points</button>
+  </div>
+  <div class="canvas">
+    <p class="cap">Secondary — outline; fills on hover</p>
+    <button class="btn secondary lg">View brands</button>
+    <button class="btn secondary md">View brands</button>
+    <button class="btn secondary sm">View</button>
+    <button class="btn secondary md" disabled>View brands</button>
+  </div>
+  <div class="canvas dark">
+    <p class="cap">Contrast — for emphasis surfaces and imagery</p>
+    <button class="btn contrast lg">Join MUSE</button>
+    <button class="btn contrast md">Join MUSE</button>
+    <button class="btn contrast sm">Join</button>
+    <button class="btn contrast md" disabled>Join MUSE</button>
+  </div>
+
+  <table class="tokens">
+    <thead><tr><th>State</th><th>Primary</th><th>Secondary</th><th>Contrast</th></tr></thead>
+    <tbody>
+      <tr><td>Default</td><td><span class="dot" style="background:var(--loyalty-900)"></span>LoyaltyBlue900</td><td>stroke LoyaltyBlue800</td><td><span class="dot" style="background:#fff"></span>White</td></tr>
+      <tr><td>Hover</td><td><span class="dot" style="background:var(--loyalty-700)"></span>LoyaltyBlue700</td><td>fill LoyaltyBlue900</td><td><span class="dot" style="background:var(--loyalty-50)"></span>LoyaltyBlue50</td></tr>
+      <tr><td>Pressed</td><td><span class="dot" style="background:var(--loyalty-500)"></span>LoyaltyBlue500</td><td>fill LoyaltyBlue500</td><td><span class="dot" style="background:var(--loyalty-100)"></span>LoyaltyBlue100</td></tr>
+      <tr><td>Disabled</td><td colspan="3">LoyaltyBlue100 fill · subtle foreground</td></tr>
+    </tbody>
+  </table>
+  <p class="note">The Figma library also defines a liquid-glass type with only its default state populated — treat it as experimental until the state matrix is complete.</p>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>type</td><td><code>primary | secondary | contrast | liquid</code></td><td><code>primary</code></td><td><span class='api-badge'>liquid</span> has only a default state in the source library — gate behind a flag</td></tr><tr><td>size</td><td><code>large | medium | small</code></td><td><code>large</code></td><td>Heights 56 / 48 / 40</td></tr><tr><td>state</td><td><code>default | hover | pressed | disabled | validating</code></td><td><code>default</code></td><td>hover/pressed derive from CSS pseudo-classes; validating renders a spinner and sets <code>aria-busy</code></td></tr><tr><td>leadingIcon / trailingIcon</td><td><code>boolean</code></td><td><code>false</code></td><td>16–20px glyph from the icon library</td></tr><tr><td>label</td><td><code>string</code></td><td>—</td><td>Required unless icon-only (then use the Icon button component)</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;button class=&quot;btn primary lg&quot;&gt;Redeem points&lt;/button&gt;
+&lt;button class=&quot;btn secondary md&quot;&gt;View brands&lt;/button&gt;
+&lt;button class=&quot;btn contrast sm&quot;&gt;Join&lt;/button&gt;
+
+&lt;!-- async validating state --&gt;
+&lt;button class=&quot;btn primary md&quot; aria-busy=&quot;true&quot; disabled&gt;
+  &lt;span class=&quot;spinner&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt; Validating
+&lt;/button&gt;</code></pre></div><div class="codewrap"><div class="bar"><span>CSS (state contract)</span><button class="copy-btn" type="button">Copy</button></div><pre><code>.btn.primary          { background: var(--muse-btn-primary-bg-default); color: var(--muse-fg-body-emphasis); }
+.btn.primary:hover    { background: var(--muse-btn-primary-bg-hover); }
+.btn.primary:active   { background: var(--muse-btn-primary-bg-pressed); }
+.btn.primary:disabled { background: var(--muse-btn-primary-bg-disabled); color: var(--muse-fg-body-subtle); }</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Native <code>&lt;button&gt;</code> only. Disabled buttons keep their label; a validating button also sets <code>aria-busy="true"</code> and <code>disabled</code> so it cannot be double-submitted. Focus ring: 2px LoyaltyBlue500 with 2px offset on <code>:focus-visible</code>.</p>
+
+<div class="guide"><h4>Platform: Liquid Glass</h4><ul><li>MUSE has adopted iOS 26 Liquid Glass; the liquid button type implements the translucency + reflective gradient per Apple's <em>Adopting Liquid Glass</em> guide.</li><li>On older iOS and Android, use a <strong>frosted button treatment</strong> to mirror the effect.</li><li>Validation flow: pressed → inline loading (“Please wait…”) → success or error resolution.</li></ul></div>
+</section>
+
+<!-- ============ ICON BUTTONS ============ -->
+<section id="icon-buttons">
+  <h2>Icon buttons</h2>
+  <p class="lede">Primary (bordered on light), ghost (borderless on imagery or dark), in sm 32, md 40, lg 48.</p>
+  <div class="canvas">
+    <p class="cap">Primary on light</p>
+    <button class="ibtn primary sm" aria-label="Favorite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-4.6-9.3-9A5.4 5.4 0 0 1 12 6.5 5.4 5.4 0 0 1 21.3 12C19 16.4 12 21 12 21z"/></svg></button>
+    <button class="ibtn primary md" aria-label="Favorite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-4.6-9.3-9A5.4 5.4 0 0 1 12 6.5 5.4 5.4 0 0 1 21.3 12C19 16.4 12 21 12 21z"/></svg></button>
+    <button class="ibtn primary lg" aria-label="Favorite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-4.6-9.3-9A5.4 5.4 0 0 1 12 6.5 5.4 5.4 0 0 1 21.3 12C19 16.4 12 21 12 21z"/></svg></button>
+    <button class="ibtn primary md" disabled aria-label="Favorite"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21s-7-4.6-9.3-9A5.4 5.4 0 0 1 12 6.5 5.4 5.4 0 0 1 21.3 12C19 16.4 12 21 12 21z"/></svg></button>
+  </div>
+  <div class="canvas dark">
+    <p class="cap">Ghost on emphasis</p>
+    <button class="ibtn ghost sm" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"/></svg></button>
+    <button class="ibtn ghost md" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"/></svg></button>
+    <button class="ibtn ghost lg" aria-label="Share"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"/></svg></button>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>type</td><td><code>primary | contrast | ghost | liquid</code></td><td><code>primary</code></td><td>ghost is for imagery / emphasis surfaces</td></tr><tr><td>size</td><td><code>sm | md | lg</code></td><td><code>lg</code></td><td>32 / 40 / 48px hit areas</td></tr><tr><td>state</td><td><code>default | hover | pressed | disabled</code></td><td><code>default</code></td><td>pseudo-class driven</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;button class=&quot;ibtn primary md&quot; aria-label=&quot;Add to favorites&quot;&gt;
+  &lt;svg&gt;&lt;!-- icon --&gt;&lt;/svg&gt;
+&lt;/button&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Icon-only controls must carry <code>aria-label</code>. Minimum touch target is the md size (40px) on touch surfaces; sm is desktop-only.</p>
+</section>
+
+<!-- ============ PILLS ============ -->
+<section id="pills">
+  <h2>Pills</h2>
+  <p class="lede">Selectable filters. App states: default, selected, error, disabled; the web set swaps selected for hover and pressed. Tap to toggle.</p>
+  <div class="canvas">
+    <button class="pill" aria-pressed="true">New in</button>
+    <button class="pill" aria-pressed="false">Beauty</button>
+    <button class="pill" aria-pressed="false">Fragrance</button>
+    <button class="pill" aria-pressed="false">Watches</button>
+    <button class="pill error">Unavailable</button>
+    <button class="pill" disabled>Coming soon</button>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>state (app)</td><td><code>default | selected | error | disabled</code></td><td><code>default</code></td><td>selection is a toggle</td></tr><tr><td>state (web)</td><td><code>default | hover | pressed | error</code></td><td><code>default</code></td><td>web set has no persistent selected state</td></tr><tr><td>iconLeading / iconTrailing</td><td><code>boolean</code></td><td><code>true</code></td><td>16px glyphs</td></tr><tr><td>label</td><td><code>string</code></td><td><code>Pill label</code></td><td></td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML + JS</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;button class=&quot;pill&quot; aria-pressed=&quot;false&quot;&gt;Beauty&lt;/button&gt;
+
+&lt;script&gt;
+  pill.addEventListener(&#x27;click&#x27;, () =&gt;
+    pill.setAttribute(&#x27;aria-pressed&#x27;, pill.getAttribute(&#x27;aria-pressed&#x27;) !== &#x27;true&#x27;));
+&lt;/script&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Filter pills are toggle buttons: expose state with <code>aria-pressed</code>, not a CSS class alone. Error pills are not interactive-disabled — they remain focusable so screen readers can announce why the filter is invalid.</p>
+</section>
+
+<!-- ============ TEXT FIELDS ============ -->
+<section id="textfields">
+  <h2>Text fields</h2>
+  <p class="lede">Text and search types across default, hover, focus, filled, error, disabled, and read-only. Focus and type below — the clear button appears once a search has a value.</p>
+  <div class="canvas subtle">
+    <div class="field">
+      <label for="tf1">Full name</label>
+      <div class="box"><input id="tf1" type="text" placeholder="As it appears on your ID"></div>
+      <span class="helper">Used for boutique pickup verification</span>
+    </div>
+    <div class="field error">
+      <label for="tf2">Email</label>
+      <div class="box"><input id="tf2" type="email" value="muse@"></div>
+      <span class="helper">Enter a complete email address</span>
+    </div>
+    <div class="field">
+      <label for="tf3">Membership ID</label>
+      <div class="box"><input id="tf3" type="text" value="MU-88 214 907" disabled></div>
+      <span class="helper">Assigned at enrollment</span>
+    </div>
+    <div class="field" id="searchField">
+      <label for="tf4">Search brands</label>
+      <div class="box"><input id="tf4" type="search" placeholder="Search"><button class="clear" aria-label="Clear search">✕</button></div>
+    </div>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>type</td><td><code>text | search</code></td><td><code>text</code></td><td>search adds clear button + optional dropdown</td></tr><tr><td>state</td><td><code>default | hover | active | filled | error | disabled | readonly</code></td><td><code>default</code></td><td>hover/active from pseudo-classes; error via class</td></tr><tr><td>label / helperText / inputGuide</td><td><code>string | boolean</code></td><td>shown</td><td>helper turns danger-colored in error state</td></tr><tr><td>iconLeading / iconTrailing / clearButton</td><td><code>boolean</code></td><td>varies</td><td>clear shows only when the field has a value</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;div class=&quot;field error&quot;&gt;
+  &lt;label for=&quot;email&quot;&gt;Email&lt;/label&gt;
+  &lt;div class=&quot;box&quot;&gt;&lt;input id=&quot;email&quot; type=&quot;email&quot; aria-invalid=&quot;true&quot; aria-describedby=&quot;email-err&quot;&gt;&lt;/div&gt;
+  &lt;span class=&quot;helper&quot; id=&quot;email-err&quot;&gt;Enter a complete email address&lt;/span&gt;
+&lt;/div&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Every field pairs <code>&lt;label for&gt;</code> with the input id. Error fields set <code>aria-invalid="true"</code> and point <code>aria-describedby</code> at the helper text so the message is announced. Never communicate error by border color alone — the helper text is required.</p>
+
+<div class="guide"><h4>Documented compositions & states</h4><ul><li>States: default, hover, active, <strong>filled</strong> (<code>input-stroke-filled</code>), error, disabled, read-only (“This text is for viewing only.”).</li><li>Search type adds a persistent clear control; phone type composes a fixed dialing prefix (+971) before the input.</li><li>A dropdown trigger variant exists: label + chevron opening an option list (modal or bottom sheet — see Action menu).</li><li>Inline validation messages sit directly beneath the field and update dynamically as the user types.</li></ul></div>
+</section>
+
+<!-- ============ SELECTION CONTROLS ============ -->
+<section id="controls">
+  <h2>Selection controls</h2>
+  <p class="lede">Toggle, checkbox (with indeterminate), and radio. All are live and keyboard operable.</p>
+  <div class="canvas" style="gap:var(--sp-6xl);align-items:flex-start">
+    <div style="display:flex;flex-direction:column;gap:var(--sp-lg)">
+      <div class="ctl-row"><button class="toggle" role="switch" aria-checked="true" aria-label="Push notifications"></button>Push notifications</div>
+      <div class="ctl-row"><button class="toggle" role="switch" aria-checked="false" aria-label="Email offers"></button>Email offers</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--sp-lg)">
+      <label class="ctl-row"><input type="checkbox" class="mcheck" checked>Order updates</label>
+      <label class="ctl-row"><input type="checkbox" class="mcheck" id="indet">Partner brands</label>
+      <label class="ctl-row"><input type="checkbox" class="mcheck" disabled>Legacy program</label>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:var(--sp-lg)">
+      <label class="ctl-row"><input type="radio" class="mradio" name="lang" checked>English</label>
+      <label class="ctl-row"><input type="radio" class="mradio" name="lang">العربية</label>
+    </div>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Control</th><th>States</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>toggle</td><td><code>on | off</code></td><td><code>off</code></td><td><code>role=switch</code> + <code>aria-checked</code></td></tr><tr><td>checkbox</td><td><code>default | hover | selected | indeterminate | disabled</code></td><td><code>default</code></td><td>indeterminate set via JS property</td></tr><tr><td>radio</td><td><code>default | hover | selected | disabled</code></td><td><code>default</code></td><td>grouped by <code>name</code></td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML + JS</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;button class=&quot;toggle&quot; role=&quot;switch&quot; aria-checked=&quot;false&quot; aria-label=&quot;Email offers&quot;&gt;&lt;/button&gt;
+
+&lt;label class=&quot;ctl-row&quot;&gt;&lt;input type=&quot;checkbox&quot; class=&quot;mcheck&quot; checked&gt; Order updates&lt;/label&gt;
+
+&lt;script&gt;  // indeterminate is a JS property, not an attribute
+  document.querySelector(&#x27;#parent&#x27;).indeterminate = true;
+&lt;/script&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> The toggle is a real button with <code>role="switch"</code>; Space/Enter flip it. Checkboxes and radios are native inputs restyled with <code>appearance:none</code>, so keyboard and form semantics come for free.</p>
+
+<div class="guide"><h4>Token & platform notes</h4><ul><li>Toggle track: <code>bg-muted</code> when off → <code>bg-emphasis</code> when on.</li><li>Pills and the segmented control take the liquid-glass active treatment on iOS 26+; frosted fallback elsewhere.</li></ul></div>
+</section>
+
+<!-- ============ SEGMENTED ============ -->
+<section id="segmented">
+  <h2>Segmented control</h2>
+  <p class="lede">A two-position switch for peer views. The active segment lifts on a white surface with shadow-xs.</p>
+  <div class="canvas subtle">
+    <div class="segmented" role="tablist" aria-label="Offer view">
+      <button class="seg" role="tab" aria-selected="true">Available</button>
+      <button class="seg" role="tab" aria-selected="false">Redeemed</button>
+    </div>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>activeControl</td><td><code>left | right</code></td><td><code>left</code></td><td>two positions only in the source library</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;div class=&quot;segmented&quot; role=&quot;tablist&quot; aria-label=&quot;Offer view&quot;&gt;
+  &lt;button class=&quot;seg&quot; role=&quot;tab&quot; aria-selected=&quot;true&quot;&gt;Available&lt;/button&gt;
+  &lt;button class=&quot;seg&quot; role=&quot;tab&quot; aria-selected=&quot;false&quot;&gt;Redeemed&lt;/button&gt;
+&lt;/div&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Behaves as a tablist: arrow keys should move selection between segments when wired to panels; if it merely filters in place, swap to the pill pattern with <code>aria-pressed</code> instead.</p>
+
+<div class="guide"><h4>Platform note</h4><ul><li>The active control renders as a liquid-glass element on iOS 26+; older iOS/Android use the frosted white treatment shown here.</li></ul></div>
+</section>
+
+<!-- ============ ACCORDION ============ -->
+<section id="accordion">
+  <h2>Accordion</h2>
+  <p class="lede">Collapsed and expanded states with an animated disclosure. Web adds a grouped variant; behavior is identical.</p>
+  <div class="accordion" style="max-width:640px">
+    <div class="acc-item open">
+      <button class="acc-head" aria-expanded="true">How do I earn points?
+        <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-body"><p>Shop at any participating brand and scan your MUSE barcode at checkout, or link your card for automatic earning online. Points post within 24 hours.</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head" aria-expanded="false">When do points expire?
+        <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-body"><p>Points remain valid for 12 months from the date they are earned. Any activity on your account extends all points by a further 12 months.</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head" aria-expanded="false">Can I share points with family?
+        <svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="acc-body"><p>Gold and Elite members can pool points into a family wallet with up to four linked accounts. Manage linked members from Account settings.</p></div>
+    </div>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>state</td><td><code>collapsed | expanded</code></td><td><code>collapsed</code></td><td></td></tr><tr><td>title / paragraph</td><td><code>string</code></td><td>placeholder</td><td>web variant adds a grouped wrapper</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;div class=&quot;acc-item&quot;&gt;
+  &lt;button class=&quot;acc-head&quot; aria-expanded=&quot;false&quot; aria-controls=&quot;a1&quot;&gt;When do points expire?&lt;/button&gt;
+  &lt;div class=&quot;acc-body&quot; id=&quot;a1&quot; role=&quot;region&quot;&gt;&lt;p&gt;…&lt;/p&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Header is a button with <code>aria-expanded</code> and <code>aria-controls</code>; the panel is a <code>region</code>. The max-height animation is skipped entirely under <code>prefers-reduced-motion</code>.</p>
+
+<div class="guide"><h4>When to use</h4><ul><li>To organize related information.</li><li>To shorten pages and reduce scrolling when content is not crucial to read in full.</li><li>When space is at a premium — mobile interfaces, side panels.</li></ul><h4>When not to use</h4><ul><li>If a user is likely to read all of the content, don't add the extra click — use a full scrolling page with normal headers.</li></ul><h4>Anatomy</h4><ul><li><strong>Header title</strong> — the section title, and the control that reveals the panel.</li><li><strong>Chevron</strong> — indicates open/closed state.</li><li><strong>Panel</strong> — the content associated with the header.</li></ul></div>
+</section>
+
+<section id="actionmenu">
+  <h2>Action menu</h2>
+  <p class="lede">A list of choices opened from a trigger. Two presentations, chosen by content weight.</p>
+  <div class="guide"><h4>Choosing the trigger</h4><ul>
+    <li><strong>Modal</strong> — for smaller lists or light content that doesn't need the full screen.</li>
+    <li><strong>Bottom sheet</strong> — for large or complex content requiring full-screen coverage; dismissed by dragging the sheet downward.</li></ul>
+  <h4>Anatomy</h4><ul>
+    <li>Trigger row: label + chevron (<code>action-menu-trigger</code>, default / selected states).</li>
+    <li>Items in radio style (single choice) or menu style (navigation); optional leading icon and search.</li>
+    <li>Country switcher variants exist for app and web, in normal and liquid styles, light and dark modes.</li></ul></div>
+  <details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;button class="list-tab" aria-haspopup="dialog" aria-expanded="false"&gt;
+  &lt;span class="t"&gt;&lt;b&gt;Country&lt;/b&gt;&lt;span&gt;United Arab Emirates&lt;/span&gt;&lt;/span&gt;
+&lt;/button&gt;
+&lt;dialog class="sheet"&gt;&lt;!-- action-menu-list: search + radio items --&gt;&lt;/dialog&gt;</code></pre></div></details>
+</section>
+
+
+<!-- ============ ALERTS ============ -->
+<section id="alerts">
+  <h2>Alerts</h2>
+  <p class="lede">One component, three surfaces: transient snackbar, persistent banner, and inline message — across success, info, warning, and critical.</p>
+  <div class="canvas" style="flex-direction:column;align-items:flex-start">
+    <div class="alert success"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg><div><b>Points added</b>320 points from your purchase at Level Shoes are now available.</div><button class="close" aria-label="Dismiss">✕</button></div>
+    <div class="alert info"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11v5"/></svg><div><b>Tier review on 1 March</b>Spend AED 1,200 more to keep Gold for another year.</div><button class="close" aria-label="Dismiss">✕</button></div>
+    <div class="alert warning"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v4M12 17.5h.01"/></svg><div><b>2,400 points expiring</b>Redeem before 28 February to keep their full value.</div><button class="close" aria-label="Dismiss">✕</button></div>
+    <div class="alert critical"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg><div><b>Payment method expired</b>Update your card to keep auto-earning on linked purchases.</div><button class="close" aria-label="Dismiss">✕</button></div>
+    <button class="btn secondary sm" id="snackDemo" style="margin-top:var(--sp-xs)">Show snackbar</button>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>type</td><td><code>snackbar | banner | inline</code></td><td><code>banner</code></td><td>snackbar auto-dismisses after 5s (ease-out); banner persists; inline sits under the field/section it describes</td></tr><tr><td>state</td><td><code>success | info | warning | critical | default</code></td><td><code>success</code></td><td>default exists only for snackbar</td></tr><tr><td>actionButton / closeButton / subcopy / title / check</td><td><code>boolean</code></td><td><code>true</code></td><td>compose per context</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;div class=&quot;alert warning&quot; role=&quot;alert&quot;&gt;
+  &lt;svg class=&quot;ic&quot;&gt;&lt;!-- icon --&gt;&lt;/svg&gt;
+  &lt;div&gt;&lt;b&gt;2,400 points expiring&lt;/b&gt;Redeem before 28 February.&lt;/div&gt;
+  &lt;button class=&quot;close&quot; aria-label=&quot;Dismiss&quot;&gt;✕&lt;/button&gt;
+&lt;/div&gt;
+
+&lt;div class=&quot;snackbar show&quot; role=&quot;status&quot;&gt;Offer saved to your wallet&lt;button&gt;View&lt;/button&gt;&lt;/div&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Critical and warning alerts use <code>role="alert"</code> (interrupts); snackbars and success confirmations use <code>role="status"</code> (polite). A snackbar with an action must persist long enough to reach by keyboard — the documented duration is 5 seconds, and it should pause on hover/focus.</p>
+
+<div class="guide"><h4>Snackbar (modal type)</h4><ul><li>Appears at the bottom; <strong>auto-dismisses after 5 seconds</strong> with an ease-out animation.</li><li>Users can also dismiss via the ✕ or by <strong>swiping left</strong>; with an action button it persists until dismissed or actioned.</li><li>Three layouts: single line + close · double line + close · long line + action link + close.</li></ul><h4>Non-modal banner</h4><ul><li>Appears at the top of the content and informs without blocking interaction — passive, auto-dismissing or persistent without required action.</li></ul><h4>Inline message</h4><ul><li>A single contextual line beneath a field or component, changing dynamically with user actions (validation feedback).</li></ul></div>
+</section>
+
+<!-- ============ BANNER TAG ============ -->
+<section id="bannertag">
+  <h2>Banner tag</h2>
+  <p class="lede">Overlaid on media in translucent or ghost style, small and large.</p>
+  <div class="canvas dark" style="background:linear-gradient(135deg,var(--loyalty-600),var(--loyalty-900))">
+    <span class="bannertag translucent"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17l-6.1 3.6 1.4-6.8L2.2 9.1l6.9-.8z"/></svg>Members only</span>
+    <span class="bannertag translucent lg"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17l-6.1 3.6 1.4-6.8L2.2 9.1l6.9-.8z"/></svg>Double points</span>
+    <span class="bannertag ghost">New brand</span>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>size</td><td><code>small | large</code></td><td><code>small</code></td><td>24 / 32px</td></tr><tr><td>style</td><td><code>translucent | ghost</code></td><td><code>translucent</code></td><td>translucent = 40% LoyaltyBlue900 + blur; ghost = outline</td></tr><tr><td>icon</td><td><code>boolean</code></td><td><code>true</code></td><td></td></tr><tr><td>label</td><td><code>string</code></td><td><code>Banner tag</code></td><td></td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;span class=&quot;bannertag translucent&quot;&gt;Members only&lt;/span&gt;
+&lt;span class=&quot;bannertag ghost lg&quot;&gt;New brand&lt;/span&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Decorative on media; if the tag conveys the only signal (e.g. "Members only"), repeat it in the card's accessible text.</p>
+</section>
+
+
+<section id="aspect">
+  <h2>Aspect ratio</h2>
+  <p class="lede">A utility that keeps media proportional across devices — 1:1, 4:3, 16:9, 5:4, 3:2, 2:1, 21:9, each in landscape or portrait, with an optional 50%-height mode.</p>
+  <div class="canvas subtle">
+    <div style="width:120px;aspect-ratio:1/1;border-radius:var(--r-md)" class="grad-loyalty"></div>
+    <div style="width:160px;aspect-ratio:4/3;border-radius:var(--r-md)" class="grad-steel"></div>
+    <div style="width:196px;aspect-ratio:16/9;border-radius:var(--r-md)" class="grad-gold"></div>
+    <div style="width:210px;aspect-ratio:21/9;border-radius:var(--r-md)" class="grad-red"></div>
+  </div>
+  <div class="guide"><h4>When to use</h4><ul>
+    <li>Media-driven components: images, video, banners, cards.</li>
+    <li>When visual hierarchy and composition must hold across breakpoints.</li>
+    <li>When a child element must scale responsively while preserving proportion.</li>
+    <li>Reusable components shared between mobile and web.</li></ul>
+  <h4>When not to use</h4><ul><li>Purely text-based containers where height should be dictated by content.</li></ul>
+  <h4>Fit modes</h4><ul><li><strong>Filled</strong> — the image fully covers the container.</li><li><strong>Fitted</strong> — centered, not filling the container; typically for brand logos.</li></ul></div>
+  <details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>CSS</span><button class="copy-btn" type="button">Copy</button></div><pre><code>.media-16x9 { aspect-ratio: 16 / 9; }
+.media-16x9 img.filled { width: 100%; height: 100%; object-fit: cover; }   /* Filled */
+.media-16x9 img.fitted { width: 100%; height: 100%; object-fit: contain; } /* Fitted (logos) */</code></pre></div></details>
+</section>
+
+<!-- ============ CARDS ============ -->
+<section id="cards">
+  <h2>Cards</h2>
+  <p class="lede">Card A is the workhorse: media at 1:1 or 16:9, optional banner tag, title, and subcopy, in four sizes. Stroke color communicates interaction — hover and press these.</p>
+  <div class="canvas subtle">
+    <button class="mcard">
+      <div class="media grad-gold"><span class="bannertag translucent">2× points</span></div>
+      <div class="body"><h5>Weekend at Tanagra</h5><p>Double points on home & design</p></div>
+    </button>
+    <button class="mcard">
+      <div class="media r169 grad-loyalty"><span class="bannertag ghost">Members only</span></div>
+      <div class="body"><h5>Private sale access</h5><p>Gold tier and above</p></div>
+    </button>
+    <button class="mcard">
+      <div class="media grad-red"></div>
+      <div class="body"><h5>Fragrance week</h5><p>Earn on every note</p></div>
+    </button>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>size</td><td><code>lg | md | sm | xs</code></td><td><code>lg</code></td><td>populated combos: all sizes at 1:1; lg+md at 16:9</td></tr><tr><td>imageRatio</td><td><code>1:1 | 16:9</code></td><td><code>1:1</code></td><td>use the aspect-ratio utility</td></tr><tr><td>bannertag / title / subcopy</td><td><code>boolean</code></td><td><code>true</code></td><td>cards B–G are fixed compositions built on the same tokens</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;button class=&quot;mcard&quot;&gt;
+  &lt;div class=&quot;media&quot; style=&quot;aspect-ratio:1/1&quot;&gt;&lt;span class=&quot;bannertag translucent&quot;&gt;2× points&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;body&quot;&gt;&lt;h5&gt;Weekend at Tanagra&lt;/h5&gt;&lt;p&gt;Double points on home &amp;amp; design&lt;/p&gt;&lt;/div&gt;
+&lt;/button&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> A whole clickable card is one <code>&lt;button&gt;</code> or <code>&lt;a&gt;</code> — never nest a second interactive element inside; put secondary actions outside the card surface.</p>
+
+<div class="guide"><h4>Shared specs (from the source docs)</h4><ul><li>Corner radius <code>radius-xl</code> (24px) · elevation <code>shadow-md</code> · section background configurable.</li><li>Press transition is identical to the Apple App Store card effect.</li><li>Media fit modes: <strong>Filled</strong> — image covers the container; <strong>Fitted</strong> — centered without filling (brand logos).</li></ul><h4>Content rules</h4><ul><li>Card A: title <code>title-sm</code> ≤14 chars · subcopy <code>parag-md</code> ≤20 · banner tag small · image 1:1 default.</li><li>Card B: 4:3 media + configurable gradient · kicker <code>label-md-strong</code> ≤32 · title <code>subheading-lg</code> · description ≤112 · <strong>contrast</strong> button.</li><li>Card C: 1:1 image with 40% black overlay · label <code>label-md-strong</code> ≤14.</li><li>Card E: title <code>subheading-sm</code> ≤25 · subcopy <code>parag-sm</code> ≤38 · badge <code>caption-md</code> ≤14.</li><li>Banner tag large: ≤80 characters including spaces.</li></ul></div>
+</section>
+
+<section id="modules">
+  <h2>Content modules</h2>
+  <p class="lede">The homepage building kit: ten lettered modules plus the hero, each a fixed composition of cards, carousels, and text blocks. Section backgrounds are configurable per placement.</p>
+  <table class="tokens">
+    <thead><tr><th>Module</th><th>Name</th><th>Composition & rules</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mod-tag">Hero</span></td><td>Homepage hero</td><td>Full-bleed media · title · supporting copy · CTA · page indicator. Points and modules animate in on entry.</td></tr>
+      <tr><td><span class="mod-tag">A</span></td><td>Carousel with medium cards</td><td>Title (<code>title-sm</code> ≤14) + subcopy (<code>parag-md</code>) + Card A carousel.</td></tr>
+      <tr><td><span class="mod-tag">B</span></td><td>Card with gradient effect</td><td>Single Card B: 4:3 media, configurable gradient, kicker ≤32, description ≤112, contrast button.</td></tr>
+      <tr><td><span class="mod-tag">C</span></td><td>Collage with image carousel</td><td>16:9 top image (non-16:9 uploads scale to width, bottom-aligned) · 1:1 grid of 4–6 · 4:3 carousel of ≤3 assets · page control.</td></tr>
+      <tr><td><span class="mod-tag">D</span></td><td>Carousel with small cards</td><td>Title + small-card carousel.</td></tr>
+      <tr><td><span class="mod-tag">E</span></td><td>Featured with large card</td><td>Title + one large Card A.</td></tr>
+      <tr><td><span class="mod-tag">F</span></td><td>Moving brand blocks</td><td>Title + subcopy + auto-scrolling brand logos in 112×80 blocks.</td></tr>
+      <tr><td><span class="mod-tag">G</span></td><td>Quicklinks</td><td>Card C tiles + text labels.</td></tr>
+      <tr><td><span class="mod-tag">H</span></td><td>Collapse &amp; expand carousel</td><td>Collapsible section (chevron) revealing a Card A carousel.</td></tr>
+      <tr><td><span class="mod-tag">I</span></td><td>Stacked cards on a grid</td><td>Card C on a 2- or 3-column grid, title + subcopy.</td></tr>
+      <tr><td><span class="mod-tag">J</span></td><td>Cards on 1 &amp; 2 col grid</td><td>Overline + title + support text; Card G rows (1-col) and Card F pairs (2-col).</td></tr>
+    </tbody>
+  </table>
+</section>
+
+
+<!-- ============ AVATAR ============ -->
+<section id="avatar">
+  <h2>Avatar</h2>
+  <p class="lede">Photo and no-photo variants at 48px; the fallback carries initials on bg-muted.</p>
+  <div class="canvas">
+    <span class="avatar grad-steel" role="img" aria-label="Member photo">SA</span>
+    <span class="avatar noimg">SA</span>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>photo</td><td><code>yes | no</code></td><td><code>yes</code></td><td>no-photo falls back to initials on bg-muted</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;span class=&quot;avatar&quot; role=&quot;img&quot; aria-label=&quot;Sara A.&quot;&gt;&lt;img src=&quot;…&quot; alt=&quot;&quot;&gt;&lt;/span&gt;
+&lt;span class=&quot;avatar noimg&quot; aria-hidden=&quot;true&quot;&gt;SA&lt;/span&gt;</code></pre></div></details>
+
+<div class="guide"><h4>Fallback order</h4><ul><li>Profile image → <strong>fallback image</strong> if it fails to load → <strong>initials placeholder</strong> when no photo has been uploaded.</li><li>Two categories: representing a <em>person</em> or an <em>entity</em>; icon and initials alternatives exist for both.</li></ul></div>
+</section>
+
+<!-- ============ POPOVER ============ -->
+<section id="popover">
+  <h2>Popover</h2>
+  <p class="lede">Anchored hint with a directional pointer (top, bottom, left, right, or none). Click the trigger.</p>
+  <div class="canvas" style="padding-top:88px">
+    <div class="pop-wrap" id="popWrap">
+      <div class="popover" role="tooltip">Your tier is reviewed every 12 months based on qualifying spend.</div>
+      <button class="btn secondary sm">Why tiers change</button>
+    </div>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Prop</th><th>Type</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>pointer</td><td><code>top | bottom | left | right | none</code></td><td><code>bottom</code></td><td>pointer names the edge it sits on</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;div class=&quot;pop-wrap&quot;&gt;
+  &lt;button aria-describedby=&quot;tip1&quot; class=&quot;btn secondary sm&quot;&gt;Why tiers change&lt;/button&gt;
+  &lt;div class=&quot;popover&quot; role=&quot;tooltip&quot; id=&quot;tip1&quot;&gt;Your tier is reviewed every 12 months…&lt;/div&gt;
+&lt;/div&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Trigger references the popover with <code>aria-describedby</code>. Dismiss on Escape and on outside click; return focus to the trigger.</p>
+</section>
+
+<!-- ============ LIST TAB ============ -->
+<section id="listtab">
+  <h2>List tab</h2>
+  <p class="lede">Row-level navigation with a leading block, supporting text, and a trailing action. Rows tint to bg-subtle on hover.</p>
+  <div class="canvas" style="flex-direction:column;gap:0;padding:0;overflow:hidden">
+    <button class="list-tab"><span class="avatar grad-gold" style="width:40px;height:40px;font-size:13px">LS</span><span class="t"><b>Level Shoes</b><span>Earn 10 pts / AED · Dubai Mall</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--fg-icon-muted)" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="list-tab"><span class="avatar grad-loyalty" style="width:40px;height:40px;font-size:13px">FA</span><span class="t"><b>Faces</b><span>Earn 10 pts / AED · 42 locations</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--fg-icon-muted)" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="list-tab" style="border-bottom:0"><span class="avatar grad-steel" style="width:40px;height:40px;font-size:13px">TA</span><span class="t"><b>Tanagra</b><span>Earn 12 pts / AED · By invitation</span></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--fg-icon-muted)" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
+
+<details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;button class=&quot;list-tab&quot;&gt;
+  &lt;span class=&quot;avatar&quot; aria-hidden=&quot;true&quot;&gt;LS&lt;/span&gt;
+  &lt;span class=&quot;t&quot;&gt;&lt;b&gt;Level Shoes&lt;/b&gt;&lt;span&gt;Earn 10 pts / AED · Dubai Mall&lt;/span&gt;&lt;/span&gt;
+  &lt;svg aria-hidden=&quot;true&quot;&gt;&lt;!-- chevron --&gt;&lt;/svg&gt;
+&lt;/button&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> The row itself is the single interactive element; the chevron is decorative (<code>aria-hidden</code>).</p>
+</section>
+
+<!-- ============ NAVIGATION ============ -->
+<section id="navigation">
+  <h2>Navigation</h2>
+  <p class="lede">Header L1 with the tier pill and account entry; the bottom bar carries five destinations with the barcode action raised at center. Tabs switch live.</p>
+  <div class="canvas subtle" style="flex-direction:column;align-items:center;gap:var(--sp-6xl)">
+    <div class="hdr">
+      <span class="title">MUSE</span>
+      <span class="tier-pill"><span class="tier-badge"></span>12,480</span>
+      <span class="avatar grad-steel" style="width:36px;height:36px;font-size:12px">SA</span>
+    </div>
+    <div class="bottom-nav" role="tablist" aria-label="App navigation">
+      <button class="bnav-item" aria-current="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5L12 3l9 7.5V21H3z"/></svg><span class="lbl">Home</span></button>
+      <button class="bnav-item" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 12l-8 9-8-9 4-8h8z"/></svg><span class="lbl">Offers</span></button>
+      <button class="bnav-qr" aria-label="Show barcode"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h2v2h-2zM19 15h2v2h-2zM15 19h2v2h-2zM19 19h2v2h-2z"/></svg></button>
+      <button class="bnav-item" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/></svg><span class="lbl">Brands</span></button>
+      <button class="bnav-item" aria-current="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17l-6.1 3.6 1.4-6.8L2.2 9.1l6.9-.8z"/></svg><span class="lbl">For you</span></button>
+    </div>
+  </div>
+
+<table class="tokens api"><thead><tr><th>Component · prop</th><th>Values</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>bottom-nav · active</td><td><code>home | offers | brands | experiences | barcode</code></td><td><code>home</code></td><td>two OS treatments in the library (iOS 18 / 26)</td></tr><tr><td>header-L1 · use-in</td><td><code>homepage | home | innerpage</code></td><td><code>homepage</code></td><td>plus <code>state: default | scroll</code></td></tr><tr><td>header-L2 · state</td><td><code>default | scrolled</code></td><td><code>default</code></td><td>left/right buttons and title are togglable</td></tr></tbody></table><details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;nav class=&quot;bottom-nav&quot; aria-label=&quot;App navigation&quot;&gt;
+  &lt;button class=&quot;bnav-item&quot; aria-current=&quot;true&quot;&gt;…Home&lt;/button&gt;
+  &lt;button class=&quot;bnav-qr&quot; aria-label=&quot;Show barcode&quot;&gt;…&lt;/button&gt;
+  &lt;button class=&quot;bnav-item&quot; aria-current=&quot;false&quot;&gt;…Brands&lt;/button&gt;
+&lt;/nav&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> Exactly one destination carries <code>aria-current</code>. The raised barcode action is still in DOM order between its neighbors — visual elevation must not break tab order.</p>
+
+<div class="guide"><h4>Bottom nav — SF Symbol mapping</h4><ul><li><code>house.fill</code> Home — main page, modules & personalized content.</li><li><code>tag.fill</code> Offers — promotions, discounts, available offers.</li><li>Center: QR symbol that <strong>animates into the “M” logo</strong> — opens the MUSE ID to earn/burn points at checkout.</li><li><code>heart.fill</code> Brands · <code>calendar.badge</code> Experiences · <code>ellipsis</code> More (Gift card, Tier benefits…).</li></ul><h4>Behavior rules</h4><ul><li>Persistent across all main sections; every tap target <strong>≥ 48×48dp</strong>.</li><li>Re-tapping the current tab reloads the section or scrolls back to top.</li></ul><h4>Header behavior</h4><ul><li>Homepage: tier color treatment communicates loyalty status; points <strong>animate into view</strong> on entry; account icon opens the Dashboard with animated transitions.</li><li>On scroll the header becomes a <strong>compact rounded variant</strong>; Account/Chat turn into sticky liquid-glass buttons; the compact header acts as <strong>back-to-top</strong>.</li><li>Inner pages (e.g. Brands) use the distinct <strong>MUSE red</strong> header; on scroll the title fades, filters hide (returning at top), and the red transitions to a soft iOS-style adaptive gradient.</li></ul></div>
+</section>
+
+<!-- ============ BARCODE ============ -->
+<section id="barcode">
+  <h2>Barcode</h2>
+  <p class="lede">The member barcode presented at checkout — 244×48 code with a tracked numeric readout.</p>
+  <div class="canvas subtle">
+    <div class="barcode"><div class="lines" role="img" aria-label="Membership barcode"></div><span class="num">6 2 4 4 1 0 8 8 2 1 4 9 0 7</span></div>
+  </div>
+
+<details class="devdoc"><summary>Code</summary><div class="codewrap"><div class="bar"><span>HTML</span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;div class=&quot;barcode&quot;&gt;
+  &lt;div class=&quot;lines&quot; role=&quot;img&quot; aria-label=&quot;Membership barcode 6244 1088 2149 07&quot;&gt;&lt;/div&gt;
+  &lt;span class=&quot;num&quot; aria-hidden=&quot;true&quot;&gt;6 2 4 4 1 0 8 8 2 1 4 9 0 7&lt;/span&gt;
+&lt;/div&gt;</code></pre></div></details><p class="a11y"><strong>Accessibility contract.</strong> The graphic carries the full number in its <code>aria-label</code>; the tracked visual digits are hidden from assistive tech to avoid digit-by-digit letter-spacing announcement issues.</p>
+</section>
+
+<footer>
+  MUSE Design System · Tokens and component specifications extracted from the source Figma library · Icons drawn inline for demonstration; production icons load from the shared icon library via icon-swapper. Token exports: muse-tokens.css · muse-tokens.json (W3C).
+</footer>
+</main>
+</div>
+
+<div class="snackbar" id="snackbar" role="status">Offer saved to your wallet<button id="snackAction">View</button></div>
+
+<script>
+/* ---- Color ramps (rendered from token data) ---- */
+const RAMPS = {
+  "Loyalty Blue":["#15203B","#1F304D","#2F4466","#435E85","#5D79A1","#7F96B8","#A4B5CE","#C3CEDF","#E2E7F0","#F7FAFF"],
+  "Steel Blue":["#192226","#33444C","#4C6672","#668898","#7FAABE","#99BBCB","#B2CCD8","#CCDDE5","#E5EEF2","#EFF8FC"],
+  "Sapphire Blue":["#040822","#070F44","#0B1766","#0E1E88","#1226AA","#4151BB","#717DCC","#A0A8DD","#D0D4EE","#EEF0FF"],
+  "Sea Green":["#001A13","#003427","#004D3A","#00674E","#008161","#339A81","#66B3A0","#99CDC0","#CCE6DF","#E8FAF5"],
+  "Red Orange":["#280D02","#501903","#782605","#A03206","#C83F08","#D36539","#DE8C6B","#E9B29C","#F4D9CE","#FDEFE9"],
+  "Scarlet":["#230006","#46000D","#6A0013","#8D001A","#B00020","#C0334D","#D06679","#DF99A6","#EFCCD2","#FFEFF2"],
+  "Gold":["#2A1F11","#533F21","#7D5E32","#A67E42","#DAA520","#D9B175","#E3C498","#ECD8BA","#F6EBDD","#FFF8EF"],
+  "Silver":["#232325","#464749","#696A6E","#8C8E92","#AFB1B7","#BFC1C5","#CFD0D4","#DFE0E2","#EFEFF1","#F9F9F9"],
+  "Bronze":["#231106","#46220D","#683313","#8B441A","#AE5520","#BE774D","#CE9979","#DFBBA6","#EFDDD2","#F9EEE8"]
+};
+const STEPS=[900,800,700,600,500,400,300,200,100,50];
+function luma(hex){const n=parseInt(hex.slice(1),16);return (0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255))/255}
+const rampsEl=document.getElementById('ramps');
+for(const [name,colors] of Object.entries(RAMPS)){
+  const wrap=document.createElement('div');wrap.className='ramp';
+  wrap.innerHTML=`<h4>${name}</h4>`;
+  const cells=document.createElement('div');cells.className='cells';
+  colors.forEach((hex,i)=>{
+    const b=document.createElement('button');b.className='cell';
+    b.style.background=hex;b.style.color=luma(hex)>0.6?'#15203B':'#fff';
+    b.innerHTML=`<span><b>${STEPS[i]}</b><br>${hex}</span><span class="copied">Copied</span>`;
+    b.setAttribute('aria-label',`${name} ${STEPS[i]} ${hex}, copy to clipboard`);
+    b.addEventListener('click',()=>{navigator.clipboard&&navigator.clipboard.writeText(hex);b.classList.add('did-copy');setTimeout(()=>b.classList.remove('did-copy'),900)});
+    cells.appendChild(b);
+  });
+  wrap.appendChild(cells);rampsEl.appendChild(wrap);
+}
+
+/* ---- Semantic token table ---- */
+const SEM=[
+  ["fg-title-default","LoyaltyBlue900","Headings and titles","#15203B"],
+  ["fg-body-default","LoyaltyBlue900","Primary body text","#15203B"],
+  ["fg-body-muted","LoyaltyBlue700","Secondary text","#2F4466"],
+  ["fg-body-subtle","LoyaltyBlue500","Hints, captions, placeholders","#5D79A1"],
+  ["bg-default","White","Page and card surfaces","#FFFFFF"],
+  ["bg-subtle","LoyaltyBlue50","Recessed panels, hover tint","#F7FAFF"],
+  ["bg-muted","LoyaltyBlue100","Selected rows, chips","#E2E7F0"],
+  ["bg-emphasis","LoyaltyBlue900","Inverse surfaces, primary buttons","#15203B"],
+  ["stroke-default","LoyaltyBlue100","Hairlines and card borders","#E2E7F0"],
+  ["fg-success / bg-success","SeaGreen600 / 50","Positive status","#00674E"],
+  ["fg-info / bg-info","SapphireBlue600 / 50","Informational status","#0E1E88"],
+  ["fg-warning / bg-warning","RedOrange600 / 50","Caution","#A03206"],
+  ["fg-danger / bg-danger","Scarlet600 / 50","Errors and destructive actions","#8D001A"]
+];
+document.getElementById('semantic-rows').innerHTML=SEM.map(r=>
+  `<tr><td><span class="dot" style="background:${r[3]}"></span>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('');
+
+/* ---- Spacing scale ---- */
+const SPACING=[["3xs",2],["2xs",4],["xs",8],["sm",12],["md",14],["lg",16],["xl",18],["2xl",20],["3xl",22],["4xl",24],["5xl",28],["6xl",32],["7xl",40],["8xl",48],["9xl",56],["10xl",64],["12xl",80],["14xl",96],["16xl",112],["18xl",128],["20xl",144]];
+document.getElementById('spacing-scale').innerHTML=SPACING.map(([n,v])=>
+  `<div class="scale-row"><span>spacing-${n}</span><span>${v}</span><div class="bar" style="width:${v*2.2}px"></div></div>`).join('');
+
+/* ---- Interactions ---- */
+// Toggles
+document.querySelectorAll('.toggle').forEach(t=>t.addEventListener('click',()=>t.setAttribute('aria-checked',t.getAttribute('aria-checked')==='true'?'false':'true')));
+// Indeterminate checkbox
+const ind=document.getElementById('indet'); if(ind) ind.indeterminate=true;
+// Pills toggle
+document.querySelectorAll('.pill:not(.error):not(:disabled)').forEach(p=>p.addEventListener('click',()=>p.setAttribute('aria-pressed',p.getAttribute('aria-pressed')==='true'?'false':'true')));
+// Segmented
+document.querySelectorAll('.segmented').forEach(seg=>seg.querySelectorAll('.seg').forEach(b=>b.addEventListener('click',()=>{seg.querySelectorAll('.seg').forEach(x=>x.setAttribute('aria-selected','false'));b.setAttribute('aria-selected','true')})));
+// Accordion
+document.querySelectorAll('.acc-item').forEach(item=>{
+  const head=item.querySelector('.acc-head'),body=item.querySelector('.acc-body');
+  if(item.classList.contains('open')) body.style.maxHeight=body.scrollHeight+'px';
+  head.addEventListener('click',()=>{
+    const open=item.classList.toggle('open');
+    head.setAttribute('aria-expanded',open);
+    body.style.maxHeight=open?body.scrollHeight+'px':'0';
+  });
+});
+// Alert dismiss
+document.querySelectorAll('.alert .close').forEach(c=>c.addEventListener('click',()=>c.closest('.alert').remove()));
+// Snackbar
+const snack=document.getElementById('snackbar');let snackT;
+document.getElementById('snackDemo').addEventListener('click',()=>{
+  snack.classList.add('show');clearTimeout(snackT);snackT=setTimeout(()=>snack.classList.remove('show'),5000);
+});
+document.getElementById('snackAction').addEventListener('click',()=>snack.classList.remove('show'));
+// Popover
+const pw=document.getElementById('popWrap');
+pw.querySelector('button').addEventListener('click',e=>{e.stopPropagation();pw.classList.toggle('open')});
+document.addEventListener('click',()=>pw.classList.remove('open'));
+// Search clear
+const sf=document.getElementById('searchField'),si=sf.querySelector('input');
+si.addEventListener('input',()=>sf.classList.toggle('has-value',si.value.length>0));
+sf.querySelector('.clear').addEventListener('click',()=>{si.value='';sf.classList.remove('has-value');si.focus()});
+// Bottom nav
+document.querySelectorAll('.bnav-item').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.bnav-item').forEach(x=>x.setAttribute('aria-current','false'));b.setAttribute('aria-current','true');
+}));
+// Active nav highlight on scroll
+const links=[...document.querySelectorAll('.nav-group a')];
+const secs=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+e.target.id))}})},{rootMargin:'-30% 0px -60% 0px'});
+secs.forEach(s=>io.observe(s));
+// Copy buttons for code blocks
+document.querySelectorAll('.copy-btn').forEach(b=>b.addEventListener('click',()=>{
+  const code=b.closest('.codewrap').querySelector('code').textContent;
+  navigator.clipboard&&navigator.clipboard.writeText(code);
+  const t=b.textContent;b.textContent='Copied';setTimeout(()=>b.textContent=t,1200);
+}));
+</script>
+</body>
+</html>
