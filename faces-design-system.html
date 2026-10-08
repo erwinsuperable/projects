@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FACES Design System — Bloom DS v1.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   FACES DESIGN SYSTEM — "BLOOM" — DESIGN TOKENS
+   Tier 1: primitives · Tier 2: semantic aliases · Tier 3: component
+   Naming: --ds-{category}-{scale} ; classes .ds-{component}[--variant]
+   ============================================================ */
+:root{
+  /* --- color.brand (observed on faces.com, hex approximated) --- */
+  --ds-green-950:#07271D;
+  --ds-green-900:#0C382A;   /* brand core — FACES logo green */
+  --ds-green-800:#124A37;
+  --ds-green-700:#1A5C45;
+  --ds-green-500:#2E8062;
+  --ds-green-300:#8FC3AC;
+  --ds-green-100:#DCEEE4;
+  --ds-green-050:#EFF7F2;
+  /* --- color.accent (proposed: beauty warmth for campaigns) --- */
+  --ds-blush-500:#D98E7E;
+  --ds-blush-100:#F7E4DE;
+  --ds-gold-500:#B98A2F;    /* ratings */
+  /* --- color.neutral --- */
+  --ds-neutral-0:#FFFFFF;
+  --ds-neutral-050:#F7F7F5;
+  --ds-neutral-100:#EFEFEC;
+  --ds-neutral-200:#E1E1DC;
+  --ds-neutral-400:#A6A6A0;
+  --ds-neutral-600:#6B6B66;
+  --ds-neutral-800:#33332F;
+  --ds-neutral-900:#1B1B18;
+  /* --- color.semantic --- */
+  --ds-success-600:#1D7A4B; --ds-success-100:#DCF2E5;
+  --ds-error-600:#BE3A2B;   --ds-error-100:#FAE4E0;  /* sale red observed */
+  --ds-warning-600:#9A6A12; --ds-warning-100:#F8EDD4;
+  --ds-info-600:#2B5D9E;    --ds-info-100:#E1EBF8;
+  /* --- semantic aliases --- */
+  --ds-bg:var(--ds-neutral-0);
+  --ds-bg-subtle:var(--ds-neutral-050);
+  --ds-fg:var(--ds-neutral-900);
+  --ds-fg-muted:var(--ds-neutral-600);
+  --ds-border:var(--ds-neutral-200);
+  --ds-brand:var(--ds-green-900);
+  --ds-brand-hover:var(--ds-green-800);
+  --ds-sale:var(--ds-error-600);
+  --ds-focus:0 0 0 2px var(--ds-neutral-0),0 0 0 4px var(--ds-green-700);
+  /* --- typography --- */
+  --ds-font-sans:'Archivo','Tajawal',system-ui,sans-serif;
+  --ds-font-ar:'Tajawal','Archivo',system-ui,sans-serif;
+  --ds-text-xs:.75rem;  --ds-text-sm:.875rem; --ds-text-md:1rem;
+  --ds-text-lg:1.125rem;--ds-text-xl:1.375rem;--ds-text-2xl:1.75rem;
+  --ds-text-3xl:2.25rem;--ds-text-4xl:3rem;
+  --ds-leading-tight:1.15;--ds-leading-normal:1.5;--ds-leading-loose:1.7;
+  /* --- spacing (4px base) --- */
+  --ds-sp-1:.25rem;--ds-sp-2:.5rem;--ds-sp-3:.75rem;--ds-sp-4:1rem;
+  --ds-sp-5:1.25rem;--ds-sp-6:1.5rem;--ds-sp-8:2rem;--ds-sp-10:2.5rem;
+  --ds-sp-12:3rem;--ds-sp-16:4rem;
+  /* --- radius (FACES uses squared, minimal rounding) --- */
+  --ds-radius-xs:2px;--ds-radius-sm:4px;--ds-radius-md:8px;--ds-radius-pill:999px;
+  /* --- borders --- */
+  --ds-border-w:1px;--ds-border-w-bold:2px;
+  /* --- shadows --- */
+  --ds-shadow-1:0 1px 2px rgba(12,56,42,.08);
+  --ds-shadow-2:0 4px 14px rgba(12,56,42,.10);
+  --ds-shadow-3:0 12px 34px rgba(12,56,42,.16);
+  /* --- motion --- */
+  --ds-dur-fast:120ms;--ds-dur-base:200ms;--ds-dur-slow:320ms;
+  --ds-ease:cubic-bezier(.33,1,.68,1);
+  /* --- layout --- */
+  --ds-container:1240px;
+  --ds-header-h:64px;
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{
+  font-family:var(--ds-font-sans);
+  background:var(--ds-bg);color:var(--ds-fg);
+  font-size:var(--ds-text-md);line-height:var(--ds-leading-normal);
+  -webkit-font-smoothing:antialiased;
+}
+[dir="rtl"] body{font-family:var(--ds-font-ar)}
+button{font:inherit;cursor:pointer}
+input,select,textarea{font:inherit}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+:focus-visible{outline:none;box-shadow:var(--ds-focus);border-radius:var(--ds-radius-xs)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+/* ============ DOC SHELL ============ */
+.shell{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+.side{
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  background:var(--ds-green-950);color:#E9F2ED;
+  padding:var(--ds-sp-6) var(--ds-sp-4);
+}
+.side .logo{
+  font-weight:800;font-size:1.4rem;letter-spacing:.14em;
+  color:#fff;margin-bottom:2px;font-stretch:112%;
+}
+.side .logo span{color:var(--ds-green-300)}
+.side .ver{font-size:var(--ds-text-xs);color:var(--ds-green-300);margin-bottom:var(--ds-sp-6)}
+.side nav{display:flex;flex-direction:column;gap:2px}
+.side .grp{font-size:.7rem;letter-spacing:.1em;color:var(--ds-green-300);margin:var(--ds-sp-4) 0 var(--ds-sp-1);font-weight:700;text-transform:uppercase}
+.side a{
+  color:#D7E7DE;text-decoration:none;font-size:var(--ds-text-sm);
+  padding:6px 10px;border-radius:var(--ds-radius-sm);
+  transition:background var(--ds-dur-fast) var(--ds-ease);
+}
+.side a:hover{background:rgba(255,255,255,.08);color:#fff}
+.side a.active{background:var(--ds-green-800);color:#fff;font-weight:600}
+.main{min-width:0}
+.topbar{
+  position:sticky;top:0;z-index:60;display:flex;align-items:center;gap:var(--ds-sp-3);
+  justify-content:flex-end;background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--ds-border);padding:10px var(--ds-sp-6);
+}
+.topbar .hint{margin-inline-end:auto;font-size:var(--ds-text-sm);color:var(--ds-fg-muted)}
+.lang-toggle{
+  display:inline-flex;border:1px solid var(--ds-green-900);border-radius:var(--ds-radius-pill);overflow:hidden;
+}
+.lang-toggle button{
+  background:none;border:0;padding:6px 16px;font-weight:600;font-size:var(--ds-text-sm);color:var(--ds-green-900);
+}
+.lang-toggle button[aria-pressed="true"]{background:var(--ds-green-900);color:#fff}
+.wrap{max-width:980px;margin:0 auto;padding:var(--ds-sp-10) var(--ds-sp-6) var(--ds-sp-16)}
+section.doc{padding-block:var(--ds-sp-10);border-bottom:1px solid var(--ds-border)}
+section.doc:last-child{border-bottom:0}
+h1.doc-title{font-size:var(--ds-text-4xl);line-height:var(--ds-leading-tight);font-weight:700;font-stretch:105%;letter-spacing:-.01em}
+h2.doc-h{font-size:var(--ds-text-2xl);font-weight:700;margin-bottom:var(--ds-sp-2);letter-spacing:-.01em}
+h3.doc-sub{font-size:var(--ds-text-lg);font-weight:700;margin:var(--ds-sp-6) 0 var(--ds-sp-3)}
+p.lede{font-size:var(--ds-text-lg);color:var(--ds-fg-muted);max-width:62ch;margin-top:var(--ds-sp-3)}
+p.note{color:var(--ds-fg-muted);font-size:var(--ds-text-sm);max-width:70ch;margin:var(--ds-sp-2) 0 var(--ds-sp-4)}
+.tag-observed,.tag-proposed{
+  display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.06em;
+  padding:2px 8px;border-radius:var(--ds-radius-pill);vertical-align:middle;margin-inline-start:8px;text-transform:uppercase;
+}
+.tag-observed{background:var(--ds-green-100);color:var(--ds-green-800)}
+.tag-proposed{background:var(--ds-info-100);color:var(--ds-info-600)}
+.spec{width:100%;border-collapse:collapse;font-size:var(--ds-text-sm);margin:var(--ds-sp-3) 0}
+.spec th{text-align:start;font-weight:700;border-bottom:2px solid var(--ds-fg);padding:8px 10px}
+.spec td{border-bottom:1px solid var(--ds-border);padding:8px 10px;vertical-align:top}
+.spec code,.inline-code{background:var(--ds-neutral-050);border:1px solid var(--ds-border);border-radius:var(--ds-radius-xs);padding:1px 6px;font-family:ui-monospace,monospace;font-size:.8rem}
+.demo{
+  border:1px solid var(--ds-border);border-radius:var(--ds-radius-md);
+  padding:var(--ds-sp-6);margin:var(--ds-sp-4) 0;background:var(--ds-bg);
+  display:flex;flex-wrap:wrap;gap:var(--ds-sp-4);align-items:center;
+}
+.demo.stack{flex-direction:column;align-items:stretch}
+.demo.subtle{background:var(--ds-bg-subtle)}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:var(--ds-sp-4);margin:var(--ds-sp-4) 0}
+.dos .do,.dos .dont{border-radius:var(--ds-radius-md);padding:var(--ds-sp-4);font-size:var(--ds-text-sm)}
+.dos .do{background:var(--ds-success-100);border-inline-start:4px solid var(--ds-success-600)}
+.dos .dont{background:var(--ds-error-100);border-inline-start:4px solid var(--ds-error-600)}
+.dos strong{display:block;margin-bottom:6px}
+.dos ul{padding-inline-start:18px;display:grid;gap:6px}
+
+/* ============ FOUNDATIONS ============ */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:var(--ds-sp-3);margin:var(--ds-sp-4) 0}
+.swatch{border:1px solid var(--ds-border);border-radius:var(--ds-radius-md);overflow:hidden;background:#fff;text-align:start}
+.swatch button{width:100%;border:0;background:none;padding:0;text-align:start}
+.swatch .chip{height:64px}
+.swatch .meta{padding:8px 10px;font-size:var(--ds-text-xs)}
+.swatch .meta b{display:block;font-size:var(--ds-text-sm)}
+.swatch .meta span{color:var(--ds-fg-muted);font-family:ui-monospace,monospace}
+.type-row{display:grid;grid-template-columns:150px 1fr;gap:var(--ds-sp-4);align-items:baseline;padding:14px 0;border-bottom:1px solid var(--ds-border)}
+.type-row .lbl{font-size:var(--ds-text-xs);color:var(--ds-fg-muted);font-family:ui-monospace,monospace}
+.space-row{display:flex;align-items:center;gap:var(--ds-sp-4);padding:6px 0}
+.space-row .bar{height:16px;background:var(--ds-green-300);border-radius:2px}
+.space-row code{width:90px}
+.grid-demo{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--ds-sp-3)}
+.grid-demo div{background:var(--ds-green-100);border:1px dashed var(--ds-green-500);height:44px;border-radius:var(--ds-radius-xs);display:flex;align-items:center;justify-content:center;font-size:var(--ds-text-xs);color:var(--ds-green-800)}
+.icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:var(--ds-sp-3)}
+.icon-cell{border:1px solid var(--ds-border);border-radius:var(--ds-radius-md);padding:14px 8px;display:grid;place-items:center;gap:8px;font-size:var(--ds-text-xs);color:var(--ds-fg-muted)}
+.icon-cell svg{width:24px;height:24px;stroke:var(--ds-fg);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.shadow-demo{display:flex;gap:var(--ds-sp-6);flex-wrap:wrap}
+.shadow-demo .card{width:150px;height:90px;border-radius:var(--ds-radius-md);background:#fff;display:grid;place-items:center;font-size:var(--ds-text-sm);border:1px solid var(--ds-neutral-100)}
+.motion-demo{display:flex;gap:var(--ds-sp-6);align-items:center;flex-wrap:wrap}
+.motion-dot{width:40px;height:40px;border-radius:var(--ds-radius-sm);background:var(--ds-green-700)}
+.motion-track{width:220px;background:var(--ds-neutral-050);border-radius:var(--ds-radius-sm);padding:4px}
+.motion-track.play .motion-dot{transform:translateX(176px)}
+[dir="rtl"] .motion-track.play .motion-dot{transform:translateX(-176px)}
+.motion-dot.fast{transition:transform var(--ds-dur-fast) var(--ds-ease)}
+.motion-dot.base{transition:transform var(--ds-dur-base) var(--ds-ease)}
+.motion-dot.slow{transition:transform var(--ds-dur-slow) var(--ds-ease)}
+
+/* ============ COMPONENTS: BUTTONS ============ */
+.ds-btn{
+  --btn-bg:var(--ds-brand);--btn-fg:#fff;--btn-bd:var(--ds-brand);
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--btn-bg);color:var(--btn-fg);
+  border:var(--ds-border-w) solid var(--btn-bd);
+  border-radius:var(--ds-radius-xs);
+  font-weight:600;letter-spacing:.02em;
+  padding:0 var(--ds-sp-6);height:44px;font-size:var(--ds-text-sm);
+  transition:background var(--ds-dur-fast) var(--ds-ease),border-color var(--ds-dur-fast) var(--ds-ease),color var(--ds-dur-fast) var(--ds-ease),transform var(--ds-dur-fast) var(--ds-ease);
+  text-decoration:none;user-select:none;position:relative;
+}
+.ds-btn:hover{--btn-bg:var(--ds-brand-hover);--btn-bd:var(--ds-brand-hover)}
+.ds-btn:active{transform:translateY(1px)}
+.ds-btn--secondary{--btn-bg:transparent;--btn-fg:var(--ds-brand);--btn-bd:var(--ds-brand)}
+.ds-btn--secondary:hover{--btn-bg:var(--ds-green-050);--btn-fg:var(--ds-green-800)}
+.ds-btn--ghost{--btn-bg:transparent;--btn-fg:var(--ds-brand);--btn-bd:transparent}
+.ds-btn--ghost:hover{--btn-bg:var(--ds-green-050)}
+.ds-btn--danger{--btn-bg:var(--ds-error-600);--btn-bd:var(--ds-error-600)}
+.ds-btn--danger:hover{--btn-bg:#A32F22;--btn-bd:#A32F22}
+.ds-btn--sm{height:34px;padding:0 var(--ds-sp-4);font-size:var(--ds-text-xs)}
+.ds-btn--lg{height:52px;padding:0 var(--ds-sp-8);font-size:var(--ds-text-md)}
+.ds-btn:disabled,.ds-btn[aria-disabled="true"]{
+  --btn-bg:var(--ds-neutral-100);--btn-fg:var(--ds-neutral-400);--btn-bd:var(--ds-neutral-100);
+  cursor:not-allowed;transform:none;
+}
+.ds-btn.is-loading{color:transparent;pointer-events:none}
+.ds-btn.is-loading::after{
+  content:"";position:absolute;inset:0;margin:auto;width:18px;height:18px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.35);border-top-color:#fff;
+  animation:ds-spin .7s linear infinite;
+}
+.ds-btn--secondary.is-loading::after,.ds-btn--ghost.is-loading::after{border-color:var(--ds-green-100);border-top-color:var(--ds-green-800)}
+@keyframes ds-spin{to{transform:rotate(360deg)}}
+.ds-iconbtn{
+  display:inline-grid;place-items:center;width:40px;height:40px;
+  border:1px solid var(--ds-border);background:#fff;border-radius:var(--ds-radius-sm);
+  transition:border-color var(--ds-dur-fast) var(--ds-ease),background var(--ds-dur-fast) var(--ds-ease);
+}
+.ds-iconbtn:hover{border-color:var(--ds-green-700);background:var(--ds-green-050)}
+.ds-iconbtn svg{width:18px;height:18px;stroke:var(--ds-fg);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ds-iconbtn[aria-pressed="true"] svg{fill:var(--ds-sale);stroke:var(--ds-sale)}
+
+/* ============ FORMS ============ */
+.ds-field{display:grid;gap:6px;max-width:340px;width:100%}
+.ds-label{font-size:var(--ds-text-sm);font-weight:600}
+.ds-label .req{color:var(--ds-error-600)}
+.ds-input,.ds-select{
+  height:44px;border:1px solid var(--ds-neutral-400);border-radius:var(--ds-radius-xs);
+  padding:0 var(--ds-sp-3);background:#fff;width:100%;color:var(--ds-fg);
+  transition:border-color var(--ds-dur-fast) var(--ds-ease);
+}
+.ds-input::placeholder{color:var(--ds-neutral-400)}
+.ds-input:hover,.ds-select:hover{border-color:var(--ds-neutral-600)}
+.ds-input:focus-visible,.ds-select:focus-visible{border-color:var(--ds-green-700);box-shadow:var(--ds-focus)}
+.ds-field.is-error .ds-input{border-color:var(--ds-error-600)}
+.ds-field.is-success .ds-input{border-color:var(--ds-success-600)}
+.ds-help{font-size:var(--ds-text-xs);color:var(--ds-fg-muted)}
+.ds-msg{font-size:var(--ds-text-xs);display:flex;gap:6px;align-items:center}
+.ds-msg.err{color:var(--ds-error-600)}.ds-msg.ok{color:var(--ds-success-600)}
+.ds-field.is-disabled{opacity:.55}
+.ds-field.is-disabled .ds-input{background:var(--ds-neutral-050);cursor:not-allowed}
+.ds-check,.ds-radio{display:flex;gap:10px;align-items:flex-start;font-size:var(--ds-text-sm);cursor:pointer}
+.ds-check input,.ds-radio input{width:18px;height:18px;accent-color:var(--ds-green-800);margin-top:2px;flex:none}
+.ds-switch{position:relative;display:inline-flex;align-items:center;gap:10px;font-size:var(--ds-text-sm);cursor:pointer}
+.ds-switch input{position:absolute;opacity:0}
+.ds-switch .trk{width:44px;height:24px;border-radius:var(--ds-radius-pill);background:var(--ds-neutral-200);transition:background var(--ds-dur-base) var(--ds-ease);position:relative;flex:none}
+.ds-switch .trk::after{content:"";position:absolute;inset-inline-start:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:var(--ds-shadow-1);transition:transform var(--ds-dur-base) var(--ds-ease)}
+.ds-switch input:checked + .trk{background:var(--ds-green-800)}
+.ds-switch input:checked + .trk::after{transform:translateX(20px)}
+[dir="rtl"] .ds-switch input:checked + .trk::after{transform:translateX(-20px)}
+.ds-switch input:focus-visible + .trk{box-shadow:var(--ds-focus)}
+.ds-qty{display:inline-flex;align-items:center;border:1px solid var(--ds-neutral-400);border-radius:var(--ds-radius-xs);height:40px}
+.ds-qty button{width:38px;height:100%;background:none;border:0;font-size:1.1rem;color:var(--ds-green-900)}
+.ds-qty button:disabled{color:var(--ds-neutral-400);cursor:not-allowed}
+.ds-qty output{min-width:34px;text-align:center;font-weight:600;font-size:var(--ds-text-sm)}
+
+/* ============ BADGES / TABS / ACCORDION ============ */
+.ds-badge{display:inline-flex;align-items:center;font-size:.7rem;font-weight:700;letter-spacing:.05em;padding:3px 9px;border-radius:var(--ds-radius-xs);text-transform:uppercase}
+.ds-badge--new{background:var(--ds-green-900);color:#fff}
+.ds-badge--best{background:var(--ds-gold-500);color:#fff}
+.ds-badge--sale{background:var(--ds-sale);color:#fff}
+.ds-badge--gift{background:var(--ds-blush-100);color:#8C4B3C}
+.ds-badge--excl{background:var(--ds-info-100);color:var(--ds-info-600)}
+.ds-badge--stock{background:var(--ds-warning-100);color:var(--ds-warning-600)}
+.ds-tabs{border-bottom:1px solid var(--ds-border);display:flex;gap:var(--ds-sp-2)}
+.ds-tab{background:none;border:0;border-bottom:2px solid transparent;padding:12px 14px;font-weight:600;font-size:var(--ds-text-sm);color:var(--ds-fg-muted)}
+.ds-tab:hover{color:var(--ds-fg)}
+.ds-tab[aria-selected="true"]{color:var(--ds-green-900);border-bottom-color:var(--ds-green-900)}
+.ds-tabpanel{padding:var(--ds-sp-4) 4px;font-size:var(--ds-text-sm);color:var(--ds-fg-muted);max-width:60ch}
+.ds-acc{border-top:1px solid var(--ds-border)}
+.ds-acc-item{border-bottom:1px solid var(--ds-border)}
+.ds-acc-btn{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;padding:16px 4px;font-weight:600;font-size:var(--ds-text-md);text-align:start}
+.ds-acc-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;transition:transform var(--ds-dur-base) var(--ds-ease);flex:none}
+.ds-acc-btn[aria-expanded="true"] svg{transform:rotate(180deg)}
+.ds-acc-panel{overflow:hidden;max-height:0;transition:max-height var(--ds-dur-slow) var(--ds-ease)}
+.ds-acc-panel > div{padding:0 4px 18px;color:var(--ds-fg-muted);font-size:var(--ds-text-sm);max-width:65ch}
+
+/* ============ NOTIFICATIONS ============ */
+.ds-alert{display:flex;gap:12px;align-items:flex-start;border-radius:var(--ds-radius-sm);padding:12px 16px;font-size:var(--ds-text-sm);width:100%;border:1px solid transparent}
+.ds-alert svg{width:18px;height:18px;flex:none;margin-top:1px;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.ds-alert--success{background:var(--ds-success-100);color:#14522F;border-color:#BCE3CB}.ds-alert--success svg{stroke:var(--ds-success-600)}
+.ds-alert--error{background:var(--ds-error-100);color:#7E271C;border-color:#F0C7C0}.ds-alert--error svg{stroke:var(--ds-error-600)}
+.ds-alert--warning{background:var(--ds-warning-100);color:#6B4A0C;border-color:#EBD8A8}.ds-alert--warning svg{stroke:var(--ds-warning-600)}
+.ds-alert--info{background:var(--ds-info-100);color:#1F4372;border-color:#C4D8F1}.ds-alert--info svg{stroke:var(--ds-info-600)}
+.ds-alert b{display:block}
+#toast-region{position:fixed;bottom:20px;inset-inline-end:20px;display:grid;gap:10px;z-index:200;max-width:min(360px,calc(100vw - 40px))}
+.ds-toast{display:flex;gap:10px;align-items:center;background:var(--ds-neutral-900);color:#fff;padding:12px 16px;border-radius:var(--ds-radius-sm);box-shadow:var(--ds-shadow-3);font-size:var(--ds-text-sm);animation:toast-in var(--ds-dur-slow) var(--ds-ease)}
+.ds-toast.ok{border-inline-start:4px solid var(--ds-green-300)}
+.ds-toast.err{border-inline-start:4px solid #F2A79B}
+@keyframes toast-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ============ MODAL / DRAWER ============ */
+.ds-overlay{position:fixed;inset:0;background:rgba(7,39,29,.45);z-index:150;opacity:0;pointer-events:none;transition:opacity var(--ds-dur-base) var(--ds-ease)}
+.ds-overlay.open{opacity:1;pointer-events:auto}
+.ds-modal{position:fixed;inset:0;display:grid;place-items:center;z-index:160;padding:var(--ds-sp-4);pointer-events:none}
+.ds-modal .box{background:#fff;border-radius:var(--ds-radius-md);max-width:440px;width:100%;padding:var(--ds-sp-6);box-shadow:var(--ds-shadow-3);opacity:0;transform:translateY(14px) scale(.98);transition:opacity var(--ds-dur-base) var(--ds-ease),transform var(--ds-dur-base) var(--ds-ease);pointer-events:none}
+.ds-modal.open .box{opacity:1;transform:none;pointer-events:auto}
+.ds-modal h3{font-size:var(--ds-text-xl);margin-bottom:var(--ds-sp-2)}
+.ds-modal p{color:var(--ds-fg-muted);font-size:var(--ds-text-sm);margin-bottom:var(--ds-sp-5)}
+.ds-modal .row{display:flex;gap:var(--ds-sp-3);justify-content:flex-end}
+.ds-drawer{position:fixed;top:0;bottom:0;inset-inline-end:0;width:min(400px,92vw);background:#fff;z-index:170;box-shadow:var(--ds-shadow-3);transform:translateX(105%);transition:transform var(--ds-dur-slow) var(--ds-ease);display:flex;flex-direction:column}
+[dir="rtl"] .ds-drawer{transform:translateX(-105%)}
+.ds-drawer.open{transform:none!important}
+.ds-drawer header{display:flex;justify-content:space-between;align-items:center;padding:var(--ds-sp-4) var(--ds-sp-5);border-bottom:1px solid var(--ds-border)}
+.ds-drawer header h3{font-size:var(--ds-text-lg)}
+.ds-drawer .body{flex:1;overflow-y:auto;padding:var(--ds-sp-4) var(--ds-sp-5);display:grid;gap:var(--ds-sp-4);align-content:start}
+.ds-drawer footer{border-top:1px solid var(--ds-border);padding:var(--ds-sp-4) var(--ds-sp-5);display:grid;gap:10px}
+.cart-line{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:start}
+.cart-line .thumb{width:64px;height:80px;border-radius:var(--ds-radius-sm);border:1px solid var(--ds-border)}
+.cart-line .nm{font-size:var(--ds-text-sm);font-weight:600}
+.cart-line .br{font-size:var(--ds-text-xs);color:var(--ds-fg-muted)}
+.cart-line .pr{font-weight:700;font-size:var(--ds-text-sm);white-space:nowrap}
+.cart-line .rm{background:none;border:0;font-size:var(--ds-text-xs);color:var(--ds-fg-muted);text-decoration:underline;padding:0;margin-top:6px}
+.cart-line .rm:hover{color:var(--ds-error-600)}
+.freebar{background:var(--ds-green-050);border-radius:var(--ds-radius-sm);padding:10px 12px;font-size:var(--ds-text-xs);color:var(--ds-green-800)}
+.freebar .track{height:6px;background:var(--ds-green-100);border-radius:var(--ds-radius-pill);margin-top:6px;overflow:hidden}
+.freebar .fill{height:100%;background:var(--ds-green-700);border-radius:var(--ds-radius-pill);transition:width var(--ds-dur-slow) var(--ds-ease)}
+.cart-empty{text-align:center;padding:var(--ds-sp-10) var(--ds-sp-4);color:var(--ds-fg-muted)}
+.cart-empty svg{width:44px;height:44px;margin:0 auto var(--ds-sp-3);stroke:var(--ds-neutral-400);fill:none;stroke-width:1.4}
+.subrow{display:flex;justify-content:space-between;font-size:var(--ds-text-sm)}
+.subrow b{font-size:var(--ds-text-md)}
+.subrow .vat{font-size:var(--ds-text-xs);color:var(--ds-fg-muted)}
+
+/* ============ STORE HEADER DEMO ============ */
+.store{border:1px solid var(--ds-border);border-radius:var(--ds-radius-md);overflow:hidden;margin:var(--ds-sp-4) 0;background:#fff}
+.usp{background:var(--ds-green-900);color:#EAF4EE;font-size:var(--ds-text-xs);text-align:center;padding:7px 12px;letter-spacing:.03em}
+.store-head{display:flex;align-items:center;gap:var(--ds-sp-4);padding:12px var(--ds-sp-5);border-bottom:1px solid var(--ds-border);flex-wrap:wrap}
+.store-logo{font-weight:800;letter-spacing:.16em;font-size:1.25rem;color:var(--ds-green-900);font-stretch:112%}
+.store-search{position:relative;flex:1;min-width:200px;max-width:420px}
+.store-search input{width:100%;height:40px;border:1px solid var(--ds-neutral-400);border-radius:var(--ds-radius-pill);padding-inline:40px 16px;background:var(--ds-neutral-050)}
+.store-search input:focus-visible{border-color:var(--ds-green-700);box-shadow:var(--ds-focus)}
+.store-search .mag{position:absolute;inset-inline-start:14px;top:11px;width:18px;height:18px;stroke:var(--ds-fg-muted);fill:none;stroke-width:1.8;pointer-events:none}
+.suggest{position:absolute;top:46px;inset-inline:0;background:#fff;border:1px solid var(--ds-border);border-radius:var(--ds-radius-md);box-shadow:var(--ds-shadow-2);padding:8px;display:none;z-index:40}
+.suggest.open{display:block}
+.suggest .hd{font-size:var(--ds-text-xs);color:var(--ds-fg-muted);padding:6px 10px}
+.suggest button{display:flex;width:100%;gap:10px;align-items:center;background:none;border:0;padding:8px 10px;border-radius:var(--ds-radius-sm);font-size:var(--ds-text-sm);text-align:start}
+.suggest button:hover,.suggest button:focus-visible{background:var(--ds-green-050)}
+.suggest svg{width:14px;height:14px;stroke:var(--ds-neutral-400);fill:none;stroke-width:1.8;flex:none}
+.store-acts{display:flex;gap:8px;align-items:center;margin-inline-start:auto}
+.cartbtn{position:relative}
+.cartbtn .cnt{position:absolute;top:-6px;inset-inline-end:-6px;background:var(--ds-sale);color:#fff;font-size:.65rem;font-weight:700;min-width:18px;height:18px;border-radius:var(--ds-radius-pill);display:grid;place-items:center;padding:0 4px}
+.store-nav{display:flex;gap:2px;padding:0 var(--ds-sp-4);border-bottom:1px solid var(--ds-border);overflow-x:auto}
+.store-nav a{text-decoration:none;font-size:var(--ds-text-sm);font-weight:600;padding:12px 14px;border-bottom:2px solid transparent;white-space:nowrap}
+.store-nav a:hover{color:var(--ds-green-800);border-bottom-color:var(--ds-green-300)}
+.store-nav a[aria-current="true"]{color:var(--ds-green-900);border-bottom-color:var(--ds-green-900)}
+.store-nav a.sale{color:var(--ds-sale)}
+.mega{position:relative}
+.mega-panel{display:none;padding:var(--ds-sp-5);gap:var(--ds-sp-8);border-bottom:1px solid var(--ds-border);background:var(--ds-neutral-050)}
+.mega-panel.open{display:flex;flex-wrap:wrap}
+.mega-col h4{font-size:var(--ds-text-xs);text-transform:uppercase;letter-spacing:.08em;color:var(--ds-fg-muted);margin-bottom:8px}
+.mega-col a{display:block;text-decoration:none;font-size:var(--ds-text-sm);padding:4px 0}
+.mega-col a:hover{color:var(--ds-green-700);text-decoration:underline}
+
+/* ============ PRODUCT CARD ============ */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:var(--ds-sp-4);padding:var(--ds-sp-5)}
+.pcard{position:relative;border:1px solid var(--ds-border);border-radius:var(--ds-radius-md);background:#fff;display:flex;flex-direction:column;overflow:hidden;transition:box-shadow var(--ds-dur-base) var(--ds-ease),transform var(--ds-dur-base) var(--ds-ease)}
+.pcard:hover{box-shadow:var(--ds-shadow-2);transform:translateY(-2px)}
+.pcard .badges{position:absolute;top:10px;inset-inline-start:10px;display:grid;gap:4px;z-index:2;justify-items:start}
+.pcard .wish{position:absolute;top:8px;inset-inline-end:8px;z-index:2;width:34px;height:34px;border-radius:50%;border:0;background:rgba(255,255,255,.9);display:grid;place-items:center;transition:transform var(--ds-dur-fast) var(--ds-ease)}
+.pcard .wish:hover{transform:scale(1.1)}
+.pcard .wish svg{width:17px;height:17px;stroke:var(--ds-fg);fill:none;stroke-width:1.7}
+.pcard .wish[aria-pressed="true"] svg{fill:var(--ds-sale);stroke:var(--ds-sale)}
+.pcard .img{aspect-ratio:4/5;display:grid;place-items:center;background:var(--ds-neutral-050)}
+.pcard .img svg{width:58%;height:78%}
+.pcard .info{padding:12px 14px 14px;display:grid;gap:4px;flex:1;align-content:start}
+.pcard .brand{font-size:var(--ds-text-xs);letter-spacing:.06em;text-transform:uppercase;color:var(--ds-fg-muted);font-weight:600}
+.pcard .name{font-size:var(--ds-text-sm);font-weight:600;line-height:1.35;text-decoration:none}
+.pcard .name:hover{text-decoration:underline}
+.pcard .rating{display:flex;gap:5px;align-items:center;font-size:var(--ds-text-xs);color:var(--ds-fg-muted)}
+.pcard .stars{color:var(--ds-gold-500);letter-spacing:1px;font-size:.8rem}
+.pcard .price{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap;margin-top:2px}
+.pcard .from{font-size:var(--ds-text-xs);color:var(--ds-fg-muted)}
+.pcard .now{font-weight:700;font-size:var(--ds-text-md)}
+.pcard .now.sale{color:var(--ds-sale)}
+.pcard .was{color:var(--ds-fg-muted);text-decoration:line-through;font-size:var(--ds-text-sm)}
+.pcard .add{margin:0 14px 14px}
+.pcard.is-oos .img{opacity:.5}
+.pcard .oos-lbl{position:absolute;top:45%;inset-inline:0;text-align:center;font-weight:700;color:var(--ds-neutral-600);letter-spacing:.06em;text-transform:uppercase;font-size:var(--ds-text-sm)}
+/* skeleton */
+.pcard.is-skeleton{pointer-events:none}
+.pcard.is-skeleton .sk{display:grid;background:#fff}
+.sk-box{background:linear-gradient(100deg,var(--ds-neutral-100) 40%,var(--ds-neutral-050) 50%,var(--ds-neutral-100) 60%);background-size:200% 100%;animation:sk 1.4s infinite linear}
+@keyframes sk{to{background-position:-200% 0}}
+.sk .sk-img{aspect-ratio:4/5}
+.sk .sk-lines{padding:12px 14px;display:grid;gap:8px}
+.sk .sk-lines .sk-box{height:12px;border-radius:3px}
+.sk .sk-lines .sk-box:last-child{width:50%}
+
+/* ============ FILTERS / SORT / PLP ============ */
+.plp{display:grid;grid-template-columns:230px 1fr}
+.plp .filters{border-inline-end:1px solid var(--ds-border);padding:var(--ds-sp-5)}
+.plp .results{min-width:0}
+.plp-bar{display:flex;align-items:center;gap:var(--ds-sp-3);padding:var(--ds-sp-4) var(--ds-sp-5);border-bottom:1px solid var(--ds-border);flex-wrap:wrap}
+.plp-bar .count{font-size:var(--ds-text-sm);color:var(--ds-fg-muted)}
+.plp-bar .ds-select{width:auto;height:38px;margin-inline-start:auto}
+.fgroup{border-bottom:1px solid var(--ds-border);padding-block:var(--ds-sp-3)}
+.fgroup:last-child{border-bottom:0}
+.fgroup > button{width:100%;display:flex;justify-content:space-between;align-items:center;background:none;border:0;padding:8px 0;font-weight:700;font-size:var(--ds-text-sm)}
+.fgroup .opts{display:grid;gap:10px;padding-block:6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.ds-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ds-neutral-400);background:#fff;border-radius:var(--ds-radius-pill);padding:6px 14px;font-size:var(--ds-text-xs);font-weight:600;transition:all var(--ds-dur-fast) var(--ds-ease)}
+.ds-chip:hover{border-color:var(--ds-green-800)}
+.ds-chip[aria-pressed="true"]{background:var(--ds-green-900);color:#fff;border-color:var(--ds-green-900)}
+.ds-chip .x{font-weight:400}
+.empty-state{text-align:center;padding:var(--ds-sp-12) var(--ds-sp-5);color:var(--ds-fg-muted)}
+.empty-state svg{width:48px;height:48px;margin:0 auto var(--ds-sp-4);stroke:var(--ds-neutral-400);fill:none;stroke-width:1.4}
+.empty-state h4{color:var(--ds-fg);font-size:var(--ds-text-lg);margin-bottom:6px}
+.ds-crumbs{display:flex;gap:8px;font-size:var(--ds-text-xs);color:var(--ds-fg-muted);padding:12px var(--ds-sp-5);flex-wrap:wrap}
+.ds-crumbs a{text-decoration:none}
+.ds-crumbs a:hover{text-decoration:underline;color:var(--ds-green-800)}
+.ds-pager{display:flex;gap:6px;justify-content:center;padding:var(--ds-sp-5)}
+.ds-pager button{min-width:38px;height:38px;border:1px solid var(--ds-border);background:#fff;border-radius:var(--ds-radius-sm);font-size:var(--ds-text-sm);font-weight:600}
+.ds-pager button:hover{border-color:var(--ds-green-800)}
+.ds-pager button[aria-current="page"]{background:var(--ds-green-900);color:#fff;border-color:var(--ds-green-900)}
+.ds-pager button:disabled{color:var(--ds-neutral-400);cursor:not-allowed}
+
+/* ============ RESPONSIVE ============ */
+.menu-btn{display:none}
+@media (max-width:1023px){
+  .plp{grid-template-columns:1fr}
+  .plp .filters{display:none}
+  .plp .filters.open-mobile{display:block;border-inline-end:0;border-bottom:1px solid var(--ds-border)}
+  .filters-toggle{display:inline-flex!important}
+}
+.filters-toggle{display:none}
+@media (max-width:860px){
+  .shell{grid-template-columns:1fr}
+  .side{position:fixed;z-index:120;width:260px;transform:translateX(-100%);transition:transform var(--ds-dur-slow) var(--ds-ease)}
+  [dir="rtl"] .side{transform:translateX(100%)}
+  .side.open{transform:none}
+  .menu-btn{display:inline-grid}
+  .topbar .hint{display:none}
+  .dos{grid-template-columns:1fr}
+  .type-row{grid-template-columns:1fr;gap:4px}
+  .pgrid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));padding:var(--ds-sp-4)}
+  h1.doc-title{font-size:var(--ds-text-3xl)}
+}
+@media (max-width:480px){
+  .pgrid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .pcard .add{margin:0 10px 10px}
+  .wrap{padding-inline:var(--ds-sp-4)}
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<aside class="side" id="side">
+  <div class="logo">FACES<span>·DS</span></div>
+  <div class="ver">Bloom Design System · v1.0</div>
+  <nav aria-label="Design system sections">
+    <span class="grp">Start</span>
+    <a href="#overview">Overview</a>
+    <span class="grp">Foundations</span>
+    <a href="#color">Color</a>
+    <a href="#typography">Typography</a>
+    <a href="#spacing">Spacing & Grid</a>
+    <a href="#breakpoints">Breakpoints</a>
+    <a href="#iconography">Iconography</a>
+    <a href="#elevation">Borders & Shadows</a>
+    <a href="#motion">Motion</a>
+    <span class="grp">Components</span>
+    <a href="#buttons">Buttons</a>
+    <a href="#forms">Form Controls</a>
+    <a href="#badges">Badges</a>
+    <a href="#tabs">Tabs & Accordions</a>
+    <a href="#notifications">Notifications</a>
+    <a href="#modals">Modals & Drawers</a>
+    <span class="grp">Commerce</span>
+    <a href="#navigation">Navigation & Search</a>
+    <a href="#product-card">Product Cards</a>
+    <a href="#plp">Listing Page (PLP)</a>
+    <a href="#cart">Cart</a>
+    <span class="grp">Guidelines</span>
+    <a href="#rtl">RTL & Localization</a>
+    <a href="#a11y">Accessibility</a>
+    <a href="#conventions">Naming & Governance</a>
+  </nav>
+</aside>
+
+<div class="main">
+<div class="topbar">
+  <button class="ds-iconbtn menu-btn" id="menuBtn" aria-label="Open navigation" aria-expanded="false">
+    <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+  </button>
+  <span class="hint">Toggle language to preview the full system in right-to-left Arabic.</span>
+  <div class="lang-toggle" role="group" aria-label="Language">
+    <button id="langEn" aria-pressed="true">English</button>
+    <button id="langAr" aria-pressed="false" lang="ar">العربية</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ================= OVERVIEW ================= -->
+<section class="doc" id="overview">
+  <h1 class="doc-title">Bloom — the FACES design system</h1>
+  <p class="lede">A working component library and token architecture modeled on the FACES beauty e-commerce experience (faces.com / faces.ae): deep racing green on white, squared geometry, dense merchandising badges, AED pricing patterns, and first-class English/Arabic bidirectional support.</p>
+  <p class="note">Throughout the docs, <span class="tag-observed">Observed</span> marks patterns taken directly from the live site (colors approximated from screenshots and assets), while <span class="tag-proposed">Proposed</span> marks improvements this system adds — e.g. a formal token scale, visible focus states, skeleton loading, and semantic status colors.</p>
+  <div class="demo subtle" style="justify-content:space-between">
+    <div>
+      <div style="font-weight:800;letter-spacing:.16em;font-size:1.6rem;color:var(--ds-green-900);font-stretch:112%">FACES</div>
+      <div style="font-size:var(--ds-text-sm);color:var(--ds-fg-muted);margin-top:4px" data-i18n="tagline">Beauty, delivered beautifully.</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span class="ds-badge ds-badge--new" data-i18n="b_new">New</span>
+      <span class="ds-badge ds-badge--best" data-i18n="b_best">Bestseller</span>
+      <span class="ds-badge ds-badge--sale">15% OFF</span>
+      <span class="ds-badge ds-badge--gift" data-i18n="b_gift">Free Gift</span>
+      <span class="ds-badge ds-badge--excl" data-i18n="b_excl">Online Exclusive</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= COLOR ================= -->
+<section class="doc" id="color">
+  <h2 class="doc-h">Color</h2>
+  <p class="note">Brand green ramp anchored on the FACES logo green <span class="tag-observed">Observed</span>; full 50–950 ramp, blush accent, and semantic statuses are additions for scalable UI work <span class="tag-proposed">Proposed</span>. Click any swatch to copy its token. All text/background pairs used in components meet WCAG 2.1 AA (≥4.5:1 body, ≥3:1 large/UI).</p>
+  <h3 class="doc-sub">Brand — green</h3>
+  <div class="swatches" id="sw-brand"></div>
+  <h3 class="doc-sub">Neutrals & accents</h3>
+  <div class="swatches" id="sw-neutral"></div>
+  <h3 class="doc-sub">Semantic</h3>
+  <div class="swatches" id="sw-semantic"></div>
+  <div class="dos">
+    <div class="do"><strong>Do</strong><ul><li>Reserve <code class="inline-code">green-900</code> for primary actions, active nav, and the USP bar.</li><li>Use <code class="inline-code">error-600</code> for sale prices and destructive actions only.</li><li>Reference semantic aliases (<code class="inline-code">--ds-brand</code>, <code class="inline-code">--ds-sale</code>) in components, not raw hex.</li></ul></div>
+    <div class="dont"><strong>Don't</strong><ul><li>Don't place green-500 text on white for body copy — it fails AA at small sizes.</li><li>Don't invent new tints; extend the ramp through a token proposal.</li><li>Don't use sale red for badges and success moments simultaneously in one card.</li></ul></div>
+  </div>
+</section>
+
+<!-- ================= TYPOGRAPHY ================= -->
+<section class="doc" id="typography">
+  <h2 class="doc-h">Typography</h2>
+  <p class="note">FACES uses a clean grotesque sans across UI and merchandising <span class="tag-observed">Observed</span>. Bloom pairs <b>Archivo</b> (variable width lets the wordmark sit wide at 112%) with <b>Tajawal</b> for Arabic — matched x-height and weight range so mixed-script pages feel like one voice <span class="tag-proposed">Proposed</span>. Type scale is a 1.25 ratio from a 16px base.</p>
+  <div class="demo stack" style="gap:0">
+    <div class="type-row"><span class="lbl">display · 48/1.15 · 700 · type.display</span><span style="font-size:var(--ds-text-4xl);font-weight:700;line-height:1.15;letter-spacing:-.01em">New season, new signature scent</span></div>
+    <div class="type-row"><span class="lbl">h1 · 36 · 700 · type.h1</span><span style="font-size:var(--ds-text-3xl);font-weight:700">Fragrance for women</span></div>
+    <div class="type-row"><span class="lbl">h2 · 28 · 700 · type.h2</span><span style="font-size:var(--ds-text-2xl);font-weight:700">Bestsellers this week</span></div>
+    <div class="type-row"><span class="lbl">h3 · 22 · 600 · type.h3</span><span style="font-size:var(--ds-text-xl);font-weight:600">Delivery & returns</span></div>
+    <div class="type-row"><span class="lbl">body · 16/1.5 · 400 · type.body</span><span>A warm amber heart wrapped in vanilla and Damascus rose, made to last from morning to majlis.</span></div>
+    <div class="type-row"><span class="lbl">small · 14 · 400 · type.small</span><span style="font-size:var(--ds-text-sm)">Free delivery on all orders above 299 AED.</span></div>
+    <div class="type-row" style="border-bottom:0"><span class="lbl">caption · 12 · 600 · type.caption</span><span style="font-size:var(--ds-text-xs);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ds-fg-muted)">Incl. 5% VAT</span></div>
+  </div>
+  <div class="dos">
+    <div class="do"><strong>Do</strong><ul><li>Keep body line length under 80 characters.</li><li>Uppercase only brand names on cards and the VAT caption.</li><li>Use numerals in the locale's convention; prices keep Western digits in both languages, as on the live site.</li></ul></div>
+    <div class="dont"><strong>Don't</strong><ul><li>Don't letterspace Arabic text — Tajawal must run at 0 tracking.</li><li>Don't go below 12px for any customer-facing text.</li><li>Don't mix a third typeface for campaigns; use Archivo's width axis instead.</li></ul></div>
+  </div>
+</section>
+
+<!-- ================= SPACING ================= -->
+<section class="doc" id="spacing">
+  <h2 class="doc-h">Spacing & grid</h2>
+  <p class="note">4px base unit <span class="tag-proposed">Proposed</span>. Content sits on a 12-column grid with 16px gutters, max width 1240px, matching the merchandising density of the live PLP <span class="tag-observed">Observed</span>.</p>
+  <div class="demo stack" id="space-scale"></div>
+  <h3 class="doc-sub">12-column grid</h3>
+  <div class="demo stack">
+    <div class="grid-demo" aria-hidden="true">
+      <div style="grid-column:span 3">3</div><div style="grid-column:span 3">3</div><div style="grid-column:span 3">3</div><div style="grid-column:span 3">3</div>
+      <div style="grid-column:span 4">4 · product</div><div style="grid-column:span 4">4 · product</div><div style="grid-column:span 4">4 · product</div>
+      <div style="grid-column:span 3">filters</div><div style="grid-column:span 9">results</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BREAKPOINTS ================= -->
+<section class="doc" id="breakpoints">
+  <h2 class="doc-h">Breakpoints</h2>
+  <p class="note">Mobile-first. Resize this page to see the shell, PLP, and cards reflow at each tier.</p>
+  <table class="spec">
+    <thead><tr><th>Token</th><th>Min width</th><th>Layout behavior</th></tr></thead>
+    <tbody>
+      <tr><td><code>bp.sm</code></td><td>480px</td><td>2-up product grid, stacked filters, full-width drawer</td></tr>
+      <tr><td><code>bp.md</code></td><td>768px</td><td>3-up grid, inline search, sticky add-to-bag</td></tr>
+      <tr><td><code>bp.lg</code></td><td>1024px</td><td>Filter rail appears, mega menu enabled, 4-up grid</td></tr>
+      <tr><td><code>bp.xl</code></td><td>1280px</td><td>Container caps at 1240px; gutters grow</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================= ICONOGRAPHY ================= -->
+<section class="doc" id="iconography">
+  <h2 class="doc-h">Iconography</h2>
+  <p class="note">24px grid, 1.6px stroke, rounded caps — outline style consistent with the live header icons <span class="tag-observed">Observed</span>. Directional icons (chevrons, arrows) must flip in RTL; symmetric icons do not. Every icon-only control carries an <code class="inline-code">aria-label</code>.</p>
+  <div class="icon-grid">
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>search</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M6 7h12l1 13H5L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>bag</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9Z"/></svg>wishlist</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg>account</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 21s-6-5.5-6-10a6 6 0 0 1 12 0c0 4.5-6 10-6 10Z"/><circle cx="12" cy="11" r="2"/></svg>store</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>chevron</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></svg>arrow*</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10m-7 6h4"/></svg>filter</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M3 7h13v10H3zM16 10h3l2 3v4h-5"/><circle cx="7" cy="17" r="1.6"/><circle cx="17.5" cy="17" r="1.6"/></svg>delivery</div>
+    <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 5v4h-4"/></svg>returns*</div>
+  </div>
+  <p class="note" style="margin-top:var(--ds-sp-3)">* mirrored automatically under <code class="inline-code">[dir="rtl"]</code>.</p>
+</section>
+
+<!-- ================= ELEVATION ================= -->
+<section class="doc" id="elevation">
+  <h2 class="doc-h">Borders, radius & shadows</h2>
+  <p class="note">FACES geometry is squared and quiet <span class="tag-observed">Observed</span> — radius stays small (2–8px), pill shape is reserved for search, chips, and switches. Shadows are green-tinted rather than grey so elevation stays on-brand <span class="tag-proposed">Proposed</span>.</p>
+  <div class="demo shadow-demo">
+    <div class="card" style="box-shadow:var(--ds-shadow-1)">shadow-1 · rest</div>
+    <div class="card" style="box-shadow:var(--ds-shadow-2)">shadow-2 · hover</div>
+    <div class="card" style="box-shadow:var(--ds-shadow-3)">shadow-3 · overlay</div>
+    <div class="card" style="border-radius:var(--ds-radius-xs)">radius-xs · 2</div>
+    <div class="card" style="border-radius:var(--ds-radius-md)">radius-md · 8</div>
+    <div class="card" style="border-radius:var(--ds-radius-pill)">pill</div>
+  </div>
+</section>
+
+<!-- ================= MOTION ================= -->
+<section class="doc" id="motion">
+  <h2 class="doc-h">Motion</h2>
+  <p class="note">Motion answers user action — drawers slide, accordions unfold, toasts rise. Three durations, one standard ease <code class="inline-code">cubic-bezier(.33,1,.68,1)</code>. All animation collapses under <code class="inline-code">prefers-reduced-motion</code>.</p>
+  <div class="demo motion-demo">
+    <button class="ds-btn ds-btn--secondary ds-btn--sm" id="motionPlay">Play durations</button>
+    <div style="display:grid;gap:10px">
+      <div class="motion-track" data-motion><div class="motion-dot fast"></div></div>
+      <div class="motion-track" data-motion><div class="motion-dot base"></div></div>
+      <div class="motion-track" data-motion><div class="motion-dot slow"></div></div>
+    </div>
+    <table class="spec" style="max-width:360px">
+      <tbody>
+        <tr><td><code>motion.fast</code></td><td>120ms</td><td>hovers, toggles</td></tr>
+        <tr><td><code>motion.base</code></td><td>200ms</td><td>modals, tabs</td></tr>
+        <tr><td><code>motion.slow</code></td><td>320ms</td><td>drawers, accordions</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= BUTTONS ================= -->
+<section class="doc" id="buttons">
+  <h2 class="doc-h">Buttons</h2>
+  <p class="note">Primary green fill drives commerce actions ("Add to Bag", "Go to Checkout") <span class="tag-observed">Observed</span>. Squared 2px radius; labels are verbs in sentence case. Loading and disabled states are additions <span class="tag-proposed">Proposed</span>.</p>
+  <div class="demo">
+    <button class="ds-btn" data-i18n="add_bag">Add to Bag</button>
+    <button class="ds-btn ds-btn--secondary" data-i18n="view_all">View All</button>
+    <button class="ds-btn ds-btn--ghost" data-i18n="cont_shop">Continue Shopping</button>
+    <button class="ds-btn ds-btn--danger" data-i18n="remove">Remove</button>
+  </div>
+  <div class="demo">
+    <button class="ds-btn ds-btn--sm">Small · 34</button>
+    <button class="ds-btn">Medium · 44</button>
+    <button class="ds-btn ds-btn--lg">Large · 52</button>
+  </div>
+  <div class="demo">
+    <button class="ds-btn" disabled>Disabled</button>
+    <button class="ds-btn is-loading" aria-busy="true"><span data-i18n="add_bag">Add to Bag</span></button>
+    <button class="ds-btn" id="loadDemoBtn">Click for loading → success</button>
+    <button class="ds-iconbtn" aria-label="Add to wishlist" aria-pressed="false" data-wish><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9Z"/></svg></button>
+  </div>
+  <table class="spec">
+    <thead><tr><th>Variant</th><th>Use for</th><th>Spec</th></tr></thead>
+    <tbody>
+      <tr><td>Primary</td><td>The single most important action in view (one per section)</td><td>bg <code>brand</code> · fg white · 7.9:1</td></tr>
+      <tr><td>Secondary</td><td>Supporting actions ("View All")</td><td>1px <code>brand</code> outline</td></tr>
+      <tr><td>Ghost</td><td>Tertiary/inline actions inside dense UI</td><td>no border, green text</td></tr>
+      <tr><td>Danger</td><td>Destructive confirmation only — never for sales CTAs</td><td>bg <code>error-600</code></td></tr>
+    </tbody>
+  </table>
+  <div class="dos">
+    <div class="do"><strong>Do</strong><ul><li>Say what happens: "Add to Bag", "Go to Checkout".</li><li>Keep one primary button per card/section.</li><li>Show a spinner and set <code class="inline-code">aria-busy</code> while an add-to-bag request runs.</li></ul></div>
+    <div class="dont"><strong>Don't</strong><ul><li>Don't use "Submit" or "OK" as labels.</li><li>Don't shrink below 44px height on touch layouts.</li><li>Don't disable a button without explaining why nearby.</li></ul></div>
+  </div>
+</section>
+
+<!-- ================= FORMS ================= -->
+<section class="doc" id="forms">
+  <h2 class="doc-h">Form controls</h2>
+  <p class="note">Every input has a visible, programmatically-associated label — the live site's newsletter and login forms rely on placeholders alone <span class="tag-observed">Observed</span>, which this system corrects <span class="tag-proposed">Proposed</span>. Errors name the fix, not just the failure.</p>
+  <div class="demo" style="align-items:flex-start">
+    <div class="ds-field">
+      <label class="ds-label" for="f-email" data-i18n="email_l">Email address <span class="req" aria-hidden="true">*</span></label>
+      <input class="ds-input" id="f-email" type="email" autocomplete="email" placeholder="layla@example.com">
+      <span class="ds-help" data-i18n="email_h">We only use this for order updates.</span>
+    </div>
+    <div class="ds-field is-error">
+      <label class="ds-label" for="f-phone">Phone number</label>
+      <input class="ds-input" id="f-phone" type="tel" value="12 345" aria-invalid="true" aria-describedby="f-phone-err">
+      <span class="ds-msg err" id="f-phone-err">⚠ Enter a UAE number starting with 05 — e.g. 050 123 4567.</span>
+    </div>
+    <div class="ds-field is-success">
+      <label class="ds-label" for="f-promo">Promo code</label>
+      <input class="ds-input" id="f-promo" value="BLOOM15" aria-describedby="f-promo-ok">
+      <span class="ds-msg ok" id="f-promo-ok">✓ 15% applied to eligible items.</span>
+    </div>
+    <div class="ds-field is-disabled">
+      <label class="ds-label" for="f-city">City</label>
+      <input class="ds-input" id="f-city" value="Dubai" disabled>
+      <span class="ds-help">Set from your delivery address.</span>
+    </div>
+  </div>
+  <div class="demo" style="align-items:flex-start">
+    <div class="ds-field">
+      <label class="ds-label" for="f-sort2">Sort by</label>
+      <select class="ds-select" id="f-sort2"><option>Recommended</option><option>Price: low to high</option><option>Price: high to low</option><option>Newest</option></select>
+    </div>
+    <div style="display:grid;gap:12px">
+      <label class="ds-check"><input type="checkbox" checked> <span>Email me about new arrivals and offers</span></label>
+      <label class="ds-check"><input type="checkbox"> <span>This order is a gift — add free wrapping</span></label>
+    </div>
+    <fieldset style="border:0;padding:0;display:grid;gap:12px">
+      <legend class="ds-label" style="margin-bottom:8px">Delivery speed</legend>
+      <label class="ds-radio"><input type="radio" name="del" checked> <span>Standard — free above 299 AED</span></label>
+      <label class="ds-radio"><input type="radio" name="del"> <span>Express 2-hour (Dubai) — 25 AED</span></label>
+    </fieldset>
+    <div style="display:grid;gap:14px">
+      <label class="ds-switch"><input type="checkbox" checked><span class="trk" aria-hidden="true"></span><span>Auto-replenish every 60 days</span></label>
+      <div>
+        <span class="ds-label" id="qty-l" style="display:block;margin-bottom:6px" data-i18n="qty">Quantity</span>
+        <div class="ds-qty" role="group" aria-labelledby="qty-l">
+          <button type="button" data-step="-1" aria-label="Decrease quantity">−</button>
+          <output aria-live="polite">1</output>
+          <button type="button" data-step="1" aria-label="Increase quantity">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BADGES ================= -->
+<section class="doc" id="badges">
+  <h2 class="doc-h">Badges</h2>
+  <p class="note">The FACES merchandising vocabulary <span class="tag-observed">Observed</span>: New, Bestseller, % OFF, Free Gifts, Online Exclusive. Max two badges per product card, ranked by this priority order; low-stock urgency is an addition <span class="tag-proposed">Proposed</span>.</p>
+  <div class="demo">
+    <span class="ds-badge ds-badge--sale">50% OFF</span>
+    <span class="ds-badge ds-badge--new" data-i18n="b_new">New</span>
+    <span class="ds-badge ds-badge--best" data-i18n="b_best">Bestseller</span>
+    <span class="ds-badge ds-badge--gift" data-i18n="b_gift">Free Gift</span>
+    <span class="ds-badge ds-badge--excl" data-i18n="b_excl">Online Exclusive</span>
+    <span class="ds-badge ds-badge--stock" data-i18n="b_low">Only 3 left</span>
+  </div>
+</section>
+
+<!-- ================= TABS & ACCORDION ================= -->
+<section class="doc" id="tabs">
+  <h2 class="doc-h">Tabs & accordions</h2>
+  <p class="note">Tabs organize product detail content; accordions hold filters and FAQs. Both are fully keyboard operable — arrow keys move between tabs, Enter/Space toggles accordions.</p>
+  <div class="demo stack">
+    <div class="ds-tabs" role="tablist" aria-label="Product information">
+      <button class="ds-tab" role="tab" id="t1" aria-selected="true" aria-controls="tp1">Description</button>
+      <button class="ds-tab" role="tab" id="t2" aria-selected="false" aria-controls="tp2" tabindex="-1">Ingredients</button>
+      <button class="ds-tab" role="tab" id="t3" aria-selected="false" aria-controls="tp3" tabindex="-1">Delivery & Returns</button>
+    </div>
+    <div class="ds-tabpanel" role="tabpanel" id="tp1" aria-labelledby="t1">An eau de parfum built around Taif rose and warm amber, with a musk drydown that lingers through the evening. 50ml and 100ml.</div>
+    <div class="ds-tabpanel" role="tabpanel" id="tp2" aria-labelledby="t2" hidden>Alcohol denat., parfum, aqua, rose damascena flower oil, ambroxide, coumarin, linalool.</div>
+    <div class="ds-tabpanel" role="tabpanel" id="tp3" aria-labelledby="t3" hidden>Free delivery above 299 AED. Free returns within 14 days on unopened items. Express 2-hour delivery available in Dubai before 10pm.</div>
+  </div>
+  <div class="demo stack">
+    <div class="ds-acc">
+      <div class="ds-acc-item">
+        <h3><button class="ds-acc-btn" aria-expanded="true" aria-controls="acc1"><span data-i18n="faq1">Is every product authentic?</span><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button></h3>
+        <div class="ds-acc-panel" id="acc1" style="max-height:200px"><div data-i18n="faq1a">Yes — FACES sources directly from brands and authorized distributors. Every item ships with its batch code intact.</div></div>
+      </div>
+      <div class="ds-acc-item">
+        <h3><button class="ds-acc-btn" aria-expanded="false" aria-controls="acc2"><span data-i18n="faq2">Can I pay later?</span><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button></h3>
+        <div class="ds-acc-panel" id="acc2"><div data-i18n="faq2a">Split your order into 4 interest-free payments with Tabby or Tamara at checkout.</div></div>
+      </div>
+      <div class="ds-acc-item">
+        <h3><button class="ds-acc-btn" aria-expanded="false" aria-controls="acc3"><span data-i18n="faq3">How does free engraving work?</span><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button></h3>
+        <div class="ds-acc-panel" id="acc3"><div data-i18n="faq3a">Add any eligible fragrance to your bag, then choose "Add engraving" in the cart — up to 15 characters, in English or Arabic.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= NOTIFICATIONS ================= -->
+<section class="doc" id="notifications">
+  <h2 class="doc-h">Notifications</h2>
+  <p class="note">Inline alerts hold page-level status; toasts confirm quick actions and self-dismiss after 4s. Toasts render into a polite live region so screen readers announce them without stealing focus.</p>
+  <div class="demo stack">
+    <div class="ds-alert ds-alert--success" role="status"><svg viewBox="0 0 24 24"><path d="M4 12.5 9.5 18 20 6.5"/></svg><div><b>Order confirmed</b>Your order #FA-88214 is being prepared. Track it from your account.</div></div>
+    <div class="ds-alert ds-alert--error" role="alert"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5m0 3.5v.01"/></svg><div><b>Payment didn't go through</b>Your card was declined. Try another card or pay with Tabby.</div></div>
+    <div class="ds-alert ds-alert--warning" role="status"><svg viewBox="0 0 24 24"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 10v4m0 3v.01"/></svg><div><b>Low stock</b>Only 3 bottles of Sauvage Elixir 60ml remain at this price.</div></div>
+    <div class="ds-alert ds-alert--info" role="status"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-9.5v.01"/></svg><div><b>Ramadan hours</b>Customer service is available 10am–2am throughout the holy month.</div></div>
+  </div>
+  <div class="demo">
+    <button class="ds-btn ds-btn--secondary" data-toast="ok">Show success toast</button>
+    <button class="ds-btn ds-btn--secondary" data-toast="err">Show error toast</button>
+  </div>
+</section>
+
+<!-- ================= MODALS ================= -->
+<section class="doc" id="modals">
+  <h2 class="doc-h">Modals & drawers</h2>
+  <p class="note">Modals interrupt for a decision; drawers extend the page for browsing tasks (cart, filters on mobile). Both trap focus, close on Esc and overlay click, and return focus to their trigger. The cart drawer slides from the end edge — right in LTR, left in RTL.</p>
+  <div class="demo">
+    <button class="ds-btn ds-btn--secondary" id="openModal">Open confirmation modal</button>
+    <button class="ds-btn" id="openCart1" data-i18n="open_cart">Open cart drawer</button>
+  </div>
+</section>
+
+<!-- ================= NAVIGATION & SEARCH ================= -->
+<section class="doc" id="navigation">
+  <h2 class="doc-h">Navigation & search</h2>
+  <p class="note">The live header stacks a USP ticker, logo + pill search + account/wishlist/bag, and a category bar with a red "Sale" anchor and hover mega menu <span class="tag-observed">Observed</span>. Try the search ("rose", "oud"…) and hover or focus <b>Perfume</b> for the mega menu. On mobile the category bar scrolls horizontally.</p>
+  <div class="store" id="storeHeaderDemo">
+    <div class="usp" data-i18n="usp">Free delivery above 299 AED · Buy now, pay later with Tabby & Tamara</div>
+    <div class="store-head">
+      <span class="store-logo">FACES</span>
+      <div class="store-search">
+        <svg class="mag" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="searchInput" data-i18n-ph="search_ph" placeholder="Search brands, products…" role="combobox" aria-expanded="false" aria-controls="suggestBox" aria-label="Search products">
+        <div class="suggest" id="suggestBox" role="listbox" aria-label="Search suggestions">
+          <div class="hd" data-i18n="trending">Here's what's trending…</div>
+          <div id="suggestList"></div>
+        </div>
+      </div>
+      <div class="store-acts">
+        <button class="ds-iconbtn" aria-label="Account"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-3.5 4.5-5 8-5s6.5 1.5 8 5"/></svg></button>
+        <button class="ds-iconbtn" aria-label="Wishlist" aria-pressed="false" data-wish><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9Z"/></svg></button>
+        <button class="ds-iconbtn cartbtn" aria-label="Shopping bag" id="openCart2"><svg viewBox="0 0 24 24"><path d="M6 7h12l1 13H5L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span class="cnt" id="cartCount" aria-hidden="true">0</span></button>
+      </div>
+    </div>
+    <nav class="store-nav" aria-label="Categories" id="megaNav">
+      <a href="#navigation" class="sale" data-i18n="n_sale">Sale</a>
+      <a href="#navigation" aria-current="true" aria-expanded="false" aria-controls="megaPerfume" data-mega data-i18n="n_perf">Perfume</a>
+      <a href="#navigation" data-i18n="n_makeup">Makeup</a>
+      <a href="#navigation" data-i18n="n_skin">Skincare</a>
+      <a href="#navigation" data-i18n="n_hair">Hair</a>
+      <a href="#navigation" data-i18n="n_body">Body</a>
+      <a href="#navigation" data-i18n="n_kb">K-Beauty</a>
+      <a href="#navigation" data-i18n="n_gifts">Gifts</a>
+      <a href="#navigation" data-i18n="n_brands">Brands</a>
+    </nav>
+    <div class="mega-panel" id="megaPerfume">
+      <div class="mega-col"><h4 data-i18n="m_shop">Shop</h4><a href="#navigation" data-i18n="m_w">Women's Perfume</a><a href="#navigation" data-i18n="m_m">Men's Perfume</a><a href="#navigation" data-i18n="m_arab">Arabic Perfumes</a><a href="#navigation" data-i18n="m_oud">Oud</a></div>
+      <div class="mega-col"><h4 data-i18n="m_scent">By scent</h4><a href="#navigation" data-i18n="m_amber">Amber</a><a href="#navigation" data-i18n="m_rose">Rose</a><a href="#navigation" data-i18n="m_van">Vanilla</a><a href="#navigation" data-i18n="m_jas">Jasmine</a></div>
+      <div class="mega-col"><h4 data-i18n="m_home">Home fragrance</h4><a href="#navigation" data-i18n="m_cand">Candles</a><a href="#navigation" data-i18n="m_bak">Bakhoor</a><a href="#navigation" data-i18n="m_diff">Diffusers</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRODUCT CARD ================= -->
+<section class="doc" id="product-card">
+  <h2 class="doc-h">Product cards</h2>
+  <p class="note">Anatomy mirrors the live card <span class="tag-observed">Observed</span>: badges (top-start), wishlist heart (top-end), image, uppercase brand, name link, price. Price has three patterns — flat, <b>from</b> (multi-size), and sale (strikethrough + red). Ratings, skeleton, and out-of-stock treatments are additions <span class="tag-proposed">Proposed</span>. Wishlist and Add to Bag are live — added items appear in the cart drawer.</p>
+  <div class="pgrid" style="padding:0;margin:var(--ds-sp-4) 0" id="cardShowcase"></div>
+  <table class="spec">
+    <thead><tr><th>Zone</th><th>Spec</th><th>Behavior</th></tr></thead>
+    <tbody>
+      <tr><td>Image</td><td>4:5 ratio, <code>neutral-050</code> canvas</td><td>Whole image + name are one link target</td></tr>
+      <tr><td>Badges</td><td>Max 2, priority: %OFF → New → Bestseller → Gift → Exclusive</td><td>Announced before name by screen readers</td></tr>
+      <tr><td>Wishlist</td><td>34px hit area min</td><td><code>aria-pressed</code> toggle + toast confirmation</td></tr>
+      <tr><td>Price</td><td>"from" prefix for multi-size; sale = red now + struck was</td><td>Struck price carries <code>&lt;s&gt;</code> + sr-only "was"</td></tr>
+      <tr><td>Add to Bag</td><td>Primary sm button, full width</td><td>Loading spinner → success toast → count updates</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================= PLP ================= -->
+<section class="doc" id="plp">
+  <h2 class="doc-h">Listing page (PLP)</h2>
+  <p class="note">The full shopping pattern working together: breadcrumbs, filter rail (chips on mobile), live result count, sorting, and pagination. Filters and sorting actually re-render the grid — try <b>Sale only</b>, a brand, or an impossible combination to see the empty state. "Simulate loading" shows the skeleton pass.</p>
+  <div class="store">
+    <nav class="ds-crumbs" aria-label="Breadcrumb"><a href="#plp" data-i18n="c_home">Home</a><span aria-hidden="true">/</span><a href="#plp" data-i18n="n_perf">Perfume</a><span aria-hidden="true">/</span><span aria-current="page" data-i18n="c_women">Women's Perfume</span></nav>
+    <div class="plp-bar">
+      <button class="ds-btn ds-btn--secondary ds-btn--sm filters-toggle" id="filtersToggle" aria-expanded="false">Filters</button>
+      <span class="count" aria-live="polite" id="resultCount"></span>
+      <button class="ds-btn ds-btn--ghost ds-btn--sm" id="simLoad">Simulate loading</button>
+      <label class="sr-only" for="sortSel">Sort products</label>
+      <select class="ds-select" id="sortSel">
+        <option value="rec" data-i18n="s_rec">Recommended</option>
+        <option value="lo" data-i18n="s_lo">Price: low to high</option>
+        <option value="hi" data-i18n="s_hi">Price: high to low</option>
+        <option value="new" data-i18n="s_new">Newest first</option>
+      </select>
+    </div>
+    <div class="plp">
+      <aside class="filters" id="filterRail" aria-label="Filters">
+        <div class="fgroup">
+          <button aria-expanded="true"><span data-i18n="f_offers">Offers</span></button>
+          <div class="opts">
+            <label class="ds-check"><input type="checkbox" id="fltSale"> <span data-i18n="f_sale">Sale only</span></label>
+            <label class="ds-check"><input type="checkbox" id="fltGift"> <span data-i18n="f_gift">With free gift</span></label>
+          </div>
+        </div>
+        <div class="fgroup">
+          <button aria-expanded="true"><span data-i18n="f_brand">Brand</span></button>
+          <div class="opts" id="brandOpts"></div>
+        </div>
+        <div class="fgroup">
+          <button aria-expanded="true"><span data-i18n="f_price">Price</span></button>
+          <div class="opts">
+            <label class="ds-radio"><input type="radio" name="fp" value="all" checked> <span data-i18n="f_any">Any price</span></label>
+            <label class="ds-radio"><input type="radio" name="fp" value="u500"> <span data-i18n="f_u500">Under 500 AED</span></label>
+            <label class="ds-radio"><input type="radio" name="fp" value="o500"> <span data-i18n="f_o500">500 AED and above</span></label>
+          </div>
+        </div>
+        <button class="ds-btn ds-btn--ghost ds-btn--sm" id="clearFilters" style="margin-top:10px" data-i18n="f_clear">Clear all filters</button>
+      </aside>
+      <div class="results">
+        <div class="chips" style="padding:14px var(--ds-sp-5) 0" id="activeChips"></div>
+        <div class="pgrid" id="plpGrid"></div>
+        <div class="ds-pager" aria-label="Pagination">
+          <button disabled aria-label="Previous page">‹</button>
+          <button aria-current="page">1</button><button>2</button><button>3</button>
+          <button aria-label="Next page">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CART ================= -->
+<section class="doc" id="cart">
+  <h2 class="doc-h">Cart</h2>
+  <p class="note">The mini-cart drawer mirrors the live "You just added to your bag" flow <span class="tag-observed">Observed</span>: line items with quantity steppers, a free-delivery progress meter toward 299 AED, subtotal with "Incl. 5% VAT", primary checkout + ghost continue-shopping. Empty state invites action. Add products above, then open it.</p>
+  <div class="demo">
+    <button class="ds-btn" id="openCart3" data-i18n="open_cart">Open cart drawer</button>
+    <button class="ds-btn ds-btn--secondary" id="seedCart">Add a sample item</button>
+  </div>
+</section>
+
+<!-- ================= RTL ================= -->
+<section class="doc" id="rtl">
+  <h2 class="doc-h">RTL & localization</h2>
+  <p class="note">Arabic is a first-class experience, not a mirrored afterthought. Use the language toggle above — the storefront demos, badges, buttons, filters, and cart translate, the document flips to <code class="inline-code">dir="rtl"</code>, and Tajawal takes over.</p>
+  <table class="spec">
+    <thead><tr><th>Rule</th><th>Implementation</th></tr></thead>
+    <tbody>
+      <tr><td>Layout flips automatically</td><td>Logical properties only: <code>margin-inline-start</code>, <code>inset-inline-end</code>, <code>padding-inline</code> — never left/right physical values</td></tr>
+      <tr><td>Drawers & badges follow reading direction</td><td>Cart slides from the end edge; badges anchor top-start, wishlist top-end</td></tr>
+      <tr><td>Directional icons mirror</td><td>Chevrons/arrows flip via <code>[dir="rtl"] .mirror{scale:-1 1}</code>; search, bag, heart do not</td></tr>
+      <tr><td>Prices stay legible</td><td>Western digits with the AED unit after the number in both locales, matching the live site; wrap prices in <code>dir="ltr"</code> spans inside Arabic sentences</td></tr>
+      <tr><td>No tracking on Arabic</td><td>Letterspacing tokens apply to Latin only</td></tr>
+      <tr><td>Strings live outside markup</td><td>All UI copy keyed in a locale dictionary; no concatenated sentences</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================= A11Y ================= -->
+<section class="doc" id="a11y">
+  <h2 class="doc-h">Accessibility</h2>
+  <table class="spec">
+    <thead><tr><th>Area</th><th>Standard in this system</th></tr></thead>
+    <tbody>
+      <tr><td>Contrast</td><td>Body text ≥ 4.5:1; large text & UI borders ≥ 3:1. Brand green on white = 10.9:1; sale red on white = 5.3:1</td></tr>
+      <tr><td>Keyboard</td><td>Everything reachable by Tab; tabs use roving tabindex + arrow keys; Esc closes modal/drawer/mega menu; visible 2px green focus ring on all controls</td></tr>
+      <tr><td>Touch targets</td><td>≥ 44×44px on primary actions; ≥ 34px with spacing on dense card actions</td></tr>
+      <tr><td>Semantics</td><td>Landmarks (<code>nav</code>, <code>aside</code>, <code>main</code>); one h1 per page; buttons for actions, links for navigation</td></tr>
+      <tr><td>Live updates</td><td>Result counts, cart totals, and toasts use <code>aria-live="polite"</code>; hard errors use <code>role="alert"</code></td></tr>
+      <tr><td>Forms</td><td>Visible labels, <code>autocomplete</code> attributes, errors linked via <code>aria-describedby</code> + <code>aria-invalid</code></td></tr>
+      <tr><td>Motion & images</td><td><code>prefers-reduced-motion</code> collapses all transitions; product images require meaningful alt ("Dior Sauvage Elixir 60ml bottle"), decorative art is hidden</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================= CONVENTIONS ================= -->
+<section class="doc" id="conventions">
+  <h2 class="doc-h">Naming & governance</h2>
+  <h3 class="doc-sub">Token architecture</h3>
+  <table class="spec">
+    <thead><tr><th>Tier</th><th>Pattern</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>1 · Primitive</td><td><code>{category}.{hue}.{step}</code></td><td><code>color.green.900</code> → <code>--ds-green-900</code></td></tr>
+      <tr><td>2 · Semantic</td><td><code>{intent}[.{state}]</code></td><td><code>color.brand.hover</code> → <code>--ds-brand-hover</code></td></tr>
+      <tr><td>3 · Component</td><td><code>{component}.{prop}</code></td><td><code>button.bg</code> → <code>--btn-bg</code> (scoped)</td></tr>
+    </tbody>
+  </table>
+  <h3 class="doc-sub">Component conventions</h3>
+  <table class="spec">
+    <tbody>
+      <tr><td>Class names</td><td><code>.ds-{component}</code>, modifiers <code>.ds-{component}--{variant}</code>, states <code>.is-{state}</code> (is-loading, is-error, is-oos)</td></tr>
+      <tr><td>Variants before sizes</td><td><code>class="ds-btn ds-btn--secondary ds-btn--sm"</code></td></tr>
+      <tr><td>States are additive</td><td>State classes never restyle variants — they layer on top, so any variant can load or disable</td></tr>
+      <tr><td>Contribution</td><td>New tokens/components enter via proposal → a11y review → documented here with Observed/Proposed provenance before use</td></tr>
+    </tbody>
+  </table>
+  <div class="dos">
+    <div class="do"><strong>Do</strong><ul><li>Compose pages only from documented components.</li><li>Keep hard-coded values out of feature code — everything through tokens.</li><li>Test each new component in Arabic before shipping.</li></ul></div>
+    <div class="dont"><strong>Don't</strong><ul><li>Don't fork a component for a campaign; theme it with tier-3 tokens.</li><li>Don't add a third badge to a product card.</li><li>Don't ship a state (error, empty, loading) that isn't designed here first.</li></ul></div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+</div><!-- /main -->
+</div><!-- /shell -->
+
+<!-- Modal -->
+<div class="ds-overlay" id="overlay"></div>
+<div class="ds-modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
+  <div class="box">
+    <h3 id="modalTitle" data-i18n="mod_t">Remove from bag?</h3>
+    <p id="modalDesc" data-i18n="mod_d">Sauvage Elixir 60ml will be removed. You can add it back from your wishlist anytime.</p>
+    <div class="row">
+      <button class="ds-btn ds-btn--ghost" data-close-modal data-i18n="keep">Keep it</button>
+      <button class="ds-btn ds-btn--danger" data-close-modal data-i18n="remove">Remove</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cart drawer -->
+<aside class="ds-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+  <header>
+    <h3 id="cartTitle"><span data-i18n="your_bag">Your Bag</span> (<span id="cartQty">0</span>)</h3>
+    <button class="ds-iconbtn" data-close-cart aria-label="Close cart"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </header>
+  <div class="body" id="cartBody"></div>
+  <footer id="cartFooter">
+    <div class="freebar" id="freebar"></div>
+    <div class="subrow"><span data-i18n="subtotal">Bag Subtotal <span class="vat" data-i18n="vat">(Incl. 5% VAT)</span></span><b id="cartTotal">0 AED</b></div>
+    <button class="ds-btn ds-btn--lg" data-i18n="checkout">Go to Checkout</button>
+    <button class="ds-btn ds-btn--ghost" data-close-cart data-i18n="cont_shop">Continue Shopping</button>
+  </footer>
+</aside>
+
+<div id="toast-region" aria-live="polite"></div>
+<script>
+/* ============================== i18n ============================== */
+const T = {
+en:{tagline:"Beauty, delivered beautifully.",b_new:"New",b_best:"Bestseller",b_gift:"Free Gift",b_excl:"Online Exclusive",b_low:"Only 3 left",
+add_bag:"Add to Bag",adding:"Adding…",added:"Added to your bag",view_all:"View All",cont_shop:"Continue Shopping",remove:"Remove",keep:"Keep it",
+email_l:"Email address *",email_h:"We only use this for order updates.",qty:"Quantity",open_cart:"Open cart drawer",
+usp:"Free delivery above 299 AED · Buy now, pay later with Tabby & Tamara",search_ph:"Search brands, products…",trending:"Here's what's trending…",
+n_sale:"Sale",n_perf:"Perfume",n_makeup:"Makeup",n_skin:"Skincare",n_hair:"Hair",n_body:"Body",n_kb:"K-Beauty",n_gifts:"Gifts",n_brands:"Brands",
+m_shop:"Shop",m_w:"Women's Perfume",m_m:"Men's Perfume",m_arab:"Arabic Perfumes",m_oud:"Oud",m_scent:"By scent",m_amber:"Amber",m_rose:"Rose",m_van:"Vanilla",m_jas:"Jasmine",m_home:"Home fragrance",m_cand:"Candles",m_bak:"Bakhoor",m_diff:"Diffusers",
+c_home:"Home",c_women:"Women's Perfume",s_rec:"Recommended",s_lo:"Price: low to high",s_hi:"Price: high to low",s_new:"Newest first",
+f_offers:"Offers",f_sale:"Sale only",f_gift:"With free gift",f_brand:"Brand",f_price:"Price",f_any:"Any price",f_u500:"Under 500 AED",f_o500:"500 AED and above",f_clear:"Clear all filters",
+results:"products",from:"from",was:"was",aed:"AED",wish_on:"Saved to wishlist",wish_off:"Removed from wishlist",
+empty_t:"No products match these filters",empty_d:"Try removing a filter, or browse everything in Women's Perfume.",empty_b:"Clear all filters",
+your_bag:"Your Bag",subtotal:"Bag Subtotal",vat:"(Incl. 5% VAT)",checkout:"Go to Checkout",
+bag_empty_t:"Your bag is empty",bag_empty_d:"Beautiful things are waiting — start with our bestsellers.",
+free_away:n=>`You're only ${n} AED away from free delivery`,free_ok:"You've unlocked free delivery 🎉",
+mod_t:"Remove from bag?",mod_d:"Sauvage Elixir 60ml will be removed. You can add it back from your wishlist anytime.",
+toast_err:"Couldn't update your bag. Check your connection and try again.",faq1:"Is every product authentic?",faq1a:"Yes — FACES sources directly from brands and authorized distributors. Every item ships with its batch code intact.",faq2:"Can I pay later?",faq2a:"Split your order into 4 interest-free payments with Tabby or Tamara at checkout.",faq3:"How does free engraving work?",faq3a:"Add any eligible fragrance to your bag, then choose \"Add engraving\" in the cart — up to 15 characters, in English or Arabic."},
+ar:{tagline:"الجمال، يصلكِ بجمال.",b_new:"جديد",b_best:"الأكثر مبيعاً",b_gift:"هدية مجانية",b_excl:"حصري أونلاين",b_low:"بقي 3 فقط",
+add_bag:"أضف إلى الحقيبة",adding:"جارٍ الإضافة…",added:"تمت الإضافة إلى حقيبتك",view_all:"عرض الكل",cont_shop:"مواصلة التسوق",remove:"إزالة",keep:"احتفظ به",
+email_l:"البريد الإلكتروني *",email_h:"نستخدمه فقط لتحديثات الطلب.",qty:"الكمية",open_cart:"افتح حقيبة التسوق",
+usp:"توصيل مجاني للطلبات فوق 299 درهم · اشترِ الآن وادفع لاحقاً مع تابي وتمارا",search_ph:"ابحثي عن الماركات والمنتجات…",trending:"الأكثر رواجاً الآن…",
+n_sale:"تخفيضات",n_perf:"عطور",n_makeup:"مكياج",n_skin:"العناية بالبشرة",n_hair:"الشعر",n_body:"الجسم",n_kb:"الجمال الكوري",n_gifts:"هدايا",n_brands:"الماركات",
+m_shop:"تسوقي",m_w:"عطور نسائية",m_m:"عطور رجالية",m_arab:"عطور عربية",m_oud:"عود",m_scent:"حسب الرائحة",m_amber:"عنبر",m_rose:"ورد",m_van:"فانيليا",m_jas:"ياسمين",m_home:"عطور المنزل",m_cand:"شموع",m_bak:"بخور",m_diff:"معطرات جو",
+c_home:"الرئيسية",c_women:"عطور نسائية",s_rec:"موصى به",s_lo:"السعر: من الأقل للأعلى",s_hi:"السعر: من الأعلى للأقل",s_new:"الأحدث أولاً",
+f_offers:"العروض",f_sale:"التخفيضات فقط",f_gift:"مع هدية مجانية",f_brand:"الماركة",f_price:"السعر",f_any:"أي سعر",f_u500:"أقل من 500 درهم",f_o500:"500 درهم فما فوق",f_clear:"مسح كل الفلاتر",
+results:"منتجات",from:"ابتداءً من",was:"كان",aed:"درهم",wish_on:"تم الحفظ في المفضلة",wish_off:"تمت الإزالة من المفضلة",
+empty_t:"لا توجد منتجات تطابق هذه الفلاتر",empty_d:"جرّبي إزالة أحد الفلاتر أو تصفحي كل العطور النسائية.",empty_b:"مسح كل الفلاتر",
+your_bag:"حقيبتك",subtotal:"إجمالي الحقيبة",vat:"(شامل 5% ضريبة)",checkout:"إتمام الشراء",
+bag_empty_t:"حقيبتك فارغة",bag_empty_d:"أشياء جميلة بانتظارك — ابدئي بالأكثر مبيعاً.",
+free_away:n=>`ينقصك ${n} درهم فقط للتوصيل المجاني`,free_ok:"حصلتِ على توصيل مجاني 🎉",
+mod_t:"إزالة من الحقيبة؟",mod_d:"سيتم إزالة سوفاج إليكسير 60 مل. يمكنك إعادته من المفضلة في أي وقت.",
+toast_err:"تعذّر تحديث حقيبتك. تحققي من الاتصال وحاولي مرة أخرى.",faq1:"هل كل المنتجات أصلية؟",faq1a:"نعم — تستورد فيسز مباشرة من الماركات والموزعين المعتمدين، ويصل كل منتج برمز الدفعة الأصلي.",faq2:"هل يمكنني الدفع لاحقاً؟",faq2a:"قسّمي طلبك إلى 4 دفعات بدون فوائد مع تابي أو تمارا عند الدفع.",faq3:"كيف يعمل النقش المجاني؟",faq3a:"أضيفي أي عطر مؤهل إلى حقيبتك ثم اختاري «إضافة نقش» — حتى 15 حرفاً بالعربية أو الإنجليزية."}
+};
+let lang='en';
+const t=k=>T[lang][k];
+function applyLang(l){
+  lang=l;
+  document.documentElement.lang=l;
+  document.documentElement.dir=l==='ar'?'rtl':'ltr';
+  document.getElementById('langEn').setAttribute('aria-pressed',l==='en');
+  document.getElementById('langAr').setAttribute('aria-pressed',l==='ar');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const v=T[l][el.dataset.i18n];if(typeof v==='string')el.textContent=v;});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=T[l][el.dataset.i18nPh]);
+  renderCards();renderPLP();renderCart();renderSuggest('');
+}
+document.getElementById('langEn').onclick=()=>applyLang('en');
+document.getElementById('langAr').onclick=()=>applyLang('ar');
+
+/* ============================== swatches ============================== */
+const SW={brand:[["green.950","#07271D"],["green.900 · brand","#0C382A"],["green.800","#124A37"],["green.700","#1A5C45"],["green.500","#2E8062"],["green.300","#8FC3AC"],["green.100","#DCEEE4"],["green.050","#EFF7F2"]],
+neutral:[["neutral.900","#1B1B18"],["neutral.600","#6B6B66"],["neutral.400","#A6A6A0"],["neutral.200","#E1E1DC"],["neutral.050","#F7F7F5"],["blush.500","#D98E7E"],["blush.100","#F7E4DE"],["gold.500 · rating","#B98A2F"]],
+semantic:[["success.600","#1D7A4B"],["error.600 · sale","#BE3A2B"],["warning.600","#9A6A12"],["info.600","#2B5FA3"],["success.100","#DCF2E5"],["error.100","#FAE4E0"],["warning.100","#F8EDD4"],["info.100","#E1EBF8"]]};
+for(const[id,arr]of Object.entries(SW)){
+  document.getElementById('sw-'+id).innerHTML=arr.map(([n,h])=>{
+    const varName='--ds-'+n.split(' ')[0].replace('.','-');
+    return `<div class="swatch"><button data-copy="${varName}" title="Copy ${varName}"><div class="chip" style="background:${h}"></div><div class="meta"><b>${n}</b><span>${h}</span></div></button></div>`;
+  }).join('');
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-copy]');if(!b)return;
+  navigator.clipboard?.writeText(`var(${b.dataset.copy})`).then(()=>toast(`Copied var(${b.dataset.copy})`,'ok')).catch(()=>{});
+});
+
+/* spacing scale */
+document.getElementById('space-scale').innerHTML=[["sp-1",4],["sp-2",8],["sp-3",12],["sp-4",16],["sp-6",24],["sp-8",32],["sp-10",40],["sp-12",48],["sp-16",64]]
+ .map(([n,px])=>`<div class="space-row"><code class="inline-code">${n} · ${px}px</code><div class="bar" style="width:${px*3}px"></div></div>`).join('');
+
+/* motion */
+document.getElementById('motionPlay').onclick=()=>{
+  document.querySelectorAll('[data-motion]').forEach(tr=>{tr.classList.remove('play');void tr.offsetWidth;tr.classList.add('play');});
+  setTimeout(()=>document.querySelectorAll('[data-motion]').forEach(tr=>tr.classList.remove('play')),900);
+};
+
+/* ============================== toasts ============================== */
+function toast(msg,kind='ok'){
+  const r=document.getElementById('toast-region');
+  const d=document.createElement('div');d.className='ds-toast '+kind;d.textContent=msg;
+  r.appendChild(d);setTimeout(()=>{d.style.opacity='0';d.style.transition='opacity .3s';setTimeout(()=>d.remove(),320);},4000);
+}
+document.querySelectorAll('[data-toast]').forEach(b=>b.onclick=()=>b.dataset.toast==='ok'?toast(t('added'),'ok'):toast(t('toast_err'),'err'));
+
+/* loading demo button */
+const ldb=document.getElementById('loadDemoBtn');
+ldb.onclick=()=>{ldb.classList.add('is-loading');ldb.setAttribute('aria-busy','true');
+  setTimeout(()=>{ldb.classList.remove('is-loading');ldb.removeAttribute('aria-busy');toast(t('added'),'ok');},1200);};
+
+/* wishlist toggles (generic) */
+document.addEventListener('click',e=>{
+  const w=e.target.closest('[data-wish]');if(!w)return;
+  const on=w.getAttribute('aria-pressed')!=='true';
+  w.setAttribute('aria-pressed',on);toast(on?t('wish_on'):t('wish_off'),'ok');
+});
+
+/* qty steppers (generic, bounded 1–9) */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('.ds-qty [data-step]');if(!b)return;
+  const out=b.parentElement.querySelector('output');
+  let v=Math.min(9,Math.max(1,(+out.textContent)+(+b.dataset.step)));
+  out.textContent=v;
+  b.parentElement.querySelector('[data-step="-1"]').disabled=v===1;
+  const line=b.closest('.cart-line');
+  if(line){const it=cart.find(c=>c.id==line.dataset.id);
+    if(it){it.qty=v;const p=PRODUCTS.find(x=>x.id==it.id);
+      line.querySelector('.pr').textContent=fmt(p.price*v);renderCart(false);}}
+});
+
+/* ============================== tabs ============================== */
+document.querySelectorAll('[role="tablist"]').forEach(list=>{
+  const tabs=[...list.querySelectorAll('[role="tab"]')];
+  function activate(tab){
+    tabs.forEach(x=>{x.setAttribute('aria-selected',x===tab);x.tabIndex=x===tab?0:-1;
+      document.getElementById(x.getAttribute('aria-controls')).hidden=x!==tab;});
+    tab.focus();
+  }
+  tabs.forEach((tab,i)=>{
+    tab.onclick=()=>activate(tab);
+    tab.onkeydown=e=>{
+      const dir=document.documentElement.dir==='rtl'?-1:1;
+      if(e.key==='ArrowRight')activate(tabs[(i+dir+tabs.length)%tabs.length]);
+      if(e.key==='ArrowLeft')activate(tabs[(i-dir+tabs.length)%tabs.length]);
+      if(e.key==='Home')activate(tabs[0]);
+      if(e.key==='End')activate(tabs[tabs.length-1]);
+    };
+  });
+});
+
+/* accordions */
+document.querySelectorAll('.ds-acc-btn').forEach(btn=>{
+  btn.onclick=()=>{
+    const open=btn.getAttribute('aria-expanded')==='true';
+    const panel=document.getElementById(btn.getAttribute('aria-controls'));
+    btn.setAttribute('aria-expanded',!open);
+    panel.style.maxHeight=open?'0':panel.scrollHeight+'px';
+  };
+});
+
+/* filter group collapse */
+document.querySelectorAll('.fgroup > button').forEach(b=>{
+  b.onclick=()=>{const open=b.getAttribute('aria-expanded')==='true';
+    b.setAttribute('aria-expanded',!open);b.nextElementSibling.style.display=open?'none':'grid';};
+});
+
+/* ============================== modal & drawer ============================== */
+const overlay=document.getElementById('overlay'),modal=document.getElementById('modal'),drawer=document.getElementById('cartDrawer');
+let lastFocus=null,openLayer=null;
+function trap(e,box){
+  if(e.key!=='Tab')return;
+  const f=box.querySelectorAll('button,[href],input,select,[tabindex]:not([tabindex="-1"])');
+  const first=f[0],last=f[f.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+}
+function openModal(){lastFocus=document.activeElement;openLayer='modal';overlay.classList.add('open');modal.classList.add('open');modal.querySelector('button').focus();}
+function openCart(){lastFocus=document.activeElement;openLayer='cart';overlay.classList.add('open');drawer.classList.add('open');drawer.querySelector('button').focus();}
+function closeLayers(){overlay.classList.remove('open');modal.classList.remove('open');drawer.classList.remove('open');openLayer=null;lastFocus?.focus();}
+document.getElementById('openModal').onclick=openModal;
+['openCart1','openCart2','openCart3'].forEach(id=>document.getElementById(id).onclick=openCart);
+document.querySelectorAll('[data-close-modal],[data-close-cart]').forEach(b=>b.addEventListener('click',closeLayers));
+overlay.onclick=closeLayers;
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeLayers();closeMega();suggest.classList.remove('open');searchInput.setAttribute('aria-expanded','false');}
+  if(openLayer==='modal')trap(e,modal);
+  if(openLayer==='cart')trap(e,drawer);
+});
+
+/* ============================== product data ============================== */
+const PRODUCTS=[
+ {id:1,brand:"Dior",en:"Sauvage Elixir 60ml",ar:"سوفاج إليكسير 60 مل",price:815,from:true,badges:["best"],rating:4.8,rc:1240,c:["#183B2F","#2E8062"]},
+ {id:2,brand:"Chanel",en:"Coco Mademoiselle EDP",ar:"كوكو مادموزيل أو دو برفان",price:615,from:true,badges:["best"],rating:4.9,rc:2310,c:["#1B1B18","#6B6B66"]},
+ {id:3,brand:"Guerlain",en:"L'Heure Bleue EDP 75ml",ar:"لور بلو أو دو برفان 75 مل",price:720,badges:["new","gift"],rating:4.7,rc:186,c:["#2B5D9E","#8FB2E0"]},
+ {id:4,brand:"Lattafa",en:"Khamrah EDP 100ml",ar:"خمرة أو دو برفان 100 مل",price:130,badges:["excl"],rating:4.6,rc:3410,c:["#9A6A12","#D9B25E"]},
+ {id:5,brand:"Armani Beauty",en:"Privé Oud Nacre",ar:"بريفيه عود ناكر",price:1000,from:true,badges:["new","gift"],rating:4.8,rc:97,c:["#4A3320","#B98A2F"]},
+ {id:6,brand:"Reef Perfumes",en:"Orom EDP 90ml",ar:"أوروم أو دو برفان 90 مل",price:199.5,was:399,badges:["sale50","new"],rating:4.4,rc:58,c:["#7E271C",'#D98E7E']},
+ {id:7,brand:"YSL",en:"Libre Intense EDP",ar:"ليبر إنتنس أو دو برفان",price:560,from:true,badges:["best","gift"],rating:4.8,rc:1875,c:["#0C382A","#B98A2F"]},
+ {id:8,brand:"Arabian Oud",en:"Madawi EDP 90ml",ar:"مدوي أو دو برفان 90 مل",price:320.25,was:640.5,badges:["sale50","excl"],rating:4.5,rc:412,c:["#5A2B4E","#C88AB5"]},
+];
+const BADGE={new:["ds-badge--new","b_new"],best:["ds-badge--best","b_best"],gift:["ds-badge--gift","b_gift"],excl:["ds-badge--excl","b_excl"],sale50:["ds-badge--sale",null]};
+const fmt=n=>(n%1?n.toFixed(2):n)+" "+t('aed');
+function bottleSVG(p){
+  return `<svg viewBox="0 0 100 130" role="img" aria-label="${p.brand} ${lang==='ar'?p.ar:p.en}">
+   <defs><linearGradient id="g${p.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.c[1]}"/><stop offset="1" stop-color="${p.c[0]}"/></linearGradient></defs>
+   <rect x="40" y="6" width="20" height="14" rx="2" fill="#1B1B18" opacity=".85"/>
+   <rect x="44" y="20" width="12" height="8" fill="${p.c[0]}"/>
+   <rect x="24" y="28" width="52" height="92" rx="7" fill="url(#g${p.id})"/>
+   <rect x="32" y="52" width="36" height="34" rx="2" fill="#fff" opacity=".88"/>
+   <text x="50" y="66" text-anchor="middle" font-size="7" font-weight="700" fill="#1B1B18" font-family="Archivo,sans-serif">${p.brand.split(' ')[0].toUpperCase()}</text>
+   <line x1="36" y1="74" x2="64" y2="74" stroke="#A6A6A0" stroke-width="1"/>
+   <text x="50" y="82" text-anchor="middle" font-size="5" fill="#6B6B66" font-family="Archivo,sans-serif">EAU DE PARFUM</text></svg>`;
+}
+function stars(r){const full=Math.round(r);return "★★★★★".slice(0,full)+"☆☆☆☆☆".slice(full);}
+function badgeHTML(p){
+  return p.badges.slice(0,2).map(b=>{const[cls,key]=BADGE[b];
+    return `<span class="ds-badge ${cls}">${key?t(key):(lang==='ar'?"خصم 50%":"50% OFF")}</span>`;}).join('');
+}
+function cardHTML(p,opts={}){
+  const name=lang==='ar'?p.ar:p.en;
+  const sale=!!p.was;
+  return `<article class="pcard ${opts.oos?'is-oos':''}" data-id="${p.id}">
+    <div class="badges">${opts.oos?'':badgeHTML(p)}</div>
+    <button class="wish" data-wish aria-pressed="false" aria-label="${lang==='ar'?'أضيفي إلى المفضلة:':'Add to wishlist:'} ${name}"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.5-9 9-9 9Z"/></svg></button>
+    <div class="img">${bottleSVG(p)}</div>
+    ${opts.oos?`<div class="oos-lbl">${lang==='ar'?'نفدت الكمية':'Out of stock'}</div>`:''}
+    <div class="info">
+      <span class="brand">${p.brand}</span>
+      <a class="name" href="#product-card">${name}</a>
+      <span class="rating"><span class="stars" aria-hidden="true">${stars(p.rating)}</span><span>${p.rating} (${p.rc})</span></span>
+      <span class="price">
+        ${p.from?`<span class="from">${t('from')}</span>`:''}
+        <span class="now ${sale?'sale':''}">${fmt(p.price)}</span>
+        ${sale?`<s class="was"><span class="sr-only">${t('was')} </span>${fmt(p.was)}</s>`:''}
+      </span>
+    </div>
+    <button class="ds-btn ds-btn--sm add" data-add="${p.id}" ${opts.oos?'disabled':''}>${t('add_bag')}</button>
+  </article>`;
+}
+const skeletonHTML=`<article class="pcard is-skeleton" aria-hidden="true"><div class="sk"><div class="sk-box sk-img"></div><div class="sk-lines"><div class="sk-box"></div><div class="sk-box"></div><div class="sk-box"></div></div></div></article>`;
+
+/* card showcase: normal, sale, oos, skeleton */
+function renderCards(){
+  const el=document.getElementById('cardShowcase');
+  el.innerHTML=cardHTML(PRODUCTS[0])+cardHTML(PRODUCTS[5])+cardHTML(PRODUCTS[3],{oos:true})+skeletonHTML;
+}
+
+/* ============================== PLP ============================== */
+const brandList=[...new Set(PRODUCTS.map(p=>p.brand))];
+document.getElementById('brandOpts').innerHTML=brandList.map(b=>`<label class="ds-check"><input type="checkbox" value="${b}" data-brand> <span>${b}</span></label>`).join('');
+const F={sale:false,gift:false,brands:new Set(),price:'all',sort:'rec'};
+function bindFilters(){
+  document.getElementById('fltSale').onchange=e=>{F.sale=e.target.checked;renderPLP();};
+  document.getElementById('fltGift').onchange=e=>{F.gift=e.target.checked;renderPLP();};
+  document.querySelectorAll('[data-brand]').forEach(c=>c.onchange=()=>{c.checked?F.brands.add(c.value):F.brands.delete(c.value);renderPLP();});
+  document.querySelectorAll('[name="fp"]').forEach(r=>r.onchange=()=>{F.price=r.value;renderPLP();});
+  document.getElementById('sortSel').onchange=e=>{F.sort=e.target.value;renderPLP();};
+  document.getElementById('clearFilters').onclick=clearFilters;
+}
+function clearFilters(){
+  F.sale=F.gift=false;F.brands.clear();F.price='all';
+  document.getElementById('fltSale').checked=false;document.getElementById('fltGift').checked=false;
+  document.querySelectorAll('[data-brand]').forEach(c=>c.checked=false);
+  document.querySelector('[name="fp"][value="all"]').checked=true;
+  renderPLP();
+}
+function filtered(){
+  let list=PRODUCTS.filter(p=>
+    (!F.sale||p.was)&&(!F.gift||p.badges.includes('gift'))&&
+    (F.brands.size===0||F.brands.has(p.brand))&&
+    (F.price==='all'||(F.price==='u500'?p.price<500:p.price>=500)));
+  if(F.sort==='lo')list=[...list].sort((a,b)=>a.price-b.price);
+  if(F.sort==='hi')list=[...list].sort((a,b)=>b.price-a.price);
+  if(F.sort==='new')list=[...list].sort((a,b)=>(b.badges.includes('new'))-(a.badges.includes('new')));
+  return list;
+}
+function renderPLP(){
+  const grid=document.getElementById('plpGrid'),list=filtered();
+  document.getElementById('resultCount').textContent=`${list.length} ${t('results')}`;
+  const chips=[];
+  if(F.sale)chips.push(['sale',t('f_sale')]);
+  if(F.gift)chips.push(['gift',t('f_gift')]);
+  F.brands.forEach(b=>chips.push(['b:'+b,b]));
+  if(F.price!=='all')chips.push(['price',F.price==='u500'?t('f_u500'):t('f_o500')]);
+  document.getElementById('activeChips').innerHTML=chips.map(([k,l])=>`<button class="ds-chip" aria-pressed="true" data-chip="${k}">${l} <span class="x" aria-hidden="true">✕</span><span class="sr-only"> — ${t('remove')}</span></button>`).join('');
+  if(!list.length){
+    grid.innerHTML=`<div class="empty-state" style="grid-column:1/-1">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5M8.5 11h5"/></svg>
+      <h4>${t('empty_t')}</h4><p>${t('empty_d')}</p>
+      <button class="ds-btn ds-btn--secondary" style="margin-top:14px" onclick="clearFilters()">${t('empty_b')}</button></div>`;
+    return;
+  }
+  grid.innerHTML=list.map(p=>cardHTML(p)).join('');
+}
+document.addEventListener('click',e=>{
+  const ch=e.target.closest('[data-chip]');if(!ch)return;
+  const k=ch.dataset.chip;
+  if(k==='sale'){F.sale=false;document.getElementById('fltSale').checked=false;}
+  else if(k==='gift'){F.gift=false;document.getElementById('fltGift').checked=false;}
+  else if(k==='price'){F.price='all';document.querySelector('[name="fp"][value="all"]').checked=true;}
+  else if(k.startsWith('b:')){const b=k.slice(2);F.brands.delete(b);document.querySelector(`[data-brand][value="${b}"]`).checked=false;}
+  renderPLP();
+});
+document.getElementById('simLoad').onclick=()=>{
+  const grid=document.getElementById('plpGrid');
+  grid.innerHTML=skeletonHTML.repeat(8);
+  setTimeout(renderPLP,1400);
+};
+document.getElementById('filtersToggle').onclick=function(){
+  const rail=document.getElementById('filterRail');
+  const open=rail.classList.toggle('open-mobile');
+  this.setAttribute('aria-expanded',open);
+};
+
+/* ============================== cart ============================== */
+let cart=[];
+const FREE_AT=299;
+function addToCart(id,btn){
+  if(btn){btn.classList.add('is-loading');btn.setAttribute('aria-busy','true');}
+  setTimeout(()=>{
+    if(btn){btn.classList.remove('is-loading');btn.removeAttribute('aria-busy');}
+    const ex=cart.find(c=>c.id===id);
+    ex?ex.qty=Math.min(9,ex.qty+1):cart.push({id,qty:1});
+    renderCart();toast(t('added'),'ok');
+  },600);
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-add]');if(b&&!b.disabled)addToCart(+b.dataset.add,b);
+  const rm=e.target.closest('[data-rm]');if(rm){cart=cart.filter(c=>c.id!=rm.dataset.rm);renderCart();}
+});
+document.getElementById('seedCart').onclick=()=>addToCart(1,null);
+function renderCart(rebuildAll=true){
+  const n=cart.reduce((s,c)=>s+c.qty,0);
+  const total=cart.reduce((s,c)=>s+c.qty*PRODUCTS.find(p=>p.id===c.id).price,0);
+  document.getElementById('cartCount').textContent=n;
+  document.getElementById('cartQty').textContent=n;
+  document.getElementById('cartTotal').textContent=fmt(total);
+  const fb=document.getElementById('freebar');
+  const pct=Math.min(100,total/FREE_AT*100);
+  fb.innerHTML=`${total>=FREE_AT?t('free_ok'):T[lang].free_away(Math.ceil(FREE_AT-total))}<div class="track"><div class="fill" style="width:${pct}%"></div></div>`;
+  const body=document.getElementById('cartBody');
+  document.getElementById('cartFooter').style.display=cart.length?'grid':'none';
+  if(!cart.length){
+    body.innerHTML=`<div class="cart-empty"><svg viewBox="0 0 24 24"><path d="M6 7h12l1 13H5L6 7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><h4 style="color:var(--ds-fg)">${t('bag_empty_t')}</h4><p style="font-size:var(--ds-text-sm);margin:6px 0 16px">${t('bag_empty_d')}</p><button class="ds-btn ds-btn--secondary" data-close-cart-inline>${t('cont_shop')}</button></div>`;
+    body.querySelector('[data-close-cart-inline]').onclick=closeLayers;
+    return;
+  }
+  if(!rebuildAll)return;
+  body.innerHTML=cart.map(c=>{
+    const p=PRODUCTS.find(x=>x.id===c.id);
+    return `<div class="cart-line" data-id="${p.id}">
+      <div class="thumb" style="background:linear-gradient(160deg,${p.c[1]},${p.c[0]});display:grid;place-items:center">${bottleSVG(p).replace('<svg ','<svg style="width:70%;height:82%" ')}</div>
+      <div><div class="br">${p.brand}</div><div class="nm">${lang==='ar'?p.ar:p.en}</div>
+        <div class="ds-qty" style="height:32px;margin-top:8px" role="group" aria-label="${t('qty')}"><button data-step="-1" aria-label="−" ${c.qty===1?'disabled':''}>−</button><output aria-live="polite">${c.qty}</output><button data-step="1" aria-label="+">+</button></div>
+      </div>
+      <div style="text-align:end"><span class="pr">${fmt(p.price*c.qty)}</span><br><button class="rm" data-rm="${p.id}">${t('remove')}</button></div>
+    </div>`;
+  }).join('');
+}
+
+/* ============================== search suggest ============================== */
+const searchInput=document.getElementById('searchInput'),suggest=document.getElementById('suggestBox');
+function renderSuggest(q){
+  const list=document.getElementById('suggestList');
+  const src=q?PRODUCTS.filter(p=>(p.brand+' '+p.en+' '+p.ar).toLowerCase().includes(q.toLowerCase())):PRODUCTS.slice(0,4);
+  list.innerHTML=src.length?src.slice(0,5).map(p=>`<button role="option"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>${p.brand} — ${lang==='ar'?p.ar:p.en}</button>`).join('')
+    :`<div class="hd">${t('empty_t')}</div>`;
+  list.querySelectorAll('button').forEach(b=>b.onclick=()=>{searchInput.value=b.textContent.trim();suggest.classList.remove('open');searchInput.setAttribute('aria-expanded','false');});
+}
+searchInput.addEventListener('input',()=>{renderSuggest(searchInput.value);suggest.classList.add('open');searchInput.setAttribute('aria-expanded','true');});
+searchInput.addEventListener('focus',()=>{renderSuggest(searchInput.value);suggest.classList.add('open');searchInput.setAttribute('aria-expanded','true');});
+document.addEventListener('click',e=>{if(!e.target.closest('.store-search')){suggest.classList.remove('open');searchInput.setAttribute('aria-expanded','false');}});
+
+/* ============================== mega menu ============================== */
+const megaTrigger=document.querySelector('[data-mega]'),megaPanel=document.getElementById('megaPerfume');
+function openMega(){megaPanel.classList.add('open');megaTrigger.setAttribute('aria-expanded','true');}
+function closeMega(){megaPanel.classList.remove('open');megaTrigger.setAttribute('aria-expanded','false');}
+megaTrigger.addEventListener('mouseenter',openMega);
+megaTrigger.addEventListener('focus',openMega);
+megaTrigger.addEventListener('click',e=>{e.preventDefault();megaPanel.classList.contains('open')?closeMega():openMega();});
+document.getElementById('storeHeaderDemo').addEventListener('mouseleave',closeMega);
+megaPanel.addEventListener('focusout',e=>{if(!megaPanel.contains(e.relatedTarget)&&e.relatedTarget!==megaTrigger)closeMega();});
+
+/* ============================== doc shell ============================== */
+const side=document.getElementById('side'),menuBtn=document.getElementById('menuBtn');
+menuBtn.onclick=()=>{const open=side.classList.toggle('open');menuBtn.setAttribute('aria-expanded',open);};
+side.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>side.classList.remove('open')));
+const navLinks=[...side.querySelectorAll('nav a')];
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{if(en.isIntersecting){
+    navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+en.target.id));}});
+},{rootMargin:'-20% 0px -70% 0px'});
+document.querySelectorAll('section.doc').forEach(s=>obs.observe(s));
+
+/* init */
+bindFilters();renderCards();renderPLP();renderCart();
+</script>
+</body>
+</html>
