@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Muse SSO — clickable prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#e9e6df; --panel:#ffffff; --ink:#1d1d1b; --muted:#66655f; --line:#d9d6c8; --accent:#033d33; --chip:#f3f1ea; --warn:#8a5a00; --warnbg:#fff4d6;
+  --serif:'DM Serif Display','Times New Roman',Georgia,serif;
+  --sans:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#161614; --panel:#232321; --ink:#f1efe8; --muted:#a9a79e; --line:#3a3a36; --accent:#6fc4af; --chip:#2c2c29; --warn:#f0c36a; --warnbg:#3a3017; }
+}
+:root[data-theme="dark"]{ --bg:#161614; --panel:#232321; --ink:#f1efe8; --muted:#a9a79e; --line:#3a3a36; --accent:#6fc4af; --chip:#2c2c29; --warn:#f0c36a; --warnbg:#3a3017; }
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+button{font-family:inherit;cursor:pointer}
+:focus-visible{outline:3px solid #2f7de1;outline-offset:2px}
+
+/* ---------- Presenter shell ---------- */
+.app{display:grid;grid-template-columns:270px minmax(0,1fr) 330px;gap:0;min-height:100vh}
+.rail{background:var(--panel);border-right:1px solid var(--line);padding:20px 16px;overflow:auto}
+.rail h1{font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.15;margin:0 0 4px}
+.rail .lede{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+.group{margin:18px 0 6px;font-size:12px;font-weight:600;color:var(--muted)}
+.scn{display:block;width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:8px;padding:8px 10px;color:var(--ink);font-size:13px}
+.scn:hover{background:var(--chip)}
+.scn[aria-current="true"]{background:var(--chip);border-color:var(--line);font-weight:500}
+.scn .id{display:inline-block;min-width:34px;font-weight:600;color:var(--accent)}
+.scn .tag{font-size:11px;color:var(--warn);background:var(--warnbg);border-radius:10px;padding:1px 7px;margin-left:6px;white-space:nowrap}
+.stage-wrap{padding:20px;display:flex;flex-direction:column;align-items:center;min-width:0}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;margin-bottom:14px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;color:var(--ink);padding:7px 14px;font-size:12.5px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--panel)}
+.pill{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:7px 14px;font-size:12.5px}
+.pill:hover{background:var(--chip)}
+.notes{background:var(--panel);border-left:1px solid var(--line);padding:20px 18px;overflow:auto}
+.notes h2{font-size:12px;font-weight:600;color:var(--muted);margin:18px 0 6px}
+.notes h2:first-child{margin-top:0}
+.notes p,.notes li{font-size:13px;margin:0 0 6px}
+.notes ul{padding-left:18px;margin:0}
+.task{background:var(--chip);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.frame-id{display:inline-block;background:var(--ink);color:var(--panel);border-radius:6px;padding:1px 8px;font-weight:600;font-size:12px}
+.trail{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.trail span{background:var(--chip);border-radius:6px;padding:1px 7px;font-size:12px}
+.trail span.cur{background:var(--accent);color:#fff}
+.ctl{display:grid;gap:8px}
+.ctl label{display:grid;gap:3px;font-size:12px;color:var(--muted)}
+.ctl select,.ctl input[type=text]{font:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink)}
+.ctl .chk{display:flex;gap:8px;align-items:center;color:var(--ink);font-size:13px}
+.vars{display:flex;flex-wrap:wrap;gap:6px}
+.vars button{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:4px 10px;font-size:12px}
+.vars button:hover{background:var(--chip)}
+.demo{font-size:13px;background:var(--warnbg);color:var(--warn);border-radius:8px;padding:8px 10px}
+.demo b{font-weight:600}
+.nextbtn{width:100%;margin-top:12px;border:0;background:var(--accent);color:#fff;border-radius:8px;padding:10px;font-size:13px;font-weight:500}
+body.participant .app{display:block}
+body.participant .rail,body.participant .notes,body.participant .toolbar .hide-p,body.participant .rv{display:none!important}
+body.participant .stage-wrap{min-height:100vh;justify-content:center}
+.exit-p{display:none;position:fixed;right:12px;top:calc(12px + env(safe-area-inset-top,0px));z-index:50;opacity:.7}
+body.participant .exit-p{display:block}
+
+/* ---------- Device ---------- */
+.device{position:relative;background:#fff;overflow:hidden;color:#111;font-family:var(--sans);isolation:isolate}
+.device.mobile{width:min(390px,100%);height:clamp(480px,calc(100dvh - 96px),800px);border:10px solid #1b1b1a;border-radius:38px;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+.device.desktop{width:min(980px,100%);height:clamp(460px,calc(100dvh - 96px),660px);border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.18)}
+.chrome{display:none;height:36px;background:#efede6;border-bottom:1px solid #d9d6c8;align-items:center;gap:7px;padding:0 12px;font-size:12px;color:#6b6a63}
+.device.desktop .chrome{display:flex}
+.chrome i{width:10px;height:10px;border-radius:50%;background:#cfcbbd;display:inline-block}
+.chrome .url{margin-left:12px;background:#fff;border-radius:6px;padding:3px 14px;flex:1;max-width:420px}
+.viewport{position:absolute;inset:0;overflow:hidden}
+.device.desktop .viewport{top:36px}
+
+/* brand theming */
+.t-Faces{--b:#033d33;--bt:#fff;--bl:#d9d6c8;--bw:'FACES';--wm-font:var(--serif);--wm-track:.16em}
+.t-Swarovski{--b:#161616;--bt:#fff;--bl:#d6d6d6;--wm-font:var(--sans);--wm-track:.34em}
+.wm{font-family:var(--wm-font);letter-spacing:var(--wm-track);font-size:20px;color:#111;text-transform:uppercase}
+.t-Swarovski .wm{font-weight:300;font-size:17px}
+
+/* skeleton page behind sheet */
+.page{position:absolute;inset:0;background:#fff;overflow:auto}
+.p-head{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;border-bottom:1px solid var(--bl)}
+.p-head .signin{border:1px solid #111;background:#fff;border-radius:3px;padding:7px 16px;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:#111}
+.p-hero{height:190px;margin:22px;background:linear-gradient(135deg,#efece3,#e1ddcf);border-radius:4px}
+.p-row{display:flex;gap:14px;margin:0 22px}
+.p-row div{flex:1;height:110px;background:#f2f0ea;border-radius:4px}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.sheet{position:absolute;inset:0;background:#fff;overflow:auto;display:flex;flex-direction:column}
+.device.desktop .sheet{inset:auto;left:50%;top:50%;transform:translate(-50%,-50%);width:460px;max-height:94%;border-radius:4px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.device.mobile .scrim{display:none}
+.sh-top{display:flex;align-items:center;justify-content:space-between;padding:0 22px;height:64px;border-bottom:1px solid var(--bl,#d9d6c8);flex:none}
+.sh-body{padding:28px 22px 32px;flex:1}
+.sh-body h1{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1.08;letter-spacing:-.01em;margin:0 0 8px;outline:none}
+.sh-body .sub{color:#66655f;font-size:16px;margin:0 0 26px}
+.x{background:none;border:0;padding:6px;color:#111;line-height:0}
+label.f{display:block;font-size:16px;margin:0 0 8px;font-weight:400}
+input.in{width:100%;height:52px;border:1px solid var(--bl,#d9d6c8);border-radius:2px;padding:0 14px;font:inherit;font-size:16px;background:#fff;color:#111}
+input.in[aria-invalid="true"]{border-color:#b3261e;box-shadow:inset 0 0 0 1px #b3261e}
+.hint{font-size:13px;color:#66655f;margin:6px 0 0}
+.error{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;color:#9c1c14;margin:8px 0 0}
+.error svg{flex:none;margin-top:2px}
+.info{font-size:13.5px;color:#0b5c3b;margin:10px 0 0;display:flex;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:52px;border-radius:3px;border:1px solid transparent;font-size:16px;letter-spacing:.01em;margin-top:16px}
+.btn.primary{background:var(--b,#033d33);color:var(--bt,#fff)}
+.btn.primary[disabled]{opacity:.65;cursor:progress}
+.btn.line{background:#fff;color:#111;border-color:#111}
+.btn.muse{background:#fff;color:#4a1624;border-color:#4a1624}
+.btn.ghost{background:transparent;color:#111;text-decoration:underline;height:44px;margin-top:6px}
+.or{display:flex;align-items:center;gap:14px;margin:28px 0 20px;font-size:15px;color:#111}
+.or::before,.or::after{content:"";flex:1;border-top:1px solid var(--bl,#d9d6c8)}
+.social{display:flex;gap:16px;justify-content:center}
+.social button{width:48px;height:48px;border:1px solid var(--bl,#d9d6c8);border-radius:4px;background:#fff;display:grid;place-items:center}
+.social svg{width:24px;height:24px}
+.fine{font-size:13px;color:#66655f;margin:8px 0 0;text-align:center}
+.alt{margin-top:22px;text-align:center;font-size:14.5px}
+a.lnk,button.lnk{color:#111;text-decoration:underline;background:none;border:0;padding:0;font:inherit;cursor:pointer}
+.sep{height:1px;background:var(--bl,#d9d6c8);margin:22px 0}
+
+/* Muse screens */
+.muse-sheet{background:#faf6f0}
+.muse-sheet .sh-top{border-color:#e6dccd}
+.muse-sheet .wm{font-family:var(--serif);letter-spacing:.3em;color:#4a1624;font-size:19px}
+.muse-sheet .btn.primary{background:#4a1624;color:#fff}
+.muse-sheet input.in{border-color:#d8cbb8}
+.muse-sheet .sub{color:#6c6258}
+.back{background:none;border:0;display:flex;align-items:center;gap:6px;font-size:14px;color:#4a1624;padding:6px 0}
+.via{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #e6dccd;border-radius:999px;padding:4px 12px 4px 6px;font-size:12.5px;color:#4a1624;margin-bottom:18px}
+.via b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#4a1624;color:#fff;font-weight:500;font-size:11px}
+details.help{margin-top:22px;border-top:1px solid #e6dccd;padding-top:14px}
+details.help summary{cursor:pointer;font-size:14.5px;color:#4a1624}
+details.help p{font-size:13.5px;color:#6c6258;margin:10px 0 0}
+.otp{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.otp-box{width:100%;height:56px;border:1px solid #d8cbb8;border-radius:3px;background:#fff;color:#111;font:inherit;font-size:22px;text-align:center;padding:0}
+.otp-box[aria-invalid="true"]{border-color:#b3261e;box-shadow:inset 0 0 0 1px #b3261e}
+.center{text-align:center}
+.spin{width:44px;height:44px;border-radius:50%;border:3px solid #e6dccd;border-top-color:#4a1624;animation:sp 1s linear infinite;margin:0 auto 22px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none;border-top-color:#e6dccd;border-right-color:#4a1624}}
+.avatar{width:64px;height:64px;border-radius:50%;background:var(--b,#033d33);color:#fff;display:grid;place-items:center;font-family:var(--serif);font-size:28px;margin:0 0 16px}
+.rvbadge{display:inline-block;background:#fff4d6;color:#8a5a00;border:1px dashed #c89400;border-radius:6px;padding:3px 9px;font-size:11.5px;margin-bottom:14px}
+.handoff{border:1.5px dashed #b7b2a0;border-radius:8px;padding:18px;background:#faf9f5;font-size:14px;color:#55544c}
+.handoff b{display:block;color:#111;margin-bottom:4px;font-size:15px}
+.acct h2{font-family:var(--serif);font-weight:400;font-size:34px;margin:6px 0 4px}
+.tabs{display:flex;gap:20px;border-bottom:1px solid var(--bl);margin:18px 0 18px;font-size:14px}
+.tabs span{padding-bottom:10px;color:#66655f}
+.tabs span.on{color:#111;border-bottom:2px solid var(--b)}
+.card{border:1px solid var(--bl);border-radius:6px;padding:14px 16px;margin-bottom:12px;font-size:14px}
+.card small{color:#66655f;display:block}
+.accwrap{padding:22px}
+
+
+.sheet{min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+#deviceHost{width:100%;display:flex;justify-content:center}
+@media (max-height:780px){
+  .sh-top{height:52px}
+  .sh-body{padding:16px 20px 22px}
+  .sh-body h1{font-size:27px}
+  .sh-body .sub{font-size:14.5px;margin-bottom:14px}
+  label.f{font-size:14.5px;margin-bottom:6px}
+  input.in{height:46px}
+  .btn{height:46px;margin-top:12px;font-size:15px}
+  .or{margin:16px 0 14px}
+  .alt{margin-top:14px}
+  .via{margin-bottom:12px}
+}
+@media (max-height:640px){
+  .device.mobile{border-width:6px;border-radius:26px}
+  .sh-body h1{font-size:24px}
+}
+@media (max-width:1150px){
+  .app{grid-template-columns:240px minmax(0,1fr)}
+  .notes{grid-column:1 / -1;border-left:0;border-top:1px solid var(--line)}
+}
+@media (max-width:760px){
+  .app{display:block}
+  .rail{border-right:0;border-bottom:1px solid var(--line);max-height:none}
+  .stage-wrap{padding:14px 8px}
+  .device.mobile{border-width:0;border-radius:0;box-shadow:none;width:100%}
+  .seg.devseg{display:none}
+}
+</style>
+</head>
+<body>
+<button class="pill exit-p" id="exitP">Exit participant view</button>
+<div class="app">
+  <nav class="rail" aria-label="Scenarios" id="rail"></nav>
+  <main class="stage-wrap">
+    <div class="toolbar">
+      <div class="seg devseg" role="group" aria-label="Device">
+        <button id="dMobile" aria-pressed="true">Mobile</button>
+        <button id="dDesktop" aria-pressed="false">Desktop</button>
+      </div>
+      <button class="pill" id="restart">Restart scenario</button>
+      <button class="pill hide-p" id="pview">Participant view</button>
+    </div>
+    <div id="deviceHost"></div>
+  </main>
+  <aside class="notes" id="notes" aria-label="Reviewer notes"></aside>
+</div>
+
+<script>
+(function(){
+'use strict';
+var DEMO={num:'+971 50 000 0000',code:'482915'};
+var KNOWN=['erwin@chalhoub.com'];
+var BR={Faces:{name:'Faces',host:'faces.com'},Swarovski:{name:'Swarovski',host:'swarovski.com'}};
+
+var SC=[
+ {id:'P01',group:'Primary story',title:'First sign-in at Faces',brand:'Faces',rec:false,out:'ok',start:'S01',
+  task:'You want to access your Faces account. Use the details provided for this activity.',
+  observe:'Does Erwin understand the handoff to Muse and read it as login rather than registration? Does she recognise the Faces account at the end?',
+  edges:'UX-01, 03–09, 14–17',notes:'Demonstration number and code are fictional. No real text message is sent. Code length is a demonstration value awaiting confirmation.',next:'P02'},
+ {id:'P02',group:'Primary story',title:'Continue at Swarovski, no new code',brand:'Swarovski',rec:true,out:'ok',start:'S01',
+  task:'Now access your account at Swarovski.',
+  observe:'What did she expect before selecting Muse? Does she understand why there were fewer steps? (Swarovski is illustrative; swap for Tanagra if confirmed.)',
+  edges:'UX-29–31',notes:'Alternate path: untick “Muse recognises the customer” in facilitator controls. The customer then goes through number and code with Swarovski named throughout, as a repeat sign-in rather than an error.',next:'P03'},
+ {id:'P03',group:'Recovery',title:'Correct a number or recover from code problems',brand:'Faces',rec:false,out:'ok',start:'S02',
+  task:'Continue using the account details provided for this activity.',
+  observe:'Waiting, resend discovery, number correction, alternative method. Use one interruption at a time.',
+  edges:'UX-07–20',notes:'No real countdown. Expiry and resend availability are facilitator-selected states. Phone-unavailable leads to the existing journey handoff; no Muse recovery is invented.',next:'P06',vars:true},
+ {id:'P06',group:'Recovery',title:'Interrupted after the code step',brand:'Faces',rec:false,out:'interrupted',start:'S02',
+  task:'Continue using the account details provided for this activity.',
+  observe:'Does she avoid blaming the code? Does she find Try again or an alternative method?',
+  edges:'UX-21, 30, 32',notes:'Try again recovers the sign-in once; if Muse no longer recognises Erwin, Try again leads to the number step.',next:'P07'},
+ {id:'P07',group:'Recovery',title:'Cancel and return to a familiar choice',brand:'Faces',rec:false,out:'ok',start:'S02',
+  task:'You decide to use another sign-in method.',
+  observe:'Is the exit discoverable? Does she land back on Faces sign-in? Cancelling must never lead to a success screen.',
+  edges:'UX-33–34',notes:'Also try Back to Faces sign-in from the Signing you in screen: the pending sign-in is cancelled.',next:'P04'},
+ {id:'P04',group:'Account expectations',title:'Muse member needs a brand account',brand:'Swarovski',rec:true,out:'setup',start:'S01',
+  task:'Use Muse to continue at this brand.',
+  observe:'Does she see this as setup needed rather than Muse failing? Does she choose registration deliberately?',
+  edges:'UX-03, 22, 26–27',notes:'Registration continuation is undefined: the journey ends at an annotated handoff and never jumps to a success page.',next:'P05'},
+ {id:'P05',group:'Account expectations',title:'Existing account cannot be accessed with Muse',brand:'Faces',rec:false,out:'unresolved',start:'S01',
+  task:'Use Muse to access your Faces account.',
+  observe:'Does she understand another route is needed without assuming her code was wrong or that she must create a duplicate account?',
+  edges:'UX-21, 23–25',notes:'Email-only similarity and conflicting details share one plain explanation. No merge, no choice between records, no help link until an approved destination exists.',next:'P08'},
+ {id:'P08',group:'Separate explorations',title:'Shared-device account choice',brand:'Faces',rec:true,out:'ok',start:'S01',confirm:true,tag:'Exploration',
+  task:'Use Muse to access your account on this shared device.',
+  observe:'Does the confirmation help her avoid opening the wrong account, and is the extra step worthwhile?',
+  edges:'UX-28',notes:'UX proposal only. Account switching is not defined in the supplied scope, so this is kept apart from the committed happy path.',next:'P09'},
+ {id:'P09',group:'Separate explorations',title:'Sign out and return',brand:'Faces',rec:true,out:'ok',start:'S05',tag:'Exploration',
+  task:'Sign out of Faces, then come back and sign in again.',
+  observe:'What does she believe has ended, and what does she expect when she returns?',
+  edges:'UX-36',notes:'Local sign-out only (names Faces alone). Final scope across Muse and brands is an open question, so this tests comprehension and is not final behaviour.',next:null}
+];
+
+var VARS=[
+ {l:'Missing number',screen:'S02',number:''},
+ {l:'Invalid format',screen:'S02',number:'12 ab'},
+ {l:'Wrong number',screen:'S03',number:DEMO.num},
+ {l:'Missing code',screen:'S03',number:DEMO.num},
+ {l:'Incorrect code',screen:'S03',number:DEMO.num},
+ {l:'Incomplete code',screen:'S03',number:DEMO.num},
+ {l:'Expired code',screen:'S03',number:DEMO.num,code:'expired'},
+ {l:'Resend fails',screen:'S03',number:DEMO.num,code:'resendFail'},
+ {l:'Phone unavailable',screen:'S03',number:DEMO.num}
+];
+var VARHINT={
+ 'Missing number':'Select Send code with the field empty.',
+ 'Invalid format':'Select Send code with the malformed number.',
+ 'Wrong number':'Select Change number.',
+ 'Missing code':'Open “Didn’t receive a code?” and request another.',
+ 'Incorrect code':'Type 000000, then Continue.',
+ 'Incomplete code':'Type 12, then Continue.',
+ 'Expired code':'Enter the demo code, then Continue.',
+ 'Resend fails':'Request another code.',
+ 'Phone unavailable':'Choose another sign-in method.'};
+
+var STAGEHINT={
+ S01:'Brand sign-in — choose a method',S02:'Muse mobile entry',S03:'Muse code entry',S04:'Completing sign-in',S05:'Brand account (signed in)',
+ S06:'Brand setup needed',S07:'Existing account access unresolved',S08:'Sign-in interrupted',S09:'Account confirmation (exploration)',
+ S10:'Existing brand sign-in (handoff)',S11:'Existing brand registration (handoff)',S12:'Brand sign-out confirmation (exploration)',HOME:'Brand page'};
+
+var S={device:'mobile',participant:false};
+var timer=null, focusSel=null, vhint='';
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function B(){return BR[S.brand]}
+function scn(){return SC.find(function(x){return x.id===S.sc})}
+
+function start(id,keep){
+  var sc=SC.find(function(x){return x.id===id});
+  var dev=S.device,part=S.participant;
+  var rec=sc.rec;
+  if(keep&&id==='P02') rec=true;
+  S={device:dev,participant:part,sc:id,brand:sc.brand,rec:rec,out:sc.out,codeMode:'normal',confirm:!!sc.confirm,
+     screen:null,number:'',email:'',code:'',err:null,msg:null,busy:null,trail:[]};
+  vhint='';
+  go(sc.start);
+}
+function go(screen,opts){
+  clearTimeout(timer);
+  S.screen=screen;S.err=null;S.msg=null;S.busy=null;
+  if(S.trail[S.trail.length-1]!==screen) S.trail.push(screen);
+  if(S.trail.length>14) S.trail.shift();
+  focusSel=(opts&&opts.focus)||null;
+  render();
+}
+
+/* ---------- icons ---------- */
+var iX='<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M3 3l20 20M23 3L3 23"/></svg>';
+var iBack='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>';
+var iErr='<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.2" fill="none" stroke="#9c1c14" stroke-width="1.4"/><path d="M8 4.2v4.3M8 10.6v1.2" stroke="#9c1c14" stroke-width="1.5" stroke-linecap="round"/></svg>';
+var iOk='<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7.2" fill="none" stroke="#0b5c3b" stroke-width="1.4"/><path d="M4.8 8.3l2.2 2.2 4.2-4.6" fill="none" stroke="#0b5c3b" stroke-width="1.5" stroke-linecap="round"/></svg>';
+var iG='<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.6 5.9c4.5-4.2 7-10.3 7-17.6z"/><path fill="#FBBC05" d="M10.5 28.7c-.5-1.4-.8-3-.8-4.7s.3-3.2.8-4.7l-7.9-6.1C.9 16.4 0 20.1 0 24s.9 7.6 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.6-5.9c-2.1 1.4-4.9 2.3-8.3 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg>';
+var iF='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="12" fill="#1f4e9c"/><path fill="#fff" d="M13.4 19.5v-6.6h2.2l.4-2.6h-2.6V8.7c0-.7.3-1.3 1.4-1.3H16V5.1c-.2 0-1.1-.1-2-.1-2 0-3.4 1.2-3.4 3.4v1.9H8.4v2.6h2.2v6.6z"/></svg>';
+
+function errBlock(id){return S.err?'<p class="error" id="'+id+'" role="alert">'+iErr+'<span>'+esc(S.err)+'</span></p>':''}
+function msgBlock(){return S.msg?'<p class="info" role="status">'+iOk+'<span>'+esc(S.msg)+'</span></p>':''}
+
+/* ---------- views ---------- */
+function pageBehind(){
+  var b=B();
+  return '<div class="page" aria-hidden="true"><div class="p-head"><span class="wm">'+esc(b.name)+'</span><span class="signin">Sign in</span></div><div class="p-hero"></div><div class="p-row"><div></div><div></div><div></div></div></div>';
+}
+function topBrand(){return '<div class="sh-top"><span class="wm">'+esc(B().name)+'</span><button class="x" data-a="close" aria-label="Close sign in">'+iX+'</button></div>'}
+function topMuse(back){
+  return '<div class="sh-top"><button class="back" data-a="'+(back||'toS01')+'">'+iBack+' '+esc(B().name)+' sign-in</button><span class="wm">Muse</span></div>';
+}
+function via(){return '<div class="via"><b>M</b>Signing in to '+esc(B().name)+'</div>'}
+function sheet(inner,muse){
+  return pageBehind()+'<div class="scrim"></div><section class="sheet '+(muse?'muse-sheet':'')+'" aria-label="Sign in">'+inner+'</section>';
+}
+function badge(t){return '<span class="rvbadge rv">'+esc(t)+'</span>'}
+
+function vS01(){
+  var b=B().name;
+  return sheet(topBrand()+
+  '<div class="sh-body"><h1 tabindex="-1" id="h">Sign In or Create an account</h1>'+
+  '<p class="sub">Enter your email address and we\'ll verify it for you.</p>'+
+  '<label class="f" for="em">Email</label>'+
+  '<input class="in" id="em" type="email" autocomplete="email" value="'+esc(S.email)+'" '+(S.err?'aria-invalid="true" aria-describedby="e1"':'')+'>'+errBlock('e1')+
+  '<button class="btn primary" data-a="emailContinue">CONTINUE</button>'+
+  '<div class="or"><span>or use one of these options</span></div>'+
+  '<div class="social"><button data-a="social" aria-label="Continue with Google">'+iG+'</button><button data-a="social" aria-label="Continue with Facebook">'+iF+'</button></div>'+
+  '<button class="btn muse" data-a="muse">Login with Muse</button>'+
+  '<p class="fine">Use your Muse account to sign in to '+esc(b)+'.</p></div>');
+}
+function vS02(){
+  var b=B().name;
+  return sheet(topMuse('toS01')+
+  '<div class="sh-body">'+via()+'<h1 tabindex="-1" id="h">Sign in to '+esc(b)+' with Muse</h1>'+
+  '<p class="sub">We\'ll text you a code to confirm it\'s you.</p>'+
+  '<label class="f" for="mn">Mobile number</label>'+
+  '<input class="in" id="mn" type="tel" inputmode="tel" autocomplete="tel" value="'+esc(S.number)+'" '+(S.err?'aria-invalid="true" aria-describedby="e2 h2"':'aria-describedby="h2"')+'>'+
+  '<p class="hint" id="h2">Enter the mobile number you use with Muse. Include your country code, for example +971.</p>'+errBlock('e2')+
+  '<button class="btn primary" data-a="send" '+(S.busy?'disabled':'')+'>'+(S.busy==='sending'?'Sending code…':'Send code')+'</button>'+
+  '<button class="btn ghost" data-a="toS01">Back to '+esc(b)+' sign-in</button></div>',true);
+}
+function otpBoxes(){
+  var h='',c=(S.code||'').replace(/\D/g,'').slice(0,6);
+  for(var i=0;i<6;i++){
+    h+='<input class="otp-box" '+(i===0?'id="cd" autocomplete="one-time-code" ':'id="cd'+i+'" ')+'data-otp="'+i+'" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit '+(i+1)+' of 6" value="'+(c[i]||'')+'" '+(S.err?'aria-invalid="true" aria-describedby="e3 h3"':'aria-describedby="h3"')+'>';
+  }
+  return h;
+}
+function vS03(){
+  var b=B().name;
+  return sheet(topMuse('toS01')+
+  '<div class="sh-body">'+via()+'<h1 tabindex="-1" id="h">Enter your code</h1>'+
+  '<p class="sub">We sent a code to <strong>'+esc(S.number||DEMO.num)+'</strong>. <button class="lnk" data-a="changeNum">Change number</button></p>'+
+  '<label class="f" for="cd" id="cdl">Code</label>'+
+  '<div class="otp" role="group" aria-label="6-digit code">'+otpBoxes()+'</div>'+
+  '<p class="hint" id="h3">Enter the 6-digit code we sent you. You can paste it into any box.</p>'+errBlock('e3')+msgBlock()+
+  '<button class="btn primary" data-a="verify" '+(S.busy?'disabled':'')+'>'+(S.busy==='checking'?'Checking…':'Continue')+'</button>'+
+  '<details class="help" '+(S.helpOpen?'open':'')+'><summary data-a="toggleHelp">Didn\'t receive a code?</summary>'+
+  '<p>Check that the number above is correct. Messages can take a moment to arrive.</p>'+
+  '<button class="btn line" data-a="resend">Request another code</button>'+
+  '<button class="btn ghost" data-a="changeNum">Change number</button>'+
+  '<button class="btn ghost" data-a="other">Use another '+esc(b)+' sign-in method</button></details>'+
+  '<button class="btn ghost" data-a="toS01" style="margin-top:18px">Back to '+esc(b)+' sign-in</button></div>',true);
+}
+function vS04(){
+  var b=B().name;
+  return sheet(topMuse('cancel')+
+  '<div class="sh-body center" style="padding-top:90px"><div class="spin" aria-hidden="true"></div>'+
+  '<h1 tabindex="-1" id="h" style="font-size:28px" role="status">Signing you in to '+esc(b)+'…</h1>'+
+  '<p class="sub">This usually takes a moment.</p>'+
+  '<button class="btn ghost" data-a="cancel">Back to '+esc(b)+' sign-in</button></div>',true);
+}
+function vS06(){
+  var b=B().name;
+  return sheet(topBrand()+
+  '<div class="sh-body"><h1 tabindex="-1" id="h">Set up your '+esc(b)+' account</h1>'+
+  '<p class="sub">Muse recognised you, but '+esc(b)+' needs a few more details before you can continue here.</p>'+
+  '<button class="btn primary" data-a="register">Continue to registration</button>'+
+  '<button class="btn ghost" data-a="other">Already have an account? Sign in another way</button>'+
+  '<button class="btn ghost" data-a="toS01">Back to sign-in</button></div>');
+}
+function vS07(){
+  var b=B().name;
+  return sheet(topBrand()+
+  '<div class="sh-body"><h1 tabindex="-1" id="h">We couldn\'t complete sign-in with Muse</h1>'+
+  '<p class="sub">You can use another '+esc(b)+' sign-in method.</p>'+
+  '<button class="btn primary" data-a="other">Use another sign-in method</button>'+
+  '<button class="btn ghost" data-a="toS01">Back to sign-in</button></div>');
+}
+function vS08(){
+  var b=B().name;
+  return sheet(topBrand()+
+  '<div class="sh-body"><h1 tabindex="-1" id="h">We couldn\'t finish signing you in to '+esc(b)+'</h1>'+
+  '<p class="sub">Please try again.</p>'+
+  '<button class="btn primary" data-a="retry">Try again</button>'+
+  '<button class="btn line" data-a="other">Use another sign-in method</button>'+
+  '<button class="btn ghost" data-a="toS01">Back to sign-in</button></div>');
+}
+function vS09(){
+  var b=B().name;
+  return sheet(topMuse('toS01')+
+  '<div class="sh-body">'+badge('Exploration — proposed shared-device design, not confirmed scope')+
+  '<div class="avatar" aria-hidden="true">E</div><h1 tabindex="-1" id="h">Continue to '+esc(b)+' as Erwin?</h1>'+
+  '<p class="sub">This is the Muse account on this device.</p>'+
+  '<button class="btn primary" data-a="continueErwin">Continue as Erwin</button>'+
+  '<button class="btn line" data-a="diffMuse">Use a different Muse account</button>'+
+  '<button class="btn ghost" data-a="toS01">Back to sign-in</button></div>',true);
+}
+function vHandoff(kind){
+  var b=B().name;
+  var reg=kind==='S11';
+  return sheet(topBrand()+
+  '<div class="sh-body">'+(S.disc==='found'&&!reg?badge('Email recognised in the system → existing sign-in'):'')+(S.disc==='new'&&reg?badge('No account found for this email → account creation journey'):'')+'<h1 tabindex="-1" id="h">'+(reg?'Create an account':'Sign in')+'</h1><p class="sub">'+(reg?'Register with '+esc(b)+'.':'Use your usual '+esc(b)+' sign-in.')+'</p>'+
+  '<div class="handoff"><b>'+(reg?'Existing '+esc(b)+' registration continues here':'Existing '+esc(b)+' sign-in continues here')+'</b>'+
+  (reg?'The supplied registration design replaces this panel. What happens after registration is still an open product question, so the prototype stops here and does not show a signed-in account.':'The supplied sign-in design replaces this panel. This prototype stops at the handoff.')+'</div>'+
+  '<button class="btn ghost" data-a="toS01" style="margin-top:20px">Back to sign-in</button></div>');
+}
+function vS05(){
+  var b=B().name;
+  return '<div class="page"><div class="p-head"><span class="wm">'+esc(b)+'</span><span style="font-size:13px">Erwin</span></div>'+
+  '<div class="accwrap acct"><h2 tabindex="-1" id="h">Hello, Erwin.</h2><div style="color:#66655f;font-size:14px">erwin@chalhoub.com</div>'+
+  '<div class="tabs"><span class="on">Overview</span><span>Orders</span><span>Addresses</span><span>Wishlist</span></div>'+
+  '<div class="card"><strong>Recent order</strong><small>Order #'+(S.brand==='Faces'?'FD-20418':'SW-77310')+' · Delivered</small></div>'+
+  '<div class="card"><strong>Saved details</strong><small>1 address · 1 payment method</small></div>'+
+  '<button class="btn line" data-a="signout" style="max-width:220px;margin-top:20px">Sign out</button>'+
+  '<p class="rv" style="margin-top:18px">'+badge('Prototype endpoint — the correct '+b+' account has been reached')+'</p></div></div>';
+}
+function vS12(){
+  var b=B().name;
+  return sheet(topBrand()+
+  '<div class="sh-body">'+badge('Exploration — local sign-out wording; real scope still to be agreed')+
+  '<h1 tabindex="-1" id="h">You\'ve signed out of '+esc(b)+'</h1>'+
+  '<p class="sub">This signs you out of '+esc(b)+' only.</p>'+
+  '<button class="btn primary" data-a="toS01">Back to sign-in</button></div>');
+}
+function vHOME(){
+  var b=B().name;
+  return '<div class="page"><div class="p-head"><span class="wm">'+esc(b)+'</span><button class="signin" data-a="toS01">Sign in</button></div><div class="p-hero"></div><div class="p-row"><div></div><div></div><div></div></div></div>';
+}
+
+var VIEWS={S01:vS01,S02:vS02,S03:vS03,S04:vS04,S05:vS05,S06:vS06,S07:vS07,S08:vS08,S09:vS09,S10:function(){return vHandoff('S10')},S11:function(){return vHandoff('S11')},S12:vS12,HOME:vHOME};
+
+/* ---------- render ---------- */
+function render(){
+  renderRail();
+  renderDevice();
+  renderNotes();
+  document.body.classList.toggle('participant',S.participant);
+  if(S.screen==='S04') timer=setTimeout(routeAfterProgress,1900);
+  var el=null;
+  if(focusSel) el=document.querySelector(focusSel);
+  if(!el) el=document.getElementById('h');
+  if(el&&el.focus){try{el.focus({preventScroll:true})}catch(e){}}
+}
+function renderRail(){
+  var groups=[],html='';
+  SC.forEach(function(s){ if(groups.indexOf(s.group)<0) groups.push(s.group) });
+  html+='<h1>Muse SSO</h1><p class="lede">Clickable prototype. Pick a scenario; the device resets to its starting situation.</p>';
+  groups.forEach(function(g){
+    html+='<div class="group">'+esc(g)+'</div>';
+    SC.filter(function(s){return s.group===g}).forEach(function(s){
+      html+='<button class="scn" data-sc="'+s.id+'" aria-current="'+(S.sc===s.id)+'"><span class="id">'+s.id+'</span>'+esc(s.title)+(s.tag?'<span class="tag">'+esc(s.tag)+'</span>':'')+'</button>';
+    });
+  });
+  document.getElementById('rail').innerHTML=html;
+}
+function renderDevice(){
+  var host=document.getElementById('deviceHost');
+  var v=VIEWS[S.screen]?VIEWS[S.screen]():'';
+  host.innerHTML='<div class="device '+S.device+' t-'+S.brand+'">'+
+    '<div class="chrome"><i></i><i></i><i></i><span class="url">'+esc(B().host)+'</span></div>'+
+    '<div class="viewport">'+v+'</div></div>';
+  document.getElementById('dMobile').setAttribute('aria-pressed',S.device==='mobile');
+  document.getElementById('dDesktop').setAttribute('aria-pressed',S.device==='desktop');
+}
+function renderNotes(){
+  var sc=scn(),h='';
+  h+='<h2>Participant task</h2><p class="task">“'+esc(sc.task)+'”</p>';
+  h+='<h2>Current frame</h2><p><span class="frame-id">'+esc(S.screen==='HOME'?'—':S.screen)+'</span> '+esc(STAGEHINT[S.screen]||'')+'</p>';
+  h+='<h2>Path so far</h2><div class="trail">'+S.trail.map(function(t,i){return '<span class="'+(i===S.trail.length-1?'cur':'')+'">'+t+'</span>'}).join('')+'</div>';
+  h+='<h2>What to observe</h2><p>'+esc(sc.observe)+'</p>';
+  h+='<h2>Related edge cases</h2><p>'+esc(sc.edges)+'</p>';
+  h+='<h2>Reviewer note</h2><p>'+esc(sc.notes)+'</p>';
+  if(sc.vars){
+    h+='<h2>Jump to a code situation</h2><div class="vars">'+VARS.map(function(v,i){return '<button data-var="'+i+'">'+esc(v.l)+'</button>'}).join('')+'</div>';
+    if(vhint) h+='<p style="margin-top:8px;color:var(--muted)">'+esc(vhint)+'</p>';
+  }
+  h+='<h2>Demonstration values</h2><p class="demo">Registered email <b>erwin@chalhoub.com</b> (any other email goes to account creation)<br>Mobile <b>'+esc(DEMO.num)+'</b><br>Code <b>any 6 digits</b> <span style="opacity:.8">(000000 counts as incorrect; 6-digit length is a demonstration value awaiting confirmation)</span></p>';
+  h+='<h2>Facilitator controls</h2><div class="ctl">'+
+   '<label>Brand<select id="cBrand"><option '+(S.brand==='Faces'?'selected':'')+'>Faces</option><option '+(S.brand==='Swarovski'?'selected':'')+'>Swarovski</option></select></label>'+
+   '<label class="chk"><input type="checkbox" id="cRec" '+(S.rec?'checked':'')+'> Muse recognises the customer</label>'+
+   '<label>Outcome after sign-in<select id="cOut">'+
+     [['ok','Brand account reached'],['setup','Brand setup needed'],['unresolved','Existing account unresolved'],['interrupted','Sign-in interrupted']].map(function(o){return '<option value="'+o[0]+'" '+(S.out===o[0]?'selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
+   '<label>Code behaviour<select id="cCode">'+
+     [['normal','Normal'],['expired','Code has expired'],['resendFail','Resend fails']].map(function(o){return '<option value="'+o[0]+'" '+(S.codeMode===o[0]?'selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
+   '<label class="chk"><input type="checkbox" id="cConf" '+(S.confirm?'checked':'')+'> Confirm account first (S09)</label>'+
+  '</div>';
+  if(sc.next){ h+='<button class="nextbtn" data-next="'+sc.next+'">Next scenario: '+sc.next+' — '+esc(SC.find(function(x){return x.id===sc.next}).title)+'</button>'; }
+  document.getElementById('notes').innerHTML=h;
+}
+
+/* ---------- flow logic ---------- */
+function routeAfterProgress(){
+  if(S.screen!=='S04') return;
+  var o=S.out;
+  if(o==='interrupted') go('S08');
+  else if(o==='setup') go('S06');
+  else if(o==='unresolved') go('S07');
+  else go('S05');
+}
+function validNumber(v){
+  var t=v.trim();
+  if(!/^[+]?[\d\s().-]+$/.test(t)) return false;
+  var d=t.replace(/\D/g,'').length;
+  return d>=8&&d<=15;
+}
+function act(a){
+  var b=B().name;
+  switch(a){
+    case 'close': go('HOME'); break;
+    case 'toS01': S.helpOpen=false; go('S01'); break;
+    case 'cancel': clearTimeout(timer); S.helpOpen=false; go('S01'); break;
+    case 'emailContinue':
+      var e=document.getElementById('em').value.trim(); S.email=e;
+      if(!e){S.err='Enter your email address.';render();var q=document.getElementById('em');if(q)q.focus();return}
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){S.err='Enter a valid email address.';render();var q2=document.getElementById('em');if(q2)q2.focus();return}
+      if(KNOWN.indexOf(e.toLowerCase())>=0){S.disc='found';go('S10')}
+      else{S.disc='new';go('S11')}
+      break;
+    case 'social': S.disc=null; go('S10'); break;
+    case 'register': S.disc=null; go('S11'); break;
+    case 'other': S.disc=null; go('S10'); break;
+    case 'muse':
+      if(S.rec&&S.confirm) go('S09');
+      else if(S.rec) go('S04');
+      else go('S02');
+      break;
+    case 'continueErwin': go('S04'); break;
+    case 'diffMuse': S.rec=false; go('S02'); break;
+    case 'send':
+      var n=document.getElementById('mn').value; S.number=n;
+      var msg=null;
+      if(!n.trim()) msg='Enter your mobile number.';
+      else if(!validNumber(n)) msg='Check your mobile number. Include your country code, for example +971, and use digits only.';
+      if(msg){S.err=msg;render();var m=document.getElementById('mn');if(m)m.focus();return}
+      S.busy='sending'; S.err=null; render();
+      timer=setTimeout(function(){S.code='';S.helpOpen=false;go('S03',{focus:'#cd'})},900);
+      break;
+    case 'changeNum': S.code=''; go('S02',{focus:'#mn'}); break;
+    case 'toggleHelp': break;
+    case 'resend':
+      S.code=''; S.helpOpen=true;
+      if(S.codeMode==='resendFail'){S.err='We couldn\'t request another code. Try again or return to '+b+' sign-in.';S.msg=null;render();return}
+      S.err=null; S.codeMode='normal'; S.msg='We\'ve requested another code.'; render();
+      var c=document.getElementById('cd'); if(c) c.focus();
+      break;
+    case 'verify':
+      var raw=S.code||'';
+      var digits=raw.replace(/\D/g,'');
+      var er=null;
+      if(!/^\d{6}$/.test(digits)) er='Enter the complete 6-digit code.';
+      else if(S.codeMode==='expired') er='This code has expired. Request a new code to continue.';
+      else if(digits==='000000') er='That code didn\'t work. Check it and try again.';
+      if(er){S.err=er;S.msg=null;S.helpOpen=(S.codeMode==='expired')||S.helpOpen;render();var cc=document.getElementById('cd');if(cc)cc.focus();return}
+      S.busy='checking'; S.err=null; render();
+      timer=setTimeout(function(){S.rec=true;go('S04')},900);
+      break;
+    case 'retry':
+      S.out='ok';
+      if(S.rec) go('S04'); else go('S02');
+      break;
+    case 'signout': go('S12'); break;
+  }
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(ev){
+  var t=ev.target;
+  var sc=t.closest('[data-sc]'); if(sc){start(sc.getAttribute('data-sc'));return}
+  var nx=t.closest('[data-next]'); if(nx){start(nx.getAttribute('data-next'),true);return}
+  var vr=t.closest('[data-var]'); if(vr){
+    var v=VARS[+vr.getAttribute('data-var')];
+    S.number=v.number; S.code=''; S.codeMode=v.code||'normal'; S.helpOpen=(v.l==='Missing code'||v.l==='Resend fails');
+    vhint=VARHINT[v.l]||''; go(v.screen); return;
+  }
+  var a=t.closest('[data-a]');
+  if(a){
+    if(a.getAttribute('data-a')==='toggleHelp'){ var d=a.parentElement; setTimeout(function(){S.helpOpen=d.open},0); return; }
+    act(a.getAttribute('data-a')); return;
+  }
+});
+document.addEventListener('keydown',function(ev){
+  if(ev.key!=='Enter') return;
+  var id=ev.target&&ev.target.id;
+  if(id==='em') act('emailContinue');
+  else if(id==='mn') act('send');
+  else if(ev.target&&ev.target.getAttribute&&ev.target.getAttribute('data-otp')!==null) act('verify');
+});
+document.addEventListener('input',function(ev){
+  var id=ev.target&&ev.target.id;
+  if(id==='em') S.email=ev.target.value;
+  if(id==='mn') S.number=ev.target.value;
+  var oi=ev.target&&ev.target.getAttribute&&ev.target.getAttribute('data-otp');
+  if(oi!==null&&oi!==undefined){ otpInput(+oi,ev.target); }
+});
+function otpBoxesEls(){return Array.prototype.slice.call(document.querySelectorAll('.otp-box'))}
+function otpSync(){ S.code=otpBoxesEls().map(function(b){return b.value}).join(''); }
+function otpFill(start,digits){
+  var els=otpBoxesEls(),i=start,k=0;
+  while(i<6&&k<digits.length){els[i].value=digits[k];i++;k++}
+  otpSync();
+  var f=Math.min(i,5); if(els[f]) els[f].focus();
+}
+function otpInput(idx,el){
+  var d=(el.value||'').replace(/\D/g,'');
+  if(d.length>1){ el.value=''; otpFill(idx,d.slice(0,6-idx)); return }
+  el.value=d; otpSync();
+  if(d&&idx<5){ var n=otpBoxesEls()[idx+1]; if(n) n.focus(); }
+}
+document.addEventListener('paste',function(ev){
+  var t=ev.target; if(!t||!t.getAttribute||t.getAttribute('data-otp')===null) return;
+  ev.preventDefault();
+  var txt=(ev.clipboardData||window.clipboardData).getData('text')||'';
+  var d=txt.replace(/\D/g,'').slice(0,6); if(!d) return;
+  otpBoxesEls().forEach(function(b){b.value=''});
+  otpFill(0,d);
+});
+document.addEventListener('keydown',function(ev){
+  var t=ev.target; if(!t||!t.getAttribute) return;
+  var oi=t.getAttribute('data-otp'); if(oi===null) return;
+  var i=+oi,els=otpBoxesEls();
+  if(ev.key==='Backspace'&&!t.value&&i>0){ ev.preventDefault(); els[i-1].value=''; otpSync(); els[i-1].focus(); }
+  else if(ev.key==='ArrowLeft'&&i>0){ ev.preventDefault(); els[i-1].focus(); }
+  else if(ev.key==='ArrowRight'&&i<5){ ev.preventDefault(); els[i+1].focus(); }
+});
+document.addEventListener('change',function(ev){
+  var id=ev.target&&ev.target.id;
+  if(id==='cBrand'){S.brand=ev.target.value;render()}
+  else if(id==='cRec'){S.rec=ev.target.checked;renderNotes()}
+  else if(id==='cOut'){S.out=ev.target.value;renderNotes()}
+  else if(id==='cCode'){S.codeMode=ev.target.value;renderNotes()}
+  else if(id==='cConf'){S.confirm=ev.target.checked;renderNotes()}
+});
+document.getElementById('dMobile').onclick=function(){S.device='mobile';renderDevice();document.getElementById('dMobile').setAttribute('aria-pressed','true');document.getElementById('dDesktop').setAttribute('aria-pressed','false')};
+document.getElementById('dDesktop').onclick=function(){S.device='desktop';renderDevice();document.getElementById('dMobile').setAttribute('aria-pressed','false');document.getElementById('dDesktop').setAttribute('aria-pressed','true')};
+document.getElementById('restart').onclick=function(){start(S.sc)};
+document.getElementById('pview').onclick=function(){S.participant=true;document.body.classList.add('participant')};
+document.getElementById('exitP').onclick=function(){S.participant=false;document.body.classList.remove('participant')};
+document.addEventListener('keydown',function(ev){ if(ev.key==='Escape'&&S.participant){S.participant=false;document.body.classList.remove('participant')} });
+
+if(window.matchMedia&&window.matchMedia('(max-width:760px)').matches) S.device='mobile';
+start('P01');
+})();
+</script>
+</body>
+</html>
