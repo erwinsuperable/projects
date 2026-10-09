@@ -1,2 +1,2 @@
 # projects
-repository of the stuff that I am building
+Erwin's repository of projects that are being built
