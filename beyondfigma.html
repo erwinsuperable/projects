@@ -1801,6 +1801,33 @@ html.header-scrolled body::before {
 .author__signoff { margin: var(--s-4) 0 0; font-size: var(--fs-small); font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
 .author__byline { margin-top: var(--s-6); }
 .author__byline .author__role { margin-bottom: 0; }
+
+/* ---------- progressive blur at the bottom of the screen ---------- */
+.edge-blur {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; pointer-events: none;
+  height: calc(120px + env(safe-area-inset-bottom, 0px));
+}
+.edge-blur__layer {
+  position: absolute; inset: 0;
+  -webkit-backdrop-filter: blur(var(--b)); backdrop-filter: blur(var(--b));
+  --s: calc(var(--i) * 12.5%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent var(--s), #000 calc(var(--s) + 12.5%), #000 calc(var(--s) + 25%), transparent calc(var(--s) + 37.5%));
+          mask-image: linear-gradient(to bottom, transparent var(--s), #000 calc(var(--s) + 12.5%), #000 calc(var(--s) + 25%), transparent calc(var(--s) + 37.5%));
+}
+.edge-blur__layer:last-child {
+  -webkit-mask-image: linear-gradient(to bottom, transparent var(--s), #000 calc(var(--s) + 12.5%));
+          mask-image: linear-gradient(to bottom, transparent var(--s), #000 calc(var(--s) + 12.5%));
+}
+.edge-blur::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--canvas) 35%, transparent) 70%, color-mix(in srgb, var(--canvas) 65%, transparent) 100%);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .edge-blur__layer { display: none; }
+}
+@media print { .edge-blur { display: none; } }
+/* keep the contents navigation sharp: it sits above the blur layer */
+.reading__toc .toc { z-index: 45; }
 </style>
 </head>
 <body>
@@ -2078,5 +2105,6 @@ react/cjs/react-jsx-runtime.production.js:
    *)
 */
 </script>
+<div class="edge-blur" aria-hidden="true"><div class="edge-blur__layer" style="--b:0.5px;--i:0"></div><div class="edge-blur__layer" style="--b:1px;--i:1"></div><div class="edge-blur__layer" style="--b:2px;--i:2"></div><div class="edge-blur__layer" style="--b:4px;--i:3"></div><div class="edge-blur__layer" style="--b:8px;--i:4"></div><div class="edge-blur__layer" style="--b:16px;--i:5"></div></div>
 </body>
 </html>
