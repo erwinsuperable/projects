@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MUSE OneID SSO – Demo prototype</title>
+<title>MUSE OneID SSO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Marcellus&display=swap" rel="stylesheet">
@@ -360,7 +360,7 @@ const LOOKUP_LABEL = {
 };
 const OFFER = {
   NEW_CUSTOMER:{ title:'New here? Create your MUSE OneID', body:'Your details are verified. Create a MUSE OneID to shop at FACES and every MUSE brand with one sign in, and enjoy your MUSE benefits wherever you shop.', top:'', primary:'Create MUSE OneID', primaryBusy:'', secondary:'Create a FACES account only', legal:'By continuing, you agree to our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' },
-  FACES_ONLY:{ title:'Upgrade your FACES account to MUSE OneID', body:'Welcome back. Turn your FACES account into a MUSE OneID to sign in to every MUSE brand with the same details, and join MUSE loyalty to earn and redeem points wherever you shop.', top:'', primary:'Upgrade to MUSE OneID', primaryBusy:'Upgrading…', secondary:'Maybe later', legal:'By upgrading, you agree to share your details across MUSE brands under our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' },
+  FACES_ONLY:{ greet:true, title:'Upgrade your FACES account to MUSE OneID', body:'Turn your FACES account into a MUSE OneID to sign in to every MUSE brand with the same details, and join MUSE loyalty to earn and redeem points wherever you shop.', top:'', primary:'Upgrade to MUSE OneID', primaryBusy:'Upgrading…', secondary:'Maybe later', legal:'By upgrading, you agree to share your details across MUSE brands under our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' },
   MUSE_ONLY:{ title:'Use your MUSE OneID at FACES?', body:'Your MUSE OneID is verified. Continue to shop at FACES with the same sign in, with no new account to create.', top:'', primary:'Continue to FACES', primaryBusy:'Connecting…', secondary:'Not now', legal:'By continuing, you agree to share your MUSE OneID details with FACES under our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' },
   FACES_AND_MUSE:{ title:'Connect FACES to your MUSE OneID?', body:'We found your FACES account and your MUSE OneID. Connect them to sign in to all MUSE brands with one account.', top:'', primary:'Connect accounts', primaryBusy:'Connecting…', secondary:'Maybe later', legal:'By connecting, you agree to share your details across MUSE brands under our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' }
 };
@@ -547,7 +547,7 @@ function scrOffer(){
   <div class="scroll">
     ${toolbar()}
     <div class="picto"><img src="${PICTO}" width="150" height="137" alt=""></div>
-    <div style="padding:12px 16px 24px;display:flex;flex-direction:column;gap:8px"><h1 class="t-title" style="color:var(--navy)">${o.title}</h1><p class="p-md" style="color:var(--ink2)">${o.body}</p></div>
+    <div style="padding:12px 16px 24px;display:flex;flex-direction:column;gap:8px">${o.greet ? `<p class="p-md" style="color:var(--ink2)">Welcome back, <strong style="font-weight:600;color:var(--green)">${esc(PERSONAS[S.resolved].name)}</strong></p>` : ''}<h1 class="t-title" style="color:var(--navy)">${o.title}</h1><p class="p-md" style="color:var(--ink2)">${o.body}</p>${o.greet ? `<div class="detail beige" style="margin-top:8px"><span class="who" aria-label="Signed in as">${esc(S.identity)}</span><button class="link-u" type="button" data-act="change">Change</button></div>` : ''}</div>
     ${usp()}
     <div class="cta-foot">
       ${o.top ? `<p class="cap-md">${o.top}</p>` : ''}
