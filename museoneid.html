@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MUSE OneID SSO – Demo prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Geist:wght@300;400;500&family=Poppins:wght@400;500&family=Marcellus&display=swap" rel="stylesheet">
+<style>
+/* ---------- Presenter canvas tokens (theme-aware) ---------- */
+:root{
+  --c-bg:#e7e5df; --c-panel:#ffffff; --c-text:#1d2420; --c-muted:#6b706c; --c-line:#e3e1db; --c-accent:#163b31; --c-accent-soft:#e8efec; --c-chip:#f3f2ee;
+  color-scheme: light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --c-bg:#141716; --c-panel:#1f2321; --c-text:#ecebe6; --c-muted:#a3a8a4; --c-line:#323734; --c-accent:#8fc1ae; --c-accent-soft:#25302c; --c-chip:#2a2f2c; color-scheme:dark; }
+}
+:root[data-theme="dark"]{ --c-bg:#141716; --c-panel:#1f2321; --c-text:#ecebe6; --c-muted:#a3a8a4; --c-line:#323734; --c-accent:#8fc1ae; --c-accent-soft:#25302c; --c-chip:#2a2f2c; color-scheme:dark; }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); height:100%; }
+*,*::before,*::after{ box-sizing:border-box; }
+body{ margin:0; height:100%; background:var(--c-bg); color:var(--c-text); font-family:Inter, system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+button{ font:inherit; color:inherit; }
+
+/* ---------- Layout ---------- */
+.layout{ height:100%; display:grid; grid-template-columns:1fr 320px; }
+.stage{ display:flex; align-items:center; justify-content:center; padding:24px; min-width:0; overflow:hidden; }
+.holder{ position:relative; }
+.frame{ position:absolute; top:0; left:0; width:390px; height:844px; transform-origin:top left; border-radius:48px; overflow:hidden; background:#fbfbf9; box-shadow:0 0 0 10px #0e0f0f, 0 0 0 11px #3a3c3b, 0 30px 80px rgba(0,0,0,.35); display:flex; flex-direction:column; }
+.statusbar{ height:44px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:0 22px 0 34px; background:#fbfbf9; color:#000; font:590 17px/22px -apple-system, "SF Pro Text", system-ui, sans-serif; position:relative; z-index:5; }
+.statusbar.on-home{ background:#f6f6f6; }
+.viewport{ position:relative; flex:1; overflow:hidden; background:#fbfbf9; }
+
+/* ---------- Presenter panel ---------- */
+.panel{ background:var(--c-panel); border-left:1px solid var(--c-line); display:flex; flex-direction:column; gap:20px; padding:24px 20px; overflow:auto; }
+.panel h2{ margin:0; font:600 17px/24px Inter, sans-serif; }
+.panel .sub{ margin:2px 0 0; font:400 13px/18px Inter, sans-serif; color:var(--c-muted); }
+.plist{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; }
+.pbtn{ width:100%; text-align:left; display:grid; grid-template-columns:28px 1fr; gap:10px; padding:12px; border-radius:10px; border:1px solid var(--c-line); background:transparent; cursor:pointer; transition:background .15s, border-color .15s; }
+.pbtn:hover{ background:var(--c-chip); }
+.pbtn[aria-pressed="true"]{ border-color:var(--c-accent); background:var(--c-accent-soft); }
+.pnum{ width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font:600 13px/1 Inter; background:var(--c-chip); color:var(--c-text); }
+.pbtn[aria-pressed="true"] .pnum{ background:var(--c-accent); color:var(--c-panel); }
+.pname{ font:500 14px/20px Inter; }
+.pmeta{ font:400 12px/17px Inter; color:var(--c-muted); }
+.pgroup{ display:flex; flex-direction:column; gap:8px; }
+.plabel{ font:500 13px/18px Inter; color:var(--c-muted); }
+.pselect{ width:100%; padding:9px 10px; border-radius:8px; border:1px solid var(--c-line); background:var(--c-panel); color:var(--c-text); font:400 14px Inter; }
+.now{ border-radius:10px; background:var(--c-chip); padding:12px; display:flex; flex-direction:column; gap:6px; font:400 13px/18px Inter; }
+.now b{ font-weight:500; }
+.pctrl{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.cbtn{ padding:9px 8px; border-radius:8px; border:1px solid var(--c-line); background:transparent; cursor:pointer; font:500 13px Inter; }
+.cbtn:hover:not(:disabled){ background:var(--c-chip); }
+.cbtn:disabled{ opacity:.4; cursor:default; }
+.cbtn.primary{ background:var(--c-accent); color:var(--c-panel); border-color:var(--c-accent); }
+.cbtn.primary:hover:not(:disabled){ background:var(--c-accent); filter:brightness(1.15); }
+.fills{ display:flex; flex-wrap:wrap; gap:6px; }
+.fill{ display:inline-flex; align-items:center; padding:5px 10px; border-radius:999px; border:1px solid var(--c-line); background:transparent; cursor:pointer; color:var(--c-text); max-width:100%; }
+.fill:hover{ background:var(--c-chip); }
+.fill code{ font:500 11px/1.3 ui-monospace, Menlo, monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.hint{ font:400 12px/17px Inter; color:var(--c-muted); margin:0; }
+.fab{ display:none; }
+.pclose{ display:none; }
+
+/* ---------- Product UI tokens (Figma, light only) ---------- */
+.frame{ --green:#163b31; --green-h:#1f4b3f; --green-p:#0f2c24; --green-load:#468a75; --gold:#a89e72; --gold-f:#9b905f; --bg:#fbfbf9; --beige:#f9f6ee; --ink:#1a1a1a; --ink2:#212121; --navy:#172039; --muted:#717179; --line:#e4e4e7; --serif: Optima, "Optima Nova", Marcellus, "Palatino Linotype", serif; color:var(--ink); }
+.screen{ position:absolute; inset:0; display:flex; flex-direction:column; background:var(--bg); animation:fadeIn .24s ease both; }
+.screen.leaving{ animation:fadeOut .16s ease both; pointer-events:none; }
+@keyframes fadeIn{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:none; } }
+@keyframes fadeOut{ to{ opacity:0; } }
+.scroll{ flex:1; overflow-y:auto; overflow-x:hidden; position:relative; scrollbar-width:none; }
+.scroll::-webkit-scrollbar{ display:none; }
+
+.t-title{ font-family:var(--serif); font-weight:600; font-size:20px; line-height:28px; margin:0; }
+.p-md{ font:300 16px/24px Inter, sans-serif; margin:0; }
+.p-sm{ font:300 14px/20px Inter, sans-serif; margin:0; }
+.l-lg{ font:500 16px/24px Inter, sans-serif; margin:0; }
+.cap-md{ font:300 12px/14px Inter, sans-serif; margin:0; color:var(--navy); }
+.cap-sm{ font:300 10px/12px Inter, sans-serif; margin:0; color:var(--muted); }
+
+/* toolbar */
+.toolbar{ position:sticky; top:0; z-index:3; padding:8px 16px; background:linear-gradient(0deg, rgba(251,251,249,0) 0%, rgba(251,251,249,.46) 46%, #fbfbf9 100%); }
+.back{ width:44px; height:44px; border-radius:50%; border:0; cursor:pointer; display:grid; place-items:center; background:rgba(255,255,255,.72); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); box-shadow:1.25px 0 0 -.75px #d0d0d0, -1.25px 0 0 -.75px #d0d0d0, 0 0 0 .5px #e8e8e8, 0 8px 15px rgba(0,0,0,.02); transition:background .15s, transform .1s; }
+.back:hover{ background:#fff; }
+.back:active{ transform:scale(.95); }
+
+/* buttons */
+.btn{ position:relative; width:100%; min-height:48px; border:0; border-radius:4px; padding:12px 16px; background:var(--green); color:#fff; font:500 16px/24px Geist, Inter, sans-serif; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:background .15s, opacity .15s, transform .08s; }
+.btn:hover:not(:disabled){ background:var(--green-h); }
+.btn:active:not(:disabled){ background:var(--green-p); transform:scale(.995); }
+.btn:disabled{ opacity:.45; cursor:default; }
+.btn.loading{ background:var(--green-load); opacity:1; cursor:progress; }
+.btn.ok{ background:var(--green); opacity:1; }
+.btn.ghost{ background:transparent; color:#18181b; border:1px solid #a1a1a9; }
+.btn.ghost:hover:not(:disabled){ background:rgba(22,59,49,.04); border-color:#717179; }
+.btn.ghost:active:not(:disabled){ background:rgba(22,59,49,.08); }
+.spin{ width:16px; height:16px; border-radius:50%; border:1.6px solid rgba(255,255,255,.35); border-top-color:#fff; animation:spin .8s linear infinite; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+:where(.frame) :focus-visible{ outline:2px solid var(--gold-f); outline-offset:2px; }
+
+/* text field */
+.field{ width:100%; height:48px; border:1px solid var(--gold); border-radius:4px; background:transparent; padding:12px 16px; font:400 16px/24px Inter, sans-serif; color:#18181b; outline:none; transition:border-color .15s, box-shadow .15s; }
+.field::placeholder{ color:var(--muted); }
+.field:hover{ border-color:var(--gold-f); }
+.field:focus{ border-color:var(--gold-f); box-shadow:inset 0 0 0 1px var(--gold-f); }
+.field.err{ border-color:#b42318; box-shadow:inset 0 0 0 1px #b42318; }
+.field-msg{ font:300 14px/18px Inter; color:#b42318; margin:0; align-self:flex-start; }
+select.field{ appearance:none; -webkit-appearance:none; padding-right:30px; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23717179' stroke-width='1.4' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center; }
+select.field.empty{ color:var(--muted); }
+
+/* sign in */
+.sec{ display:flex; flex-direction:column; gap:16px; padding:16px; }
+.igroup{ display:flex; flex-direction:column; gap:8px; }
+.divider{ display:flex; align-items:center; gap:16px; }
+.divider::before,.divider::after{ content:""; flex:1; height:1px; background:var(--line); }
+.divider span{ font:300 16px/24px Inter; color:var(--navy); }
+.social{ position:relative; width:358px; height:48px; margin:0 auto; }
+.social svg{ display:block; }
+.social button{ position:absolute; top:0; width:48px; height:48px; border-radius:50%; border:0; background:transparent; cursor:pointer; transition:background .15s; }
+.social button:hover{ background:rgba(0,0,0,.04); }
+.help{ display:flex; flex-direction:column; gap:8px; }
+.help-toggle{ display:flex; align-items:center; gap:8px; border:0; background:none; padding:0; cursor:pointer; font:500 16px/24px Inter; color:var(--ink2); }
+.help-toggle svg{ transition:transform .2s; }
+.help-toggle[aria-expanded="false"] svg{ transform:rotate(180deg); }
+.help-link{ border:0; background:none; padding:0; text-align:left; font:300 16px/24px Inter; color:var(--ink2); cursor:pointer; }
+.help-link:hover{ text-decoration:underline; }
+.recap{ padding:8px 0; }
+.sticky-cta{ position:absolute; left:0; right:0; bottom:0; z-index:4; padding:24px 16px 32px; background:linear-gradient(180deg, rgba(251,251,249,0) 0%, rgba(240,240,238,.92) 40%, #ededeb 100%); transform:translateY(100%); opacity:0; transition:transform .25s ease, opacity .25s ease; pointer-events:none; }
+.sticky-cta.show{ transform:none; opacity:1; pointer-events:auto; }
+
+/* MUSE USP */
+.usp{ background:var(--beige); padding:16px; display:flex; flex-direction:column; gap:32px; }
+.usp-head{ display:grid; grid-template-columns:56px 1fr; gap:16px; align-items:center; }
+.usp-head .t{ font-family:var(--serif); font-weight:600; font-size:20px; line-height:28px; color:var(--ink2); }
+.marquee{ overflow:hidden; height:40px; margin-top:8px; -webkit-mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image:linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+.track{ display:flex; width:max-content; height:40px; animation:marquee 26s linear infinite; }
+.marquee:hover .track{ animation-play-state:paused; }
+.set{ display:flex; align-items:center; gap:24px; padding-right:24px; }
+.set svg{ flex:none; display:block; }
+@keyframes marquee{ to{ transform:translateX(-50%); } }
+@media (prefers-reduced-motion: reduce){ .track{ animation:none; } .screen{ animation:none; } .sticky-cta{ transition:none; } }
+.usp-list{ display:flex; flex-direction:column; gap:16px; }
+.usp-item{ display:grid; grid-template-columns:40px 1fr; gap:16px; }
+.usp-item .h{ font:500 16px/24px Inter; color:var(--green); }
+.usp-rule{ height:1px; background:rgba(23,32,57,.1); }
+.foot{ padding:16px; display:flex; flex-direction:column; gap:8px; text-align:center; }
+.foot p{ font:300 12px/14px Inter; color:var(--navy); margin:0; }
+.foot a{ color:inherit; text-decoration:none; }
+.foot a:hover{ text-decoration:underline; }
+
+/* OTP */
+.detail{ display:flex; align-items:center; gap:8px; padding:16px; border-radius:8px; background:#f4f4f5; color:var(--ink2); }
+.detail.beige{ background:var(--beige); }
+.detail .who{ flex:1; min-width:0; font:300 16px/24px Inter; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.link-u{ border:0; background:none; padding:0; cursor:pointer; font:500 16px/24px Geist, Inter; color:var(--ink2); text-decoration:underline; text-underline-offset:3px; }
+.link-u:hover{ color:var(--green); }
+.otp-row{ display:flex; gap:8px; }
+.otp-box{ flex:1 1 0; min-width:0; height:56px; border:1px solid var(--gold); border-radius:2px; background:transparent; text-align:center; font:400 16px/24px Inter; color:#18181b; outline:none; caret-color:var(--gold-f); transition:border-color .15s, box-shadow .15s, color .15s; }
+.otp-box:focus{ border-color:var(--gold-f); box-shadow:inset 0 0 0 1px var(--gold-f); }
+.otp-box.err{ border-color:#b42318; box-shadow:inset 0 0 0 1px #b42318; }
+.otp.verifying .otp-box{ border-color:#d4d4d8; color:#71717a; box-shadow:none; }
+.otp.verifying .resend{ display:none; }
+.resend{ display:flex; gap:8px; align-items:center; font:300 16px/24px Inter; color:var(--ink2); }
+.resend button{ border:0; background:none; padding:0; cursor:pointer; font:600 16px/24px Inter; color:#18181b; }
+.resend button:hover{ text-decoration:underline; }
+.resend .sent{ font:500 16px/24px Inter; color:var(--green); }
+.check{ display:flex; gap:8px; align-items:flex-start; cursor:pointer; font:300 16px/24px Inter; color:var(--ink2); user-select:none; }
+.check input{ position:absolute; opacity:0; width:1px; height:1px; }
+.check .box{ flex:none; width:24px; height:24px; display:grid; place-items:center; }
+.check .box i{ width:16px; height:16px; border:2px solid #18181b; border-radius:2px; display:grid; place-items:center; transition:background .15s, border-color .15s; }
+.check input:checked + .box i{ background:var(--green); border-color:var(--green); }
+.check input:checked + .box i::after{ content:""; width:4px; height:8px; border:solid #fff; border-width:0 2px 2px 0; transform:translateY(-1px) rotate(45deg); }
+.check input:focus-visible + .box i{ outline:2px solid var(--gold-f); outline-offset:2px; }
+.otp.verifying .check .box i{ border-color:#d4d4d8; }
+
+/* enrol / offer */
+.picto{ height:159px; display:flex; align-items:center; justify-content:center; padding-top:4px; }
+.cta-foot{ position:sticky; bottom:0; z-index:3; display:flex; flex-direction:column; gap:8px; align-items:center; padding:24px 16px 32px; background:linear-gradient(180deg, rgba(251,251,249,0) 0%, rgba(251,251,249,.94) 22px, #fbfbf9 40px); }
+.cta-foot .cap-md{ text-align:center; }
+.cta-foot.left .cap-md{ text-align:left; align-self:stretch; }
+.cta-foot .check{ align-self:stretch; font-size:14px; line-height:20px; }
+
+/* registration */
+.row2{ display:grid; grid-template-columns:90px 1fr; gap:8px; align-items:start; }
+.fwrap{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+
+/* toast */
+.toast{ position:absolute; left:16px; right:16px; bottom:24px; z-index:20; min-height:56px; display:flex; align-items:center; gap:12px; padding:8px 8px 8px 20px; border-radius:4px; background:#1f3d33; color:#fff; box-shadow:0 10px 30px rgba(0,0,0,.18); transform:translateY(16px); opacity:0; transition:transform .25s ease, opacity .25s ease; pointer-events:none; }
+.toast.show{ transform:none; opacity:1; pointer-events:auto; }
+.toast p{ flex:1; margin:0; font:300 15px/20px Inter; color:rgba(255,255,255,.88); }
+.toast button{ border:0; background:none; color:#fff; font:600 15px/20px Inter; padding:10px 12px; cursor:pointer; border-radius:4px; }
+.toast button:hover{ background:rgba(255,255,255,.08); }
+
+/* ---------- FACES homepage ---------- */
+.home{ font-family:Poppins, sans-serif; background:#fff; }
+.urlbar{ background:#f6f6f6; padding:4px 12px 10px; }
+.urlpill{ position:relative; height:40px; border-radius:12px; background:#e9e9eb; display:flex; align-items:center; justify-content:center; gap:6px; font:400 15px/1 -apple-system, system-ui, sans-serif; color:#111; overflow:hidden; }
+.urlpill .aa{ position:absolute; left:14px; font-size:14px; font-weight:600; }
+.urlpill .rl{ position:absolute; right:14px; }
+.urlpill .prog{ position:absolute; left:0; bottom:0; height:2px; width:0; background:#0a84ff; }
+.urlpill .prog.run{ animation:prog .7s ease-out forwards; }
+@keyframes prog{ 0%{ width:0; opacity:1;} 85%{ width:100%; opacity:1;} 100%{ width:100%; opacity:0;} }
+.topban{ height:36px; background:#003c31; color:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 12px; font:400 12px/1 Poppins; }
+.fhead{ position:relative; padding:14px 20px 0; background:#fff; }
+.fhead-row{ display:flex; align-items:center; justify-content:space-between; height:68px; }
+.icons{ position:relative; width:108px; height:40px; }
+.icons button{ position:absolute; top:0; height:40px; width:40px; border:0; background:transparent; cursor:pointer; border-radius:50%; transition:background .15s; }
+.icons button:hover{ background:rgba(0,0,0,.05); }
+.icons .dot{ position:absolute; left:28px; top:6px; width:8px; height:8px; border-radius:50%; background:#2e7d5b; box-shadow:0 0 0 2px #fff; }
+.nav{ display:flex; gap:20px; overflow-x:auto; height:56px; align-items:center; scrollbar-width:none; white-space:nowrap; font:400 14px/24px Poppins; color:#262626; }
+.nav::-webkit-scrollbar{ display:none; }
+.nav span:first-child{ color:#b38b4d; }
+.menu{ position:absolute; right:12px; top:62px; width:280px; background:#fff; border-radius:8px; box-shadow:0 12px 32px rgba(0,0,0,.14), 0 0 0 1px rgba(0,0,0,.04); z-index:10; padding:0 16px; animation:fadeIn .18s ease both; }
+.menu button{ width:100%; height:56px; display:flex; align-items:center; gap:10px; border:0; border-bottom:1px solid #eee; background:none; cursor:pointer; font:400 16px/24px Poppins; color:#262626; text-align:left; }
+.menu button:last-child{ border-bottom:0; }
+.menu button:hover span{ text-decoration:underline; }
+.menu .greet{ font:500 14px/20px Poppins; color:#003c31; padding:14px 0 6px; border-bottom:1px solid #eee; }
+.hero{ margin:16px; border-radius:4px; overflow:hidden; background:#f3ead9; }
+.hero-photo{ height:287px; position:relative; overflow:hidden; background:#ead0c6; }
+.hero-photo svg{ display:block; width:100%; height:100%; }
+.hero-body{ padding:16px 24px 20px; text-align:center; display:flex; flex-direction:column; gap:8px; align-items:center; }
+.hero-body h3{ margin:0; font:500 18px/26px Marcellus, serif; color:#003c31; }
+.hero-body p{ margin:0; font:400 12px/18px Poppins; color:#3a3a3a; }
+.obtn{ margin-top:6px; padding:8px 28px; border:1px solid #003c31; background:transparent; color:#003c31; font:500 12px/18px Poppins; letter-spacing:.04em; cursor:pointer; }
+.chips{ display:flex; gap:8px; overflow-x:auto; padding:0 16px; scrollbar-width:none; }
+.chips::-webkit-scrollbar{ display:none; }
+.chips span{ flex:none; padding:6px 18px; border-radius:16px; background:#f3ead9; font:400 12px/20px Poppins; color:#262626; }
+.shead{ display:flex; justify-content:space-between; align-items:baseline; padding:24px 16px 12px; }
+.shead h4{ margin:0; font:400 18px/24px Marcellus, serif; color:#111; }
+.shead a{ font:500 12px Poppins; color:#111; text-decoration:underline; }
+.prods{ display:flex; gap:8px; overflow-x:auto; padding:0 16px 8px; scrollbar-width:none; }
+.prods::-webkit-scrollbar{ display:none; }
+.prod{ flex:none; width:150px; border:1px solid #eee; border-radius:4px; padding:8px; display:flex; flex-direction:column; gap:4px; }
+.badge{ align-self:flex-start; font:400 9px/14px Poppins; padding:1px 6px; background:#f4efe8; color:#7a5c2e; }
+.bottle{ height:110px; display:grid; place-items:center; }
+.bottle i{ display:block; width:46px; height:64px; border-radius:6px; background:linear-gradient(180deg,#f6d9c8,#e9b59a); position:relative; box-shadow:inset 0 0 0 1px rgba(0,0,0,.05); }
+.bottle i::before{ content:""; position:absolute; left:50%; top:-16px; width:20px; height:16px; transform:translateX(-50%); background:#2b2b2b; border-radius:2px; }
+.prod .b{ font:500 12px/16px Poppins; }
+.prod .n{ font:400 12px/16px Poppins; color:#666; }
+.prod .pr{ display:flex; justify-content:space-between; align-items:center; font:500 12px Poppins; color:#c21d2f; }
+.prod .pr span:last-child{ width:26px; height:26px; border-radius:50%; border:1px solid #003c31; display:grid; place-items:center; color:#003c31; font-size:16px; }
+.spring{ margin:0 16px; height:185px; background:linear-gradient(90deg,#f6efe2 55%, #ead9bf); display:flex; flex-direction:column; justify-content:center; padding:0 20px; }
+.spring small{ font:400 13px Poppins; color:#003c31; }
+.spring b{ font:400 24px/30px Marcellus, serif; color:#003c31; max-width:170px; }
+.ffoot{ margin-top:32px; background:#003c31; color:#fff; padding:28px 16px 32px; display:flex; flex-direction:column; gap:14px; font:400 13px/20px Poppins; }
+.ffoot .row{ display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.18); }
+.ffoot small{ opacity:.7; font-size:11px; text-align:center; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 960px){
+  .layout{ grid-template-columns:1fr; }
+  .panel{ position:fixed; z-index:50; right:12px; left:12px; bottom:calc(12px + env(safe-area-inset-bottom,0px)); max-height:78%; border:1px solid var(--c-line); border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3); transform:translateY(calc(100% + 40px)); transition:transform .25s ease; }
+  .panel.open{ transform:none; }
+  .pclose{ display:block; position:absolute; top:14px; right:14px; border:0; background:var(--c-chip); width:32px; height:32px; border-radius:50%; cursor:pointer; }
+  .fab{ display:flex; align-items:center; gap:8px; position:fixed; z-index:40; right:14px; bottom:calc(14px + env(safe-area-inset-bottom,0px)); padding:10px 14px; border-radius:24px; border:1px solid var(--c-line); background:var(--c-panel); color:var(--c-text); box-shadow:0 8px 24px rgba(0,0,0,.2); cursor:pointer; font:500 13px Inter; }
+  .fab .dotp{ width:8px; height:8px; border-radius:50%; background:var(--c-accent); }
+}
+@media (max-width: 500px){
+  .stage{ padding:0; align-items:stretch; }
+  .holder{ width:100% !important; height:100% !important; }
+  .frame{ position:relative; width:100%; height:100%; transform:none !important; border-radius:0; box-shadow:none; }
+  .statusbar{ display:none; }
+  .social{ width:100%; }
+  .social svg{ margin:0 auto; }
+  .fab{ bottom:calc(84px + env(safe-area-inset-bottom,0px)); opacity:.85; }
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <main class="stage" id="stage">
+    <div class="holder" id="holder">
+      <div class="frame" id="frame" aria-label="FACES mobile prototype">
+        <div class="statusbar" id="statusbar" aria-hidden="true">
+          <span>9:41</span>
+          <svg width="78" height="13" viewBox="0 0 78 13"><g fill="#000"><rect x="0" y="8" width="3" height="4.5" rx="1"/><rect x="5" y="5.5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9.5" rx="1"/><rect x="15" y="0.5" width="3" height="12" rx="1"/></g><path d="M31.5 3.2a9.6 9.6 0 0 1 13 0M33.6 5.6a6.6 6.6 0 0 1 8.8 0M35.8 8a3.4 3.4 0 0 1 4.4 0" stroke="#000" stroke-width="1.7" fill="none" stroke-linecap="round"/><circle cx="38" cy="10.6" r="1.4" fill="#000"/><rect x="51.5" y="0.5" width="24" height="12" rx="3.8" stroke="#000" stroke-opacity=".35" fill="none"/><rect x="53.5" y="2.5" width="20" height="8" rx="2.3" fill="#000"/><path d="M77 4.5v4" stroke="#000" stroke-opacity=".4" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </div>
+        <div class="viewport" id="viewport">
+          <div class="toast" id="toast" role="status" aria-live="polite">
+            <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <p>You are now signed in.</p>
+            <button type="button" data-act="toast-close">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <aside class="panel" id="panel" aria-label="Presenter controls">
+    <button class="pclose" type="button" data-act="panel-close" aria-label="Close presenter controls">✕</button>
+    <div>
+      <h2>Example personas</h2>
+    </div>
+    <ol class="plist" id="plist"></ol>
+    <div class="pgroup">
+      <span class="plabel">Example sign-in details</span>
+      <div class="fills">
+        <button class="fill" type="button" data-act="fill-email" title="Fill in this email"><code id="exEmail"></code></button>
+        <button class="fill" type="button" data-act="fill-phone" title="Fill in this mobile number"><code>+971 50 123 4567</code></button>
+      </div>
+      <p class="hint">Gmail and other domains are treated as new customers. @chalhoub.com and mobile numbers follow the selected journey. Any 6-digit code is accepted.</p>
+    </div>
+    <div class="now" aria-live="polite">
+      <div>Step: <b id="nowStep">Homepage</b></div>
+      <div>Lookup result: <b id="nowLookup">Not checked yet</b></div>
+    </div>
+    <div class="pctrl">
+      <button class="cbtn" type="button" data-act="p-back" id="pBack">Previous</button>
+      <button class="cbtn" type="button" data-act="p-restart">Restart</button>
+      <button class="cbtn primary" type="button" data-act="p-next">Next step</button>
+    </div>
+  </aside>
+</div>
+<button class="fab" type="button" data-act="panel-open" id="fab"><span class="dotp"></span><span id="fabText">Example personas</span></button>
+
+<script>
+/* ===================== Figma assets (exported as SVG) ===================== */
+const A = {
+facesLogo:`<svg width="143" height="40" viewBox="0 0 143 40" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FACES"><g clip-path="url(#clip0_4575_39931)"><path fill-rule="evenodd" clip-rule="evenodd" d="M45.5 19.7L45.3 20.2L50.5 20.2L50.1 19.4L45.5 19.7Z" fill="#D4B180"/><mask id="mask0_4575_39931" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24"><path d="M0 0H23.9V23.9H0V0Z" fill="white"/></mask><g mask="url(#mask0_4575_39931)"><path fill-rule="evenodd" clip-rule="evenodd" d="M22.7 17.8C22.9 17.5 23.0 17.2 23.1 16.9C23.7 15.5 23.9 14.1 23.9 12.7H21.0H20.9C20.7 13.7 20.4 14.6 19.9 15.5C19.3 16.7 18.2 18.2 16.7 19.5C13.7 22.1 9.3 23.7 4.8 19.9C0.4 15.7 2.5 11.2 3.8 8.4C5.9 4.1 11.7 1.3 15.9 2.5C18.3 3.2 19.2 4.3 19.8 5.2C20.5 6.2 20.9 7.4 21.1 8.8H23.2C23.2 8.8 23.2 8.8 23.2 8.8C22.5 6.9 21.3 4.9 19.5 3.4C16.4 0.8 13.8 0.3 13.7 0.3C8.9 -0.9 3.5 1.3 1.0 6.0C-0.4 9.1 -0.1 13.2 0.7 15.5C1.7 17.8 2.9 19.9 5.7 21.8C7.9 23.1 11.2 23.8 11.2 23.8L11.2 23.8C13.0 24.1 14.9 23.9 16.7 23.2C19.2 22.3 21.4 20.4 22.7 17.8Z" fill="#D4B180"/></g><path fill-rule="evenodd" clip-rule="evenodd" d="M98.0 12.6H96.6V16.6H103.0C101.5 16.0 99.9 14.5 98.0 12.6Z" fill="#D4B180"/><path fill-rule="evenodd" clip-rule="evenodd" d="M74.6 0.1C74.6 0.1 74.6 0.1 74.6 0.1C71.3 0.1 68.0 1.0 64.2 4.0C61.3 6.6 59.9 8.8 59.9 8.8H64.1C65.7 4.3 69.2 1.8 74.0 1.0C75.4 0.9 77.2 0.9 78.5 1.2C83.0 2.5 85.8 5.3 89.9 9.3C90.8 10.2 91.6 11.1 92.3 11.9V8.8H94.1C91.3 6.1 88.1 3.4 84.1 1.8C79.4 -0.1 74.6 0.1 74.6 0.1Z" fill="#D4B180"/><mask id="mask1_4575_39931" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="71" y="34" width="7" height="6"><path d="M71.8 34.5H77.1V39.7H71.8V34.5Z" fill="white"/></mask><g mask="url(#mask1_4575_39931)"><path fill-rule="evenodd" clip-rule="evenodd" d="M77.1 37.1C77.1 38.6 75.9 39.7 74.4 39.7C73.0 39.7 71.8 38.6 71.8 37.1C71.8 35.6 73.0 34.5 74.4 34.5C75.9 34.5 77.1 35.6 77.1 37.1Z" fill="#D4B180"/></g><path fill-rule="evenodd" clip-rule="evenodd" d="M45.5 0.1C41.5 -0.4 33.9 1.6 33.3 10.3C33.3 10.3 32.7 17.5 41.0 20.3L41.5 19.3C39.1 18.5 36.8 16.3 36.4 12.6C35.7 5.0 42.1 0.6 46.4 1.3C51.0 2.0 54.3 7.1 54.1 13.0C54.1 14.2 54.0 15.8 53.7 17.5L54.9 20.4L54.9 20.5L56.0 22.9C56.1 22.5 56.3 22.0 56.4 21.5L56.7 20.5L56.8 20.2C56.9 19.8 57.0 19.4 57.1 19.0C57.2 18.4 57.3 17.7 57.4 17.1C58.7 7.1 51.6 0.9 45.5 0.1Z" fill="#D4B180"/><path fill-rule="evenodd" clip-rule="evenodd" d="M51.4 24.0C50.1 26.3 48.3 28.8 45.7 31.3C41.5 35.3 37.3 37.0 33.2 36.9C24.2 36.5 21.1 31.3 21.1 31.3H16.9C26.1 40.7 45.1 40.3 53.5 27.7L52.0 24.0H51.4Z" fill="#D4B180"/><path fill-rule="evenodd" clip-rule="evenodd" d="M92.3 17.1L69.6 18.3C69.6 18.4 69.6 18.5 69.6 18.6V18.6C69.6 18.8 69.6 18.9 69.6 19.0C69.6 19.5 69.7 20.0 69.9 20.5L92.3 20.5V17.1Z" fill="#D4B180"/><path fill-rule="evenodd" clip-rule="evenodd" d="M65.1 18.7V18.6C65.1 18.6 65.1 18.6 65.1 18.6L57.1 19.0C57.0 19.4 56.9 19.8 56.8 20.2L56.7 20.5L65.3 20.5C65.2 20.2 65.2 19.8 65.1 19.4C65.1 19.2 65.1 18.9 65.1 18.7Z" fill="#D4B180"/><path fill-rule="evenodd" clip-rule="evenodd" d="M138.0 6.3C135.5 3.5 130.1 -0.7 122.6 0.2C118.0 1.1 113.3 4.5 113.3 10.5C113.3 13.9 115.4 16.9 118.6 18.8C117.3 17.9 116.6 16.6 116.6 14.5V14.4C116.6 13.7 116.7 12.9 117.0 12.3C117.0 12.3 117.0 12.3 117.0 12.3C117.0 12.0 116.9 11.7 116.9 11.3C116.6 7.1 119.9 3.5 124.0 2.2C126.0 1.5 131.3 0.9 135.6 5.6C139.6 10.2 139.0 16.0 138.9 18.3C138.4 23.3 137.0 27.9 131.7 32.7C127.1 36.9 121.7 37.0 118.8 36.9C109.5 35.8 107.3 31.4 107.3 31.4L102.9 31.4C104.2 33.4 108.4 36.6 114.8 37.6C114.7 37.6 114.6 37.6 114.6 37.6C114.8 37.6 115.1 37.6 115.4 37.7C116.7 37.8 118.1 37.9 119.6 37.9C119.8 37.9 119.9 37.9 120.0 37.9C126.1 37.8 135.1 36.4 140.2 27.9C146.3 17.8 140.6 9.1 138.0 6.3Z" fill="#D4B180"/><path fill-rule="evenodd" clip-rule="evenodd" d="M22.7 17.8C21.4 20.4 19.2 22.3 16.7 23.2V28.4H21.0V20.8H30.3V16.9H23.1C23.0 17.2 22.9 17.5 22.7 17.8Z" fill="#003C31"/><path fill-rule="evenodd" clip-rule="evenodd" d="M45.3 20.2L47.9 13.9L50.5 20.2H45.3ZM53.7 17.5L49.9 8.7H45.9L41.0 20.3L40.8 20.9L37.6 28.4H42.0L43.7 24.0H51.4H52.0L53.5 27.8L53.8 28.4H58.3L56.0 23.0L53.7 17.5Z" fill="#003C31"/><path fill-rule="evenodd" clip-rule="evenodd" d="M75.3 24.8C72.8 24.8 71.0 23.3 70.1 21.2C69.8 20.5 69.7 19.8 69.6 19.0C69.6 18.9 69.6 18.8 69.6 18.6V18.6C69.6 15.2 72.0 12.5 75.3 12.5C77.2 12.5 78.8 13.3 80.3 14.7L83.0 11.5C81.2 9.7 79.0 8.5 75.3 8.5C69.3 8.5 65.1 13.0 65.1 18.6V18.7C65.1 18.9 65.1 19.2 65.1 19.4C65.2 20.1 65.3 20.7 65.4 21.4C66.6 25.7 70.3 28.8 75.1 28.8C78.9 28.8 81.1 27.4 83.2 25.3L80.4 22.5C78.9 23.9 77.5 24.8 75.3 24.8Z" fill="#003C31"/><path fill-rule="evenodd" clip-rule="evenodd" d="M96.6 20.5H105.8V16.6H103.0H96.6V12.6H98.0H107.1V8.8H94.1H92.3V11.9V17.2V20.3V28.4H107.2V24.6H96.6V20.5Z" fill="#003C31"/><path fill-rule="evenodd" clip-rule="evenodd" d="M125.1 16.7C121.7 15.8 120.9 15.4 120.9 14.1V14.0C120.9 13.1 121.7 12.3 123.4 12.3C125.0 12.3 126.7 13.1 128.5 14.3L130.7 11.0C128.7 9.4 126.3 8.5 123.4 8.5C120.3 8.5 117.9 10.0 117.0 12.3C116.7 12.9 116.6 13.7 116.6 14.4V14.5C116.6 16.6 117.4 17.9 118.7 18.8C119.8 19.6 121.3 20.0 123.1 20.5C126.4 21.3 127.0 21.9 127.0 23.0V23.0C127.0 24.2 126.0 24.9 124.2 24.9C122.0 24.9 120.1 24.0 118.4 22.5L115.8 25.6C118.2 27.7 121.2 28.7 124.1 28.7C128.3 28.7 131.3 26.5 131.3 22.6V22.6C131.3 19.2 129.1 17.7 125.1 16.7Z" fill="#003C31"/><path fill-rule="evenodd" clip-rule="evenodd" d="M21.1 8.8H16.7V12.7V19.5C18.2 18.2 19.3 16.7 19.9 15.5C20.4 14.6 20.7 13.7 20.9 12.7H21.0H23.9H31.6V8.8H23.2H21.1Z" fill="#003C31"/></g><defs><clipPath id="clip0_4575_39931"><rect width="143" height="40" fill="white"/></clipPath></defs></svg>`,
+headIcons:`<svg width="108" height="40" viewBox="0 0 108 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M26.3 12.6C26.3 11.1 25.7 9.7 24.6 8.7C23.6 7.6 22.2 7.0 20.7 7.0C19.2 7.0 17.8 7.6 16.8 8.7C15.7 9.7 15.1 11.1 15.1 12.6C15.1 14.0 15.7 15.5 16.8 16.5C17.8 17.5 19.2 18.1 20.7 18.1C22.2 18.1 23.6 17.5 24.6 16.5C25.7 15.5 26.3 14.0 26.3 12.6ZM28.3 12.6C28.3 14.6 27.5 16.5 26.1 18.0C24.7 19.4 22.7 20.2 20.7 20.2C18.7 20.2 16.7 19.4 15.3 18.0C13.9 16.5 13.1 14.6 13.1 12.6C13.1 10.6 13.9 8.6 15.3 7.2C16.7 5.8 18.7 5.0 20.7 5C22.7 5 24.7 5.8 26.1 7.2C27.5 8.6 28.3 10.6 28.3 12.6Z" fill="#262626"/><path d="M20.7 23.5C27.7 23.5 33.5 29.2 33.5 36.3H31.4C31.4 30.4 26.6 25.6 20.7 25.6C14.8 25.6 10.0 30.4 10.0 36.3H8C8 29.2 13.7 23.5 20.7 23.5Z" fill="#262626"/><g clip-path="url(#clip0_4575_39958)"><path d="M97.2 10.3C97.9 10.4 98.5 11.0 98.5 11.7L99.8 32.7C99.9 33.5 99.3 34.2 98.5 34.3L98.4 34.3H77.5L77.4 34.3C76.6 34.2 76.0 33.5 76.0 32.7L77.4 11.7C77.4 10.9 78.1 10.3 78.9 10.3H97.0L97.2 10.3ZM77.9 32.5H98.0L96.8 12.1H79.1L77.9 32.5Z" fill="#262626"/><path d="M91.5 14.8V10.3C91.5 8.3 89.9 6.7 87.9 6.7C86.0 6.7 84.3 8.3 84.3 10.3V14.8C84.3 15.3 83.9 15.7 83.4 15.7C82.9 15.7 82.5 15.3 82.5 14.8V10.3C82.5 7.3 85.0 4.9 87.9 4.9C90.9 4.9 93.3 7.3 93.3 10.3V14.8C93.3 15.3 92.9 15.7 92.4 15.7C92.0 15.7 91.5 15.3 91.5 14.8Z" fill="#262626"/></g><defs><clipPath id="clip0_4575_39958"><rect width="36" height="36" fill="white" transform="translate(70 2)"/></clipPath></defs></svg>`,
+museApp:`<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MUSE"><rect width="56" height="56" rx="12" fill="#15203B"/><path d="M22.9 29.8C22.8 30.4 22.8 30.8 22.8 31.8V36.0C22.8 39.7 24.9 39.7 25.7 39.7C27.6 39.7 28.7 38.3 28.7 36.3V31.8C28.7 30.8 28.7 30.4 28.6 29.8L28.6 29.8H30.0L30.0 29.8C29.9 30.4 29.9 30.8 29.9 31.8V38.3C29.9 39.2 29.9 39.6 30.0 40.2L30.0 40.3H28.8L28.7 40.2V39.0C27.9 40.1 26.9 40.5 25.5 40.5C24.8 40.5 21.5 40.4 21.5 36.1V31.8C21.5 30.8 21.5 30.4 21.4 29.8L21.4 29.8H22.9L22.9 29.8ZM35.5 29.6C36.8 29.6 37.9 29.8 38.4 30.0L38.7 31.6L38.6 31.7C37.8 30.6 36.8 30.3 35.3 30.3C33.6 30.3 32.9 30.9 32.9 32.0C32.9 34.8 39.3 34.3 39.3 37.5C39.3 39.6 37.3 40.5 34.9 40.5C33.9 40.5 32.6 40.3 32.0 40.0L31.6 38.3L31.7 38.3C32.3 39.1 33.5 39.7 35.3 39.7C37.1 39.7 38.0 39.1 38.0 37.8C38.0 35.0 31.6 35.4 31.6 32.3C31.6 30.9 32.9 29.6 35.5 29.6ZM10.5 29.8L14.4 38.4H14.4L18.4 29.8H19.6L19.7 29.8C19.5 30.6 19.5 31.1 19.5 32.0V37.8C19.5 38.8 19.5 39.4 19.7 40.2L19.6 40.3H18.2L18.2 40.3C18.4 39.5 18.4 38.8 18.4 37.8V32.3L14.7 40.3H14.1L10.5 32.3V37.8C10.5 38.8 10.5 39.5 10.7 40.3L10.6 40.3H9.2L9.1 40.2C9.3 39.4 9.4 38.8 9.4 37.8V32.0C9.4 31.1 9.3 30.6 9.2 29.8L9.2 29.8H10.5ZM47.5 29.8L47.1 30.8C45.8 30.5 43.7 30.4 41.8 30.4V34.4C43.2 34.4 45.8 34.4 46.6 34.3L46.7 34.3L46.4 35.3C45.3 35.2 43.0 35.1 41.8 35.1V39.6C44.3 39.6 46.3 39.6 47.7 39.1L47.7 39.1L47.8 39.2L47.4 40.3H40.5L40.5 40.2C40.6 39.6 40.6 39.2 40.6 38.3V31.8C40.6 30.9 40.6 30.5 40.5 29.8L40.5 29.8H47.5V29.8Z" fill="#99BBCB"/><g clip-path="url(#clip0_4575_24828)"><path d="M15.5 18.6C15.4 18.9 15.4 19.2 15.4 19.8V23.6C15.4 25.5 14.1 27.0 12.2 27.0H11.8C11.1 27.0 9.7 26.6 9.3 26.3L9.3 24.8L9.5 24.8C9.9 25.4 10.8 26.4 12.1 26.4H12.2C13.6 26.4 14.2 25.2 14.2 23.6V19.8C14.2 19.2 14.1 18.9 14.1 18.6L14.1 18.5H15.5L15.5 18.6ZM43.8 16.5C45.7 16.5 47.2 18.0 47.2 19.8C47.2 21.7 45.7 23.2 43.8 23.2H43.1C42.8 23.2 41.7 23.1 41.0 22.3C40.3 23.1 39.2 23.2 38.9 23.2H36.4C36.1 23.2 35.0 23.1 34.3 22.3C33.6 23.1 32.5 23.2 32.2 23.2L24.4 23.2V23.6C24.4 25.5 23.1 27.0 21.2 27.0H20.9C20.1 27.0 18.7 26.6 18.3 26.3L18.3 24.8L18.5 24.8C18.9 25.4 19.8 26.4 21.2 26.4H21.2C22.6 26.4 23.2 25.2 23.2 23.6V23.2L21.0 23.2C19.1 23.2 17.6 21.7 17.6 19.8C17.6 18.0 19.1 16.5 21.0 16.5C22.9 16.5 24.4 18.0 24.4 19.8V22.6L32.1 22.6C32.5 22.6 33.7 22.7 33.8 20.5V19.8C33.8 19.2 33.7 19.0 33.6 18.6L33.7 18.5H34.8L34.9 18.6C34.8 19.0 34.8 19.2 34.8 19.8V20.4C34.8 22.7 35.9 22.6 36.8 22.6L38.8 22.6C39.3 22.6 40.5 22.7 40.5 20.5V19.8C40.5 18.0 41.9 16.5 43.8 16.5ZM35.4 25.0C35.8 25.1 36.1 25.4 36.0 25.8C36.0 26.1 35.7 26.4 35.3 26.4C35.0 26.3 34.7 26.0 34.7 25.7C34.7 25.3 35.1 25.0 35.4 25.0ZM33.2 25.0C33.6 25.1 33.8 25.4 33.8 25.8C33.8 26.1 33.5 26.4 33.1 26.4C32.7 26.3 32.4 26.0 32.5 25.7C32.5 25.3 32.8 25.0 33.2 25.0ZM21.0 17.1C19.6 17.1 18.8 18.3 18.8 19.8C18.8 21.4 19.6 22.6 21.0 22.6L23.2 22.6V19.8C23.2 18.3 22.4 17.1 21.0 17.1ZM43.8 17.1C42.4 17.1 41.5 18.3 41.5 19.8V20.4C41.5 22.4 42.4 22.6 43.2 22.6H43.8C45.3 22.6 46.0 21.4 46.0 19.8C46.0 18.3 45.3 17.1 43.8 17.1ZM14.1 15.8C14.3 15.4 14.7 15.3 15.0 15.4C15.4 15.5 15.5 15.9 15.4 16.3C15.3 16.6 14.9 16.8 14.5 16.6C14.2 16.5 14.0 16.1 14.1 15.8Z" fill="#99BBCB"/></g><defs><clipPath id="clip0_4575_24828"><rect width="41.6" height="11.6" fill="white" transform="translate(7.4 15.3)"/></clipPath></defs></svg>`,
+faces:`<svg width="64" height="18" viewBox="0 0 64 18" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="FACES"><path d="M33.3 15.0C33.6 15.0 33.9 15.1 34.1 15.3C34.3 15.5 34.5 15.8 34.5 16.1C34.5 16.4 34.4 16.6 34.3 16.8C34.1 17.0 33.9 17.1 33.7 17.2C33.5 17.3 33.3 17.3 33.1 17.3C32.8 17.2 32.6 17.1 32.5 17.0C32.3 16.8 32.2 16.6 32.1 16.4C32.1 16.1 32.1 15.9 32.2 15.7C32.3 15.5 32.4 15.3 32.6 15.2C32.8 15.1 33.0 15.0 33.3 15.0ZM54.8 0.1C58.2 -0.3 60.6 1.5 61.8 2.7C62.9 3.9 65.5 7.7 62.7 12.1C60.5 15.8 56.4 16.5 53.7 16.5C53.6 16.5 53.6 16.5 53.5 16.5C52.9 16.5 52.3 16.5 51.6 16.4C51.5 16.4 51.4 16.4 51.3 16.4C51.3 16.4 51.3 16.4 51.3 16.4C48.5 15.9 46.6 14.5 46.0 13.6L48.0 13.6C48.0 13.7 49.0 15.6 53.1 16.0C54.4 16.1 56.9 16.1 58.9 14.2C61.3 12.1 61.9 10.1 62.1 7.9C62.2 7.0 62.5 4.4 60.6 2.4C60.0 1.7 59.2 1.2 58.3 0.9C57.4 0.7 56.4 0.7 55.5 0.9C53.7 1.5 52.2 3.1 52.3 4.9C52.3 5.0 52.3 5.2 52.3 5.3C52.2 5.6 52.2 5.9 52.2 6.3V6.3C52.2 7.2 52.5 7.8 53.1 8.1C51.6 7.3 50.7 6.0 50.7 4.5C50.7 1.9 52.8 0.4 54.8 0.1ZM14.9 4.4C15.2 0.6 18.5 -0.1 20.3 0.0C23.1 0.4 26.2 3.1 25.7 7.4C25.6 7.7 25.6 8.0 25.5 8.3C25.5 8.4 25.4 8.6 25.4 8.8L25.4 8.9L25.2 9.4C25.2 9.6 25.1 9.8 25.0 10.0L24.6 8.9L24.5 8.8L24.0 7.6C24.1 6.9 24.2 6.3 24.2 5.6C24.3 3.1 22.8 0.8 20.7 0.5C18.8 0.2 16.0 2.1 16.3 5.4C16.4 7.1 17.5 8.1 18.5 8.4L20.5 3.7H22.3L24.0 7.6L25.0 10.0L26.1 12.4H24.0L23.9 12.1L23.9 12.1C20.2 17.5 11.7 17.7 7.6 13.6H9.4C9.4 13.6 10.8 15.9 14.8 16.1C16.7 16.1 18.6 15.3 20.4 13.6C21.4 12.7 22.3 11.6 23.0 10.4H19.5L18.7 12.4H16.8L18.2 9.1L18.3 8.8C14.6 7.6 14.9 4.4 14.9 4.4ZM33.7 3.7C34.3 3.6 35.0 3.7 35.5 4.0C36.1 4.2 36.7 4.5 37.1 5.0L35.9 6.4C35.2 5.8 34.5 5.4 33.7 5.4C32.2 5.4 31.1 6.6 31.1 8.1V8.1C31.1 8.1 31.1 8.2 31.1 8.3C31.2 8.6 31.2 8.9 31.3 9.2C31.5 9.7 31.8 10.1 32.3 10.3C32.7 10.6 33.2 10.8 33.7 10.8C34.7 10.8 35.3 10.4 36.0 9.8L37.2 11.0C36.7 11.5 36.2 11.9 35.6 12.1C35.0 12.4 34.3 12.5 33.6 12.5C32.6 12.5 31.6 12.2 30.9 11.6C30.1 11.0 29.5 10.2 29.3 9.3C29.2 9.2 29.2 9.0 29.2 8.9H25.4L25.4 8.8C25.4 8.6 25.5 8.4 25.5 8.3L29.1 8.1V8.1C29.1 7.5 29.2 6.9 29.4 6.4C29.7 5.8 30.0 5.3 30.4 4.9C30.9 4.5 31.4 4.2 31.9 4.0C32.5 3.7 33.1 3.6 33.7 3.7ZM55.2 3.7C56.4 3.7 57.6 4.0 58.5 4.8L57.5 6.2C56.8 5.7 56.0 5.4 55.2 5.3C54.5 5.3 54.1 5.7 54.1 6.1V6.1C54.1 6.7 54.5 6.9 56.0 7.2C57.7 7.7 58.7 8.3 58.7 9.8V9.8C58.7 11.5 57.4 12.5 55.5 12.5C54.2 12.5 52.8 12.0 51.8 11.1L53.0 9.8C53.7 10.4 54.6 10.8 55.6 10.8C56.3 10.8 56.8 10.5 56.8 10.0V10.0C56.8 9.5 56.5 9.3 55.1 8.9C54.4 8.8 53.7 8.5 53.1 8.2C52.5 7.8 52.2 7.2 52.2 6.3V6.3C52.2 5.9 52.2 5.6 52.3 5.3C52.7 4.3 53.8 3.7 55.2 3.7ZM33.4 0.0C34.8 0.0 36.3 0.2 37.6 0.7C39.4 1.5 40.8 2.6 42.1 3.8H41.3V3.8H47.9V5.5H43.8C44.7 6.3 45.4 6.9 46.1 7.2H47.3V8.9H43.2V10.7H48.0V12.4H41.3V8.9H31.2C31.2 8.7 31.1 8.5 31.1 8.3C31.1 8.2 31.1 8.1 31.1 8.1V8.1C31.1 8.0 31.1 8.0 31.1 8.0L41.3 7.4V5.1C41.0 4.8 40.6 4.4 40.2 4.0C38.4 2.3 37.1 1.0 35.1 0.5C34.4 0.4 33.8 0.3 33.1 0.4C30.9 0.8 29.4 1.8 28.6 3.8H26.8C27.3 3.0 28.0 2.3 28.7 1.7C30.4 0.4 31.9 0.0 33.4 0.0ZM2.8 0.4C3.9 -0.0 5.0 -0.1 6.1 0.1C7.1 0.4 8.0 0.8 8.7 1.5C9.5 2.1 10.0 2.9 10.4 3.8L10.4 3.8H14.1V5.5H9.3C9.2 5.9 9.1 6.3 8.9 6.7C8.5 7.4 8.0 8.0 7.4 8.5V3.8H9.4C9.3 3.3 9.2 2.7 8.8 2.2C8.4 1.6 7.8 1.2 7.1 1.1C5.2 0.5 2.6 1.7 1.7 3.6C1.1 4.8 0.2 6.8 2.1 8.7C4.1 10.3 6.1 9.6 7.4 8.5C8.0 8.0 8.5 7.4 8.9 6.7C9.1 6.3 9.2 5.9 9.3 5.5H10.7C10.7 6.1 10.6 6.8 10.3 7.3H13.5V9.0H9.4V12.4H7.4V10.1L7.1 10.2C6.4 10.4 5.7 10.4 5.0 10.3C4.1 10.2 3.3 9.9 2.5 9.5C1.5 8.8 0.7 7.8 0.3 6.7C-0.0 5.7 -0.2 3.9 0.4 2.6C1.0 1.6 1.8 0.8 2.8 0.4ZM20.2 8.8H20.2L20.3 8.5L22.4 8.4L21.4 6.0L20.2 8.8ZM29.1 8.4C29.1 8.5 29.1 8.6 29.1 8.6C29.1 8.5 29.1 8.5 29.1 8.4L29.1 8.1C29.1 8.2 29.1 8.3 29.1 8.4Z" fill="#15203B" fill-opacity="0.5"/></svg>`,
+tanagra:`<svg width="59" height="16" viewBox="0 0 59 16" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tanagra"><path d="M43.1 6.0C43.1 6.1 42.9 6.9 42.9 8.3V11.8C42.9 13.3 42.1 14.2 41.7 14.5C39.9 15.9 38.0 16.0 36.8 15.8C35.6 15.6 35.3 15.1 35.3 14.5C35.3 14.4 35.3 14.4 35.3 14.4L36.6 13.5C36.7 15.3 38.5 15.4 38.8 15.4C41.3 15.0 41.3 12.2 41.3 12.2V11.5C41.3 11.5 41.3 11.2 41.3 10.8C41.2 11.0 41.1 11.3 40.9 11.5C39.7 12.6 38.6 12.6 37.9 12.6C35.5 12.4 35.8 10.1 35.9 9.7C36.2 7.6 37.8 6.6 38.9 6.3L38.9 6.3C39.7 6.0 40.5 6.0 40.5 6.0H43.1ZM15.2 1.8C15.2 1.8 11.6 3.3 6.8 3.3C4.5 6.7 4.5 9.2 4.5 9.5C4.5 11.6 5.6 12.1 5.8 12.2C6.8 12.6 7.7 12.0 7.7 12.0L7.9 12.2C7.1 13.1 5.9 13.4 5.3 13.3C3.0 12.9 2.9 10.1 2.9 9.7C2.9 7.2 4.5 4.3 5.2 3.2C3.6 3.0 2.0 2.7 0.3 2.1L0 0.1C0 0.1 2.5 1.5 6.3 1.7L6.3 1.7C8.0 1.8 11.7 1.9 16.1 0L15.2 1.8ZM15.8 10.8C15.9 11.8 15.9 12.1 16.0 12.5H14.0C14.1 12.1 14.2 12.0 14.2 11.1C14.2 10.5 14.3 10.1 14.3 9.9C14.1 10.7 13.6 11.3 13.3 11.5C13.2 11.6 13.1 11.7 13.0 11.7C11.7 12.6 10.1 12.6 9.8 12.6C7.5 12.4 7.8 10.1 7.8 9.7C8.2 7.6 9.7 6.6 10.9 6.3C11.7 6.0 12.5 6.0 12.5 6.0H15.8V10.8ZM34.5 10.8C34.6 11.8 34.6 12.1 34.7 12.5H32.7C32.8 12.1 32.9 12.0 32.9 11.1C32.9 10.5 33.0 10.1 33.0 9.9C32.8 10.7 32.3 11.3 32.0 11.5C31.9 11.6 31.8 11.7 31.7 11.7C30.4 12.6 28.8 12.6 28.5 12.6C26.2 12.4 26.5 10.1 26.5 9.7C26.9 7.6 28.4 6.6 29.6 6.3C30.4 6.0 31.2 6.0 31.2 6.0H34.5V10.8ZM58.8 10.8C58.8 11.8 58.8 12.1 59 12.5H57.0C57.1 12.1 57.1 12.0 57.1 11.1L57.1 11.1C57.1 10.5 57.2 10.1 57.2 9.9C57.0 10.7 56.5 11.3 56.2 11.5C56.1 11.6 56.0 11.7 56.0 11.7C54.7 12.6 53.1 12.6 52.8 12.6C50.4 12.4 50.7 10.1 50.8 9.7C51.1 7.6 52.7 6.6 53.8 6.3C54.6 6.0 55.4 6.0 55.4 6.0H58.8V10.8ZM48.3 6.0C49.4 5.8 50.6 6.0 50.9 7.0C50.9 7.1 50.9 7.3 50.9 7.5H50.9L49.3 8.6C49.4 7.9 49.5 6.9 48.6 6.4C48.6 6.4 47.8 6.4 46.9 7.7C46.7 8.0 46.1 9.0 45.9 10.7V10.8C46.0 11.7 46.0 12.0 46.1 12.5H44.1C44.3 12.0 44.3 11.6 44.3 10.8V7.8C44.3 7.1 44.1 6.1 44.1 6.1H45.9V7.0C45.9 7.7 45.9 8.3 45.9 8.3C46.0 7.5 46.6 6.9 46.9 6.7C47.2 6.4 47.7 6.1 48.3 6.0ZM20.8 6.2C21.7 5.8 22.9 5.8 23.8 6.1C24.8 6.5 25.3 7.2 25.4 8.3C25.6 9.1 25.5 9.9 25.4 10.7C25.3 11.9 25.4 12.5 25.4 12.5H23.4C23.8 11.5 23.9 10.3 23.9 9.2C23.9 8.8 23.9 8.4 23.9 8.1C23.8 7.6 23.6 7.2 23.3 6.8C22.9 6.5 22.5 6.4 22.1 6.4C21.6 6.3 21.2 6.5 20.8 6.8C19.7 7.5 19.3 8.6 19.1 9.6C19.0 10.1 19.0 10.7 19.0 11.3C19.0 12.2 19.1 12.5 19.1 12.5H17.1C17.1 12.5 17.3 12.0 17.3 10.7V7.8C17.3 7.1 17.1 6.0 17.1 6.0H18.9V7.2C18.9 7.5 18.9 7.8 18.9 8.0C19.3 7.2 20.0 6.5 20.8 6.2ZM14.2 6.6C14.2 6.6 13.1 6.3 12.4 6.5C11.7 6.7 9.6 7.3 9.4 9.9C9.4 9.9 9.2 11.8 10.9 12.1C10.9 12.1 12.5 12.0 13.5 9.8C13.9 8.9 14.2 7.8 14.2 6.6ZM32.9 6.6C32.9 6.6 31.8 6.3 31.1 6.5C30.3 6.7 28.3 7.3 28.1 9.9C28.1 9.9 27.9 11.8 29.6 12.1C29.6 12.1 31.2 12.0 32.2 9.8C32.6 8.9 32.9 7.8 32.9 6.6ZM57.1 6.6C57.1 6.6 56.0 6.3 55.3 6.5C54.6 6.7 52.5 7.3 52.3 9.9C52.3 10.0 52.1 11.8 53.8 12.1C53.9 12.1 55.5 12.0 56.4 9.8C56.8 8.9 57.1 7.8 57.1 6.6ZM40.0 6.5C39.3 6.6 37.6 7.3 37.4 9.9C37.4 10.0 37.3 11.7 38.5 12.1C38.5 12.1 40.1 12.0 40.8 10.2L40.9 10.0C41.2 9.1 41.3 7.9 41.3 6.6C41.3 6.6 40.7 6.5 40.0 6.5ZM15.8 6.0H15.8V6.0L15.8 6.0ZM34.5 6.0H34.5V6.0L34.5 6.0Z" fill="#15203B" fill-opacity="0.5"/></svg>`,
+swarovski:`<svg width="68" height="10" viewBox="0 0 68 10" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Swarovski"><path d="M3.5 0C4.3 0.0 5.0 0.1 5.7 0.4L5.8 2.3H5.6C5.5 1.8 5.2 1.3 4.8 1.0C4.4 0.6 3.8 0.5 3.3 0.5C1.8 0.5 1.0 1.3 1.0 2.3C1.0 3.3 1.6 3.5 3.3 3.8C5.0 4.2 6.2 4.5 6.2 6.4C6.2 7.9 5.1 9.2 2.6 9.2C1.8 9.2 0.9 9.0 0.2 8.6L0.1 6.4H0.3C0.6 7.7 1.6 8.7 3.0 8.7C4.0 8.7 5.2 8.2 5.2 6.7C5.2 5.6 4.4 5.3 3.5 5.1C1.2 4.7 8.5e-05 4.2 0 2.5C0 1.1 1.3 3.4e-05 3.5 0ZM37.3 0C40.3 0.0 41.4 2.4 41.4 4.5C41.4 6.9 39.7 9.2 37.1 9.2C34.4 9.2 32.9 7.1 32.9 4.6C32.9 1.9 35.2 0 37.3 0ZM52.8 0C53.6 0.0 54.4 0.1 55.1 0.4L55.1 2.3H54.9C54.8 1.8 54.5 1.3 54.1 1.0C53.7 0.6 53.2 0.5 52.6 0.5C51.2 0.5 50.3 1.3 50.3 2.3C50.3 3.3 51.0 3.5 52.6 3.8C54.3 4.2 55.6 4.5 55.6 6.4C55.6 7.9 54.4 9.2 51.9 9.2C51.1 9.2 50.2 9.0 49.5 8.6L49.4 6.4H49.6C49.9 7.7 50.9 8.7 52.3 8.7C53.3 8.7 54.5 8.2 54.5 6.7C54.5 5.6 53.8 5.3 52.8 5.1C50.5 4.7 49.3 4.2 49.3 2.5C49.3 1.1 50.7 5.6e-05 52.8 0ZM9.2 0.3C8.7 0.3 8.5 0.4 8.5 0.7C8.6 0.9 8.6 1.2 8.7 1.4C8.9 2.0 10.7 7.7 10.7 7.7H10.7C11.2 6.3 12.0 3.6 12.0 3.4C11.8 2.5 11.5 1.7 11.2 0.9C11.0 0.4 10.7 0.3 10.2 0.3V0.1H13.3V0.3C12.2 0.3 12.5 0.9 12.7 1.5C12.8 2.0 14.6 7.8 14.6 7.8H14.7C14.7 7.8 16.3 2.2 16.5 1.7C16.8 0.6 16.6 0.3 15.7 0.3V0.1H18.1V0.3C17.7 0.3 17.3 0.6 17.1 1.2L14.8 9.2H13.9L12.3 4.1H12.3L10.9 9.2H10.0L7.4 1.2C7.2 0.7 7.1 0.3 6.5 0.3V0.1H9.2V0.3ZM43.9 0.3C43.3 0.3 43.2 0.4 43.2 0.7C43.2 0.9 43.2 1.1 43.3 1.3L45.5 7.8H45.6C45.6 7.8 47.4 2.5 47.7 1.5C47.8 1.0 48.1 0.3 47.0 0.3V0.1H49.4V0.3C48.9 0.3 48.6 0.4 48.4 1.0C48.2 1.7 45.7 9.1 45.7 9.2H44.8L41.9 0.9C41.8 0.6 41.7 0.3 41.1 0.3V0.1H43.9V0.3ZM21.2 0.1L24.0 7.8C24.4 8.7 24.4 8.9 25.0 8.9V9.1H22.2V8.9C22.8 8.9 22.9 8.7 22.9 8.5C22.9 8.2 22.8 8.0 22.6 7.2L22.0 5.6H18.9L18.2 7.6C18.1 7.9 18.0 8.2 18.0 8.4C18.0 8.6 18.2 8.9 18.9 8.9V9.1H16.5V8.9C17.0 8.9 17.2 8.7 17.5 8.0C17.5 8.0 19.9 1.3 19.9 1.2C20.0 1.0 20.0 0.9 20.0 0.7C20.0 0.3 19.8 0.3 19.6 0.3V0.1L21.2 0.1ZM68 0.3C67.7 0.3 67.3 0.3 67.3 0.9V8.3C67.3 8.9 67.7 8.9 68 8.9V9.1H65.3V8.9C65.5 8.9 65.9 8.9 65.9 8.3V0.9C65.9 0.3 65.5 0.3 65.3 0.3V0.1H68V0.3ZM28.9 0.1C30.8 0.1 31.9 1.0 31.9 2.2C31.9 3.6 30.8 4.6 29.3 4.7L31.7 7.9C32.1 8.4 32.6 8.9 33.0 8.9V9.1H31.2L27.9 4.4C30.2 4.4 30.6 3.5 30.6 2.4C30.6 1.2 29.9 0.6 28.3 0.6H27.5V8.3C27.5 8.9 28.0 8.9 28.2 8.9V9.1H25.5V8.9C25.7 8.9 26.2 8.9 26.2 8.3V0.9C26.2 0.4 25.9 0.3 25.5 0.3V0.1H28.9ZM64.0 0.3C63.5 0.3 63.1 0.6 62.7 1.0C62.5 1.3 59.9 4.1 59.8 4.1L63.6 8.3C63.9 8.7 64.1 8.9 64.5 8.9V9.1H62.7L58.7 4.6C58.7 4.6 61.8 1.2 62.0 1.0C62.2 0.8 62.6 0.3 61.4 0.3V0.1H64.0V0.3ZM59.2 0.3C59.0 0.3 58.5 0.3 58.5 0.9V8.3C58.5 8.9 59.0 8.9 59.2 8.9V9.1H56.5V8.9C56.8 8.9 57.2 8.9 57.2 8.3V0.9C57.2 0.3 56.8 0.3 56.5 0.3V0.1H59.2V0.3ZM36.8 0.7C35.7 0.7 33.9 1.3 33.9 4.1C33.9 6.1 35.6 8.5 37.5 8.5C39.2 8.5 40.2 7.2 40.2 5.0C40.2 2.5 38.6 0.7 36.8 0.7ZM19.1 5.1H21.8L20.5 1.2H20.4L19.1 5.1Z" fill="#15203B" fill-opacity="0.5"/></svg>`,
+lacoste:`<svg width="87" height="14" viewBox="0 0 87 14" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lacoste"><path d="M78.2 0.0C78.2 0.0 78.2 0.0 78.3 0.0C78.3 0.0 78.3 0.1 78.3 0.1C78.3 0.3 78.2 1.3 76.6 2.1C73.6 3.7 72.1 3.4 69.9 4.5C69.0 4.9 68.5 5.3 68.6 5.6C68.8 6.0 69.3 6.0 69.9 5.9C71.3 5.5 72.8 5.2 74.3 5.2C75.6 5.1 77.0 5.4 78.2 6.0C78.4 5.8 78.6 5.8 78.8 5.7C79.1 5.7 79.3 5.7 79.5 5.8C80.5 4.9 81.1 5.3 81.5 5.3C82.1 5.4 82.4 4.9 82.8 5.6C82.9 5.6 85.5 5.1 85.9 5.0C86.4 4.9 86.6 4.9 86.7 5.1C86.8 5.2 86.8 5.4 86.7 5.5C86.7 5.6 86.6 5.7 86.5 5.7C86.5 5.8 86.4 5.8 86.4 5.9C86.3 6.1 86.3 6.2 86.2 6.3C86.1 6.3 85.8 6.0 85.7 6.1C85.5 6.1 85.5 6.5 85.4 6.5C85.3 6.6 85.0 6.3 84.9 6.3C84.7 6.4 84.7 6.8 84.6 6.8C84.4 6.9 84.2 6.6 84.1 6.6C83.8 6.7 83.9 7.1 83.8 7.1C83.6 7.2 83.3 6.9 83.2 6.9C83.0 7.0 83.1 7.3 82.9 7.4C82.8 7.4 82.7 7.3 82.5 7.2C82.5 7.2 82.4 7.1 82.3 7.1C82.3 7.1 82.2 7.1 82.2 7.2C81.8 7.3 81.5 7.3 81.1 7.2C80.9 7.1 80.7 7.1 80.4 7.1C80.2 7.1 80.0 7.1 79.7 7.2C79.5 7.3 79.1 7.3 78.9 7.2C78.9 7.2 78.8 7.7 79.4 7.7C79.8 7.6 80.1 7.6 80.5 7.6C81.2 7.8 81.0 8.1 81.9 8.7C82.2 8.8 82.4 8.5 82.6 8.6C82.7 8.7 82.8 9.0 82.9 9.1C83.1 9.1 83.3 8.8 83.5 8.8C83.6 8.9 83.6 9.2 83.7 9.2C83.9 9.3 84.1 9.0 84.3 9.0C84.4 9.1 84.4 9.4 84.6 9.4C84.7 9.5 84.9 9.2 85.1 9.2C85.2 9.2 85.2 9.4 85.4 9.5C85.6 9.6 85.8 9.6 85.9 9.5C86.0 9.3 85.9 9.2 85.6 9.1C85.0 8.9 84.4 8.7 83.8 8.5C83.1 8.3 82.5 8.1 82.5 7.7C82.5 7.6 82.5 7.6 82.6 7.6C82.6 7.6 82.7 7.8 82.8 7.8C83.0 7.9 83.2 8.0 83.4 8.1C83.6 8.1 83.8 7.8 83.9 7.9C84.0 7.9 84.0 8.2 84.1 8.3C84.2 8.3 84.4 8.0 84.6 8.1C84.7 8.1 84.7 8.5 84.8 8.5C84.9 8.5 85.1 8.3 85.3 8.3C85.3 8.4 85.4 8.7 85.5 8.7C85.6 8.8 85.7 8.5 85.9 8.6C86.0 8.6 86.1 8.9 86.3 8.9C86.4 9.0 86.5 9.0 86.7 9.0L86.8 9.1C87.0 9.2 87.1 9.6 86.6 9.8C86.0 10.0 85.4 10.1 84.8 10.1C83.3 10.1 81.7 10.0 80.2 9.7C78.9 10.5 77.0 10.7 74.7 10.6C74.7 10.6 74.7 10.8 75.0 10.9C75.9 11.1 76.0 11.3 76.1 11.4C76.2 11.7 76.1 12.0 75.9 12.0C75.9 12.0 75.8 12.0 75.8 11.9C75.5 11.8 75.3 11.7 75.3 12.1C75.3 12.5 75.2 12.5 75.0 12.3C74.7 11.9 74.6 12.1 74.6 12.4C74.6 12.8 74.4 12.8 74.2 12.6C74.0 12.4 73.9 12.3 73.8 12.7C73.7 13.1 73.4 13.0 73.3 12.7C73.3 12.4 73.1 12.1 72.9 11.9C72.7 11.8 72.6 11.7 72.5 11.5C72.4 11.4 72.4 11.2 72.4 11.0C72.4 10.8 72.5 10.5 72.7 10.3C72.9 10.1 73.1 9.9 73.4 9.9C73.0 9.6 72.7 9.9 72.3 10.2C72.0 10.5 71.9 10.7 71.6 10.8C70.6 10.9 69.7 10.8 68.7 10.7C68.6 10.5 68.5 10.4 68.3 10.3C68.2 10.2 68.0 10.2 67.9 10.2C68.0 10.0 68.0 9.8 68.0 9.6C68.0 9.4 68.0 9.2 67.9 9.0C67.8 8.9 67.7 8.8 67.5 8.7C67.5 8.7 67.5 8.7 67.4 8.7C67.4 8.7 67.3 8.7 67.3 8.7C67.9 9.1 67.9 9.6 67.3 10.5C67.5 10.5 67.6 10.5 67.8 10.5C68.2 10.6 68.6 10.8 68.4 11.5C68.3 11.8 68.2 11.9 68.0 11.8C67.7 11.6 67.6 11.6 67.5 11.7C67.5 11.9 67.6 12.4 67.1 12.1C66.8 12.0 66.8 11.9 66.7 12.2C66.5 12.8 66.0 12.2 65.8 11.8C65.7 11.6 65.7 11.4 65.7 11.1C65.7 10.9 65.7 10.6 65.8 10.4C65.9 10.2 66.0 10.0 66.0 10.0C65.4 9.6 64.8 8.3 65.0 6.8C65.1 5.8 65.5 4.9 66.1 4.1C66.3 3.8 66.4 4.2 66.6 3.9C66.7 3.7 67.1 2.9 67.3 3.1C67.5 3.2 67.6 3.2 67.6 3.1C67.9 2.8 68.1 2.3 68.3 2.5C68.5 2.6 68.6 2.7 68.8 2.5C69.1 2.2 69.4 1.9 69.5 2.2C69.7 2.4 69.9 2.2 70.0 2.1C70.2 1.8 70.5 1.6 70.6 1.9C70.7 2.2 70.9 2.0 71.3 1.7C71.8 1.4 71.7 1.7 71.8 1.8C71.9 1.9 72.1 1.9 72.4 1.7C72.8 1.2 72.9 1.4 73.0 1.6C73.1 1.8 73.4 1.6 73.6 1.4C74.0 1.1 74.0 1.2 74.1 1.3C74.3 1.5 74.4 1.5 74.9 1.0C75.0 1.0 75.1 1.0 75.1 1.0C75.2 1.1 75.2 1.2 75.5 1.1C75.7 1.0 75.9 0.6 76.2 0.7C76.3 0.8 76.4 1.0 76.5 0.8C76.8 0.7 76.9 0.3 77.2 0.5C77.3 0.7 77.5 0.8 78.0 0.0C78.1 0.0 78.1 -0.0 78.2 0.0ZM38.8 2.5C39.9 2.5 41.0 2.8 41.8 3.5L41.2 4.7C40.5 4.2 39.7 3.9 38.8 3.9C37.8 3.9 37.4 4.3 37.4 4.8C37.4 6.4 41.9 5.5 41.9 8.6C41.9 10.0 40.5 11.0 38.7 11.0C37.6 11.0 36.5 10.7 35.6 10.0L36.1 8.8C36.8 9.3 37.8 9.6 38.7 9.6C39.6 9.6 40.3 9.3 40.3 8.6C40.3 6.9 35.7 7.7 35.7 4.9C35.7 3.7 36.6 2.5 38.8 2.5ZM21.0 2.5C21.7 2.5 22.3 2.6 22.9 2.9C23.5 3.1 24.0 3.5 24.4 4.0L23.4 5.0C23.1 4.7 22.7 4.4 22.3 4.2C22.0 4.1 21.6 4.0 21.2 4.0L21.1 4.0C20.7 4.0 20.3 4.0 19.9 4.2C19.6 4.3 19.3 4.5 19.0 4.8C18.7 5.0 18.5 5.3 18.4 5.7C18.2 6.0 18.1 6.4 18.1 6.7C18.1 7.1 18.2 7.5 18.4 7.8C18.5 8.2 18.7 8.5 19.0 8.7C19.3 9.0 19.6 9.2 19.9 9.3C20.3 9.5 20.7 9.6 21.0 9.5C22.0 9.5 22.9 9.1 23.7 8.5L24.5 9.7C23.5 10.5 22.3 11.0 21.0 11.0C18.6 11.0 16.5 9.4 16.5 6.8C16.5 4.1 18.6 2.5 21.0 2.5ZM29.9 2.5C32.3 2.5 34.4 4.1 34.4 6.8C34.4 9.4 32.3 11.0 29.9 11.0C27.5 11.0 25.4 9.4 25.4 6.8C25.4 4.1 27.5 2.5 29.9 2.5ZM1.4 2.7V9.5H5.9V10.8H0V2.7H1.4ZM12.2 2.7L16.2 10.8H14.5L13.6 9.0H9.2L8.4 10.8H6.9L10.6 2.7H12.2ZM50.1 2.7V4.0H47.2V10.8H45.7V4.0H42.9V2.7H50.1ZM57.7 2.7V4.0H52.9V6.1H57.1V7.4H52.9V9.5H57.8V10.8H51.4V2.7H57.7ZM29.9 4.0C29.2 4.0 28.4 4.3 27.9 4.8C27.3 5.3 27.0 6.0 27.0 6.8C27.0 7.1 27.1 7.5 27.2 7.8C27.4 8.2 27.6 8.5 27.9 8.8C28.1 9.0 28.5 9.2 28.8 9.4C29.2 9.5 29.5 9.6 29.9 9.5C30.3 9.6 30.7 9.5 31.0 9.4C31.4 9.2 31.7 9.0 32.0 8.8C32.2 8.5 32.5 8.2 32.6 7.8C32.7 7.5 32.8 7.1 32.8 6.8C32.8 6.0 32.5 5.3 31.9 4.8C31.4 4.3 30.7 4.0 29.9 4.0ZM9.8 7.7H13.0L11.4 4.1L9.8 7.7Z" fill="#15203B" fill-opacity="0.5"/></svg>`,
+usp1:`<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M11.4 5.6H7.4C6.1 5.6 5.2 6.5 5.2 7.8V11.8C5.2 13.0 6.1 14.0 7.4 14.0H11.4C12.6 14.0 13.6 13.0 13.6 11.8V7.8C13.6 6.5 12.6 5.6 11.4 5.6Z" fill="#146452"/><path d="M21.9 4H17.9C16.7 4 15.7 4.9 15.7 6.2V10.2C15.7 11.4 16.7 12.4 17.9 12.4H21.9C23.2 12.4 24.1 11.4 24.1 10.2V6.2C24.1 4.9 23.2 4 21.9 4Z" fill="#146452"/><path d="M32.6 5.6H28.6C27.3 5.6 26.4 6.5 26.4 7.8V11.8C26.4 13.0 27.3 14.0 28.6 14.0H32.6C33.8 14.0 34.8 13.0 34.8 11.8V7.8C34.8 6.5 33.8 5.6 32.6 5.6Z" fill="#146452"/><path d="M29.2 14H10.8C8.8 14 7.2 15.6 7.2 17.6V29.6C7.2 31.5 8.8 33.2 10.8 33.2H29.2C31.1 33.2 32.8 31.5 32.8 29.6V17.6C32.8 15.6 31.1 14 29.2 14Z" fill="#B8D0CB" fill-opacity="0.9"/><path d="M13.3 25.8C12.7 25.2 12.3 24.4 12.3 23.5C12.3 22.7 12.7 21.9 13.3 21.3C13.9 20.7 14.7 20.3 15.5 20.3C16.4 20.3 17.2 20.7 17.8 21.3C18.4 21.9 18.7 22.7 18.7 23.5C18.7 24.4 18.4 25.2 17.8 25.8C17.2 26.4 16.4 26.7 15.5 26.7C14.7 26.7 13.9 26.4 13.3 25.8Z" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.8 23.5H26.8V25.5M24.4 23.5V26.3" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+usp2:`<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M25.6 18C28.9 18 31.6 15.3 31.6 12C31.6 8.6 28.9 6 25.6 6C22.2 6 19.6 8.6 19.6 12C19.6 15.3 22.2 18 25.6 18Z" fill="#146452"/><path d="M31.6 22.8C34.0 22.8 36.0 20.8 36.0 18.4C36.0 15.9 34.0 14 31.6 14C29.1 14 27.2 15.9 27.2 18.4C27.2 20.8 29.1 22.8 31.6 22.8Z" fill="#146452"/><path d="M27.5 15.2H8.3C6.4 15.2 4.7 16.8 4.7 18.8V30.0C4.7 31.9 6.4 33.6 8.3 33.6H27.5C29.5 33.6 31.1 31.9 31.1 30.0V18.8C31.1 16.8 29.5 15.2 27.5 15.2Z" fill="#B8D0CB" fill-opacity="0.9"/><mask id="mask0_4575_24965" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="4" y="15" width="28" height="19"><path d="M27.5 15.2H8.3C6.4 15.2 4.7 16.8 4.7 18.8V30.0C4.7 31.9 6.4 33.6 8.3 33.6H27.5C29.5 33.6 31.1 31.9 31.1 30.0V18.8C31.1 16.8 29.5 15.2 27.5 15.2Z" fill="white"/></mask><g mask="url(#mask0_4575_24965)"><g opacity="0.8" filter="url(#filter0_f_4575_24965)"><path d="M25.6 18C28.9 18 31.6 15.3 31.6 12C31.6 8.6 28.9 6 25.6 6C22.2 6 19.6 8.6 19.6 12C19.6 15.3 22.2 18 25.6 18Z" fill="#146452"/><path d="M31.6 22.8C34.0 22.8 36.0 20.8 36.0 18.4C36.0 15.9 34.0 14 31.6 14C29.1 14 27.2 15.9 27.2 18.4C27.2 20.8 29.1 22.8 31.6 22.8Z" fill="#146452"/></g></g><path d="M25.6 8.7L26.3 10.6L28.2 10.7L26.7 11.9L27.2 13.8L25.6 12.7L23.9 13.8L24.4 11.9L22.9 10.7L24.9 10.6L25.6 8.7Z" fill="white"/><path d="M29.2 21.6H25.6C24.4 21.6 23.6 22.4 23.6 23.6V25.2C23.6 26.3 24.4 27.2 25.6 27.2H29.2C30.3 27.2 31.2 26.3 31.2 25.2V23.6C31.2 22.4 30.3 21.6 29.2 21.6Z" stroke="white"/><path d="M26.4 25.1C26.8 25.1 27.2 24.8 27.2 24.3C27.2 23.9 26.8 23.5 26.4 23.5C25.9 23.5 25.6 23.9 25.6 24.3C25.6 24.8 25.9 25.1 26.4 25.1Z" fill="white"/><path d="M8.4 20H18.4" stroke="white" stroke-linecap="round" stroke-linejoin="round"/><defs><filter id="filter0_f_4575_24965" x="16.8" y="3.2" width="21.9" height="22.3" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="1.4" result="effect1_foregroundBlur_4575_24965"/></filter></defs></svg>`,
+usp3:`<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13.6 15.5V11.5C13.6 5.9 23.2 5.9 23.2 11.5V15.5" stroke="#146452" stroke-width="1.8" stroke-linecap="round"/><path d="M26.4 5.2H34.4V13.2L28.4 19.2L20.4 11.2L26.4 5.2Z" fill="#146452"/><path d="M7.5 14.7H29.1L31.9 33.5H4.7L7.5 14.7Z" fill="#B8D0CB" fill-opacity="0.9"/><mask id="mask0_4575_24988" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="4" y="14" width="28" height="20"><path d="M7.5 14.7H29.1L31.9 33.5H4.7L7.5 14.7Z" fill="white"/></mask><g mask="url(#mask0_4575_24988)"><g opacity="0.8" filter="url(#filter0_f_4575_24988)"><path d="M13.6 15.5V11.5C13.6 5.9 23.2 5.9 23.2 11.5V15.5" stroke="#146452" stroke-width="1.8" stroke-linecap="round"/><path d="M26.4 5.2H34.4V13.2L28.4 19.2L20.4 11.2L26.4 5.2Z" fill="#146452"/></g></g><path d="M32.0 9C32.5 9 33.0 8.5 33.0 8C33.0 7.4 32.5 7 32.0 7C31.4 7 31.0 7.4 31.0 8C31.0 8.5 31.4 9 32.0 9Z" fill="white"/><path d="M18.4 20.0L19.4 22.9L22.5 23.0L20.1 24.9L20.9 27.9L18.4 26.2L15.8 27.9L16.6 24.9L14.2 23.0L17.3 22.9L18.4 20.0Z" fill="white"/><defs><filter id="filter0_f_4575_24988" x="9.9" y="2.4" width="27.3" height="19.6" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="1.4" result="effect1_foregroundBlur_4575_24988"/></filter></defs></svg>`,
+usp4:`<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M34.7 10.6V12.6L33.1 12.4L32.5 13.7L33.8 14.7L32.3 16.2L31.3 14.9L30.0 15.5L30.2 17.1H28.2L28.3 15.5L27.0 14.9L26.0 16.2L24.6 14.7L25.8 13.7L25.3 12.4L23.7 12.6V10.6L25.3 10.7L25.8 9.4L24.6 8.4L26.0 7.0L27.0 8.2L28.3 7.7L28.2 6.1H30.2L30.0 7.7L31.3 8.2L32.3 7.0L33.8 8.4L32.5 9.4L33.1 10.7L34.7 10.6Z" fill="#146452"/><path d="M27.6 10H8.4C6.4 10 4.8 11.6 4.8 13.6V30.4C4.8 32.3 6.4 34 8.4 34H27.6C29.5 34 31.2 32.3 31.2 30.4V13.6C31.2 11.6 29.5 10 27.6 10Z" fill="#B8D0CB" fill-opacity="0.9"/><mask id="mask0_4575_25009" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="4" y="9" width="28" height="25"><path d="M27.6 9.9H8.4C6.4 9.9 4.8 11.6 4.8 13.5V30.3C4.8 32.3 6.4 33.9 8.4 33.9H27.6C29.5 33.9 31.2 32.3 31.2 30.3V13.5C31.2 11.6 29.5 9.9 27.6 9.9Z" fill="white"/></mask><g mask="url(#mask0_4575_25009)"><g opacity="0.8" filter="url(#filter0_f_4575_25009)"><path d="M34.7 10.6V12.6L33.1 12.4L32.5 13.7L33.8 14.7L32.3 16.2L31.3 14.9L30.0 15.5L30.2 17.1H28.2L28.3 15.5L27.0 14.9L26.0 16.2L24.6 14.7L25.8 13.7L25.3 12.4L23.7 12.6V10.6L25.3 10.7L25.8 9.4L24.6 8.4L26.0 7.0L27.0 8.2L28.3 7.7L28.2 6.1H30.2L30.0 7.7L31.3 8.2L32.3 7.0L33.8 8.4L32.5 9.4L33.1 10.7L34.7 10.6Z" fill="#146452"/></g></g><path d="M29.2 13.3C30.1 13.3 31.0 12.5 31.0 11.5C31.0 10.6 30.1 9.7 29.2 9.7C28.2 9.7 27.4 10.6 27.4 11.5C27.4 12.5 28.2 13.3 29.2 13.3Z" fill="white"/><path d="M13.4 14.7H10.2C9.2 14.7 8.4 15.6 8.4 16.5C8.4 17.5 9.2 18.3 10.2 18.3H13.4C14.3 18.3 15.2 17.5 15.2 16.5C15.2 15.6 14.3 14.7 13.4 14.7Z" stroke="white" stroke-width="0.8"/><path d="M13.4 17.6C13.9 17.6 14.4 17.1 14.4 16.6C14.4 16.0 13.9 15.6 13.4 15.6C12.8 15.6 12.4 16.0 12.4 16.6C12.4 17.1 12.8 17.6 13.4 17.6Z" fill="white"/><path d="M17.6 16.6H27.2" stroke="white" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.4 20.3H10.2C9.2 20.3 8.4 21.2 8.4 22.1C8.4 23.1 9.2 23.9 10.2 23.9H13.4C14.3 23.9 15.2 23.1 15.2 22.1C15.2 21.2 14.3 20.3 13.4 20.3Z" stroke="white" stroke-width="0.8"/><path d="M10.2 23.1C10.7 23.1 11.2 22.7 11.2 22.1C11.2 21.6 10.7 21.1 10.2 21.1C9.6 21.1 9.2 21.6 9.2 22.1C9.2 22.7 9.6 23.1 10.2 23.1Z" fill="white"/><path d="M17.6 22.2H27.2" stroke="white" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.4 25.9H10.2C9.2 25.9 8.4 26.8 8.4 27.7C8.4 28.7 9.2 29.5 10.2 29.5H13.4C14.3 29.5 15.2 28.7 15.2 27.7C15.2 26.8 14.3 25.9 13.4 25.9Z" stroke="white" stroke-width="0.8"/><path d="M13.4 28.8C13.9 28.8 14.4 28.3 14.4 27.8C14.4 27.2 13.9 26.8 13.4 26.8C12.8 26.8 12.4 27.2 12.4 27.8C12.4 28.3 12.8 28.8 13.4 28.8Z" fill="white"/><path d="M17.6 27.7H27.2" stroke="white" stroke-linecap="round" stroke-linejoin="round"/><defs><filter id="filter0_f_4575_25009" x="20.9" y="3.3" width="16.6" height="16.6" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="1.4" result="effect1_foregroundBlur_4575_25009"/></filter></defs></svg>`,
+picto:`<svg width="149" height="124" viewBox="0 0 149 124" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M123.3 50.1C137.1 50.1 148.4 38.8 148.4 25.0C148.4 11.2 137.1 0 123.3 0C109.5 0 98.2 11.2 98.2 25.0C98.2 38.8 109.5 50.1 123.3 50.1Z" fill="#146452"/><path d="M117.5 36.6H13.4C6.0 36.6 0 42.6 0 50.1V109.8C0 117.3 6.0 123.3 13.4 123.3H117.5C125.0 123.3 131.0 117.3 131.0 109.8V50.1C131.0 42.6 125.0 36.6 117.5 36.6Z" fill="#B8D0CB" fill-opacity="0.9"/><mask id="mask0_4575_25431" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="36" width="132" height="88"><path d="M117.5 36.6H13.4C6.0 36.6 0 42.6 0 50.1V109.8C0 117.3 6.0 123.3 13.4 123.3H117.5C125.0 123.3 131.0 117.3 131.0 109.8V50.1C131.0 42.6 125.0 36.6 117.5 36.6Z" fill="white"/></mask><g mask="url(#mask0_4575_25431)"><g opacity="0.8" filter="url(#filter0_f_4575_25431)"><path d="M123.3 50.1C137.1 50.1 148.4 38.8 148.4 25.0C148.4 11.2 137.1 0 123.3 0C109.5 0 98.2 11.2 98.2 25.0C98.2 38.8 109.5 50.1 123.3 50.1Z" fill="#146452"/></g></g><path d="M30.8 55.9C37.2 55.9 42.3 61.0 42.3 67.4C42.3 73.8 37.2 78.9 30.8 78.9C24.4 78.9 19.3 73.8 19.3 67.4C19.3 61.0 24.4 55.9 30.8 55.9Z" stroke="white" stroke-width="2"/><path d="M30.8 84.8C34.9 84.8 38.7 85.6 41.7 87.4C44.6 89.1 46.9 92.0 48.1 96.4C48.6 98.1 48.1 99.8 46.9 101.0C45.8 102.2 44.0 103.0 42.1 103.0H19.5C17.6 103.0 15.8 102.2 14.6 101.0C13.5 99.8 13.0 98.1 13.4 96.4C14.6 92.0 16.9 89.1 19.9 87.4C22.9 85.6 26.6 84.8 30.8 84.8Z" stroke="white" stroke-width="2"/><path d="M62.5 70.8V64.0H63.7L65.9 69.9L68.0 64.0H69.2V70.8H68.4V65.5L66.4 70.8H65.3L63.3 65.5V70.8H62.5ZM73.5 71.0C73.0 71.0 72.6 70.9 72.2 70.7C71.8 70.5 71.5 70.2 71.3 69.8C71.1 69.4 71.0 69.0 71.0 68.5V64.0H71.8V68.5C71.8 69.0 71.9 69.4 72.2 69.7C72.6 70.0 73.0 70.2 73.5 70.2C74.1 70.2 74.5 70.0 74.8 69.7C75.1 69.4 75.3 69.0 75.3 68.5V64.0H76.1V68.5C76.1 69.0 76.0 69.4 75.8 69.8C75.6 70.2 75.3 70.5 74.9 70.7C74.5 70.9 74.1 71.0 73.5 71.0ZM80.1 71.0C79.6 71.0 79.1 70.9 78.7 70.7C78.3 70.5 78.0 70.2 77.8 69.9C77.6 69.5 77.4 69.1 77.4 68.7L78.3 68.6C78.3 68.9 78.4 69.2 78.6 69.5C78.7 69.7 78.9 69.9 79.2 70.0C79.4 70.1 79.8 70.2 80.1 70.2C80.4 70.2 80.7 70.1 80.9 70.1C81.2 70.0 81.3 69.9 81.5 69.7C81.6 69.5 81.6 69.3 81.6 69.1C81.6 68.9 81.6 68.7 81.5 68.6C81.4 68.4 81.2 68.2 80.9 68.1C80.6 68.0 80.2 67.8 79.7 67.7C79.2 67.5 78.7 67.4 78.4 67.2C78.1 67.1 77.9 66.9 77.7 66.7C77.6 66.4 77.5 66.1 77.5 65.8C77.5 65.4 77.6 65.1 77.8 64.8C78.0 64.5 78.3 64.3 78.6 64.1C78.9 63.9 79.3 63.8 79.8 63.8C80.3 63.8 80.7 63.9 81.1 64.1C81.5 64.3 81.7 64.6 82.0 64.9C82.2 65.2 82.3 65.6 82.4 66.0L81.5 66.1C81.5 65.8 81.4 65.6 81.2 65.4C81.1 65.1 80.9 65.0 80.7 64.8C80.4 64.7 80.1 64.7 79.8 64.7C79.4 64.7 79.0 64.8 78.8 65.0C78.5 65.2 78.4 65.4 78.4 65.8C78.4 66.0 78.5 66.1 78.5 66.3C78.7 66.4 78.8 66.5 79.1 66.7C79.3 66.8 79.7 66.9 80.2 67.0C80.8 67.1 81.2 67.3 81.6 67.5C81.9 67.7 82.1 67.9 82.3 68.2C82.4 68.4 82.5 68.7 82.5 69.1C82.5 69.5 82.4 69.8 82.2 70.1C82.0 70.4 81.7 70.6 81.3 70.8C81.0 70.9 80.6 71.0 80.1 71.0ZM83.8 70.8V64.0H88.1V64.8H84.6V67.0H88.0V67.8H84.6V70.0H88.2V70.8H83.8Z" fill="white"/><path d="M67.6 87.7C66.4 87.7 65.3 87.4 64.3 86.9C63.4 86.3 62.7 85.5 62.2 84.5C61.7 83.5 61.5 82.3 61.5 80.9C61.5 79.5 61.7 78.3 62.2 77.3C62.7 76.2 63.4 75.5 64.3 74.9C65.3 74.4 66.4 74.1 67.6 74.1C68.9 74.1 70.1 74.4 71.0 74.9C71.9 75.5 72.6 76.2 73.1 77.3C73.6 78.3 73.8 79.5 73.8 80.9C73.8 82.3 73.6 83.5 73.1 84.5C72.6 85.5 71.9 86.3 71.0 86.9C70.1 87.4 68.9 87.7 67.6 87.7ZM67.6 85.6C68.4 85.6 69.1 85.4 69.7 85.0C70.2 84.7 70.6 84.1 70.9 83.4C71.2 82.7 71.4 81.9 71.4 80.9C71.4 79.9 71.2 79.1 70.9 78.3C70.6 77.6 70.2 77.1 69.7 76.7C69.1 76.3 68.4 76.1 67.6 76.1C66.9 76.1 66.2 76.3 65.6 76.7C65.1 77.1 64.6 77.6 64.3 78.3C64.1 79.1 63.9 79.9 63.9 80.9C63.9 81.9 64.1 82.7 64.3 83.4C64.6 84.1 65.1 84.7 65.6 85.0C66.2 85.4 66.9 85.6 67.6 85.6ZM75.9 87.4V77.6H78.0L78.1 80.3L77.9 80.2C77.9 79.5 78.2 79.0 78.5 78.6C78.8 78.2 79.1 77.9 79.6 77.7C80.0 77.5 80.5 77.4 81.0 77.4C81.7 77.4 82.3 77.5 82.8 77.9C83.3 78.2 83.7 78.6 84.0 79.2C84.2 79.7 84.4 80.4 84.4 81.1V87.4H82.0V81.8C82.0 81.3 82.0 80.8 81.8 80.5C81.7 80.1 81.5 79.8 81.3 79.6C81.0 79.4 80.7 79.3 80.3 79.3C79.7 79.3 79.2 79.5 78.8 79.9C78.4 80.4 78.3 81.0 78.3 81.8V87.4H75.9ZM90.9 87.6C89.9 87.6 89.1 87.4 88.4 87.0C87.6 86.5 87.1 85.9 86.7 85.2C86.3 84.4 86.1 83.5 86.1 82.5C86.1 81.5 86.3 80.6 86.7 79.8C87.1 79.0 87.6 78.4 88.3 78.0C89.1 77.6 89.9 77.4 90.8 77.4C91.8 77.4 92.6 77.6 93.3 78.0C94.0 78.4 94.5 79.0 94.9 79.8C95.3 80.6 95.5 81.5 95.5 82.6V83.1H88.5C88.6 84.0 88.8 84.6 89.2 85.1C89.7 85.5 90.2 85.7 90.9 85.7C91.4 85.7 91.9 85.6 92.2 85.4C92.6 85.1 92.8 84.8 93.0 84.4L95.4 84.5C95.1 85.5 94.6 86.2 93.8 86.8C93.0 87.3 92.0 87.6 90.9 87.6ZM88.5 81.6H93.1C93.0 80.8 92.8 80.2 92.4 79.8C92.0 79.4 91.5 79.2 90.8 79.2C90.2 79.2 89.7 79.4 89.3 79.8C88.9 80.2 88.6 80.8 88.5 81.6ZM97.5 87.4V74.4H99.9V87.4H97.5ZM102.5 87.4V74.4H106.8C108.9 74.4 110.5 74.9 111.6 76.1C112.7 77.2 113.3 78.8 113.3 80.9C113.3 83.0 112.8 84.6 111.7 85.7C110.6 86.8 109.0 87.4 107.0 87.4H102.5ZM104.9 85.3H106.8C108.2 85.3 109.2 84.9 109.9 84.2C110.5 83.5 110.9 82.4 110.9 80.9C110.9 79.4 110.5 78.3 109.9 77.5C109.2 76.8 108.2 76.4 106.8 76.4H104.9V85.3Z" fill="white"/><path d="M61.6 102.1H111.7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M112.7 25.0L120.4 32.7L133.9 17.3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><defs><filter id="filter0_f_4575_25431" x="84.8" y="-13.4" width="77.0" height="77.0" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur stdDeviation="6.7" result="effect1_foregroundBlur_4575_25431"/></filter></defs></svg>`,
+social:`<svg width="358" height="48" viewBox="0 0 358 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="91.5" y="0.5" width="47" height="47" rx="23.5" stroke="#E4E4E7"/><path d="M123.8 24.2C123.8 23.5 123.8 22.9 123.6 22.3H115.1V25.6H120.1C119.9 26.8 119.3 27.8 118.3 28.5L118.3 28.6L120.9 30.7L121.1 30.7C122.8 29.1 123.8 26.9 123.8 24.2Z" fill="#517CBE"/><path d="M115.1 32.8C117.6 32.8 119.6 32.1 121.1 30.7L118.3 28.5C117.3 29.1 116.2 29.4 115.1 29.4C112.8 29.4 110.7 27.9 110.0 25.7L109.9 25.7L107.1 27.8L107.0 27.9C108.6 31.0 111.7 32.8 115.1 32.8Z" fill="#32A853"/><path d="M110.0 25.7C109.8 25.1 109.7 24.6 109.7 24C109.7 23.4 109.8 22.8 110.0 22.2V22.1L107.1 19.9L107.0 20C105.7 22.5 105.7 25.4 107.0 27.9L110.0 25.7Z" fill="#FBBC0C"/><path d="M115.1 18.5C116.4 18.5 117.7 19.0 118.6 19.8L121.2 17.4C119.6 15.9 117.4 15.0 115.1 15.1C111.7 15.1 108.6 17.0 107.0 20.0L109.9 22.2C110.7 20.0 112.8 18.5 115.1 18.5Z" fill="#E84436"/><rect x="155.5" y="0.5" width="47" height="47" rx="23.5" stroke="#E4E4E7"/><path d="M187.5 28.8C187.4 28.8 187.0 30.2 186.0 31.7C185.1 32.9 184.2 34.2 182.8 34.2C181.4 34.2 181.0 33.4 179.4 33.4C177.8 33.4 177.3 34.2 175.9 34.2C174.6 34.3 173.5 32.9 172.6 31.6C170.9 29.1 169.5 24.4 171.3 21.3C172.2 19.7 173.9 18.7 175.6 18.7C177.0 18.7 178.3 19.6 179.1 19.6C179.9 19.6 181.5 18.5 183.1 18.6C183.8 18.7 185.7 18.9 186.9 20.7C186.8 20.7 184.6 22.0 184.7 24.6C184.7 27.7 187.4 28.7 187.5 28.8ZM183.1 13.7C182.1 13.7 180.8 14.4 180.0 15.2C179.4 16.0 178.8 17.2 178.9 18.4C180.1 18.5 181.3 17.8 182.0 17.0C182.8 16.1 183.2 14.9 183.1 13.7Z" fill="#001021"/><rect x="219.5" y="0.5" width="47" height="47" rx="23.5" stroke="#E4E4E7"/><rect x="233" y="14" width="20" height="20" rx="10" fill="#255398"/><path d="M245.5 21.4H247V19.1C246.7 19.0 245.8 19 244.8 19C240.2 19 241.5 23.9 241.3 24.6H239V27.2H241.3V34H244.1V27.2H246.4L246.7 24.6H244.1C244.2 22.8 243.6 21.4 245.5 21.4Z" fill="white"/></svg>`
+};
+const ICON = {
+  chevBack:`<svg width="12" height="20" viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2L2.5 10L10 18" stroke="#1a1a1a" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  chevUp:`<svg width="12" height="8" viewBox="0 0 12 8" aria-hidden="true"><path d="M1.5 6.5L6 2L10.5 6.5" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  user:`<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4.2" stroke="#262626" stroke-width="1.4" fill="none"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#262626" stroke-width="1.4" fill="none"/></svg>`,
+  bag:`<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 13H4L5 8z" stroke="#262626" stroke-width="1.4" fill="none" stroke-linejoin="round"/><path d="M9 10V6a3 3 0 0 1 6 0v4" stroke="#262626" stroke-width="1.4" fill="none"/></svg>`,
+  pin:`<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11z" stroke="#262626" stroke-width="1.4" fill="none"/><circle cx="12" cy="10" r="2.3" stroke="#262626" stroke-width="1.4" fill="none"/></svg>`,
+  out:`<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10" stroke="#262626" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  lock:`<svg width="11" height="13" viewBox="0 0 11 13" aria-hidden="true"><rect x="1" y="5.5" width="9" height="7" rx="1.5" fill="#3a3a3c"/><path d="M3 5.5V4a2.5 2.5 0 0 1 5 0v1.5" stroke="#3a3a3c" stroke-width="1.4" fill="none"/></svg>`,
+  reload:`<svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5v3h-3" stroke="#111" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+};
+
+/* ===================== Demo data ===================== */
+const PERSONAS = {
+  NEW_CUSTOMER:   { n:1, label:'New customer',          a:'No FACES account', b:'No MUSE account', example:'newuser@gmail.com',           name:'' },
+  FACES_ONLY:     { n:2, label:'FACES customer',        a:'FACES account exists', b:'No MUSE account', example:'faces.user@chalhoub.com', name:'Layla' },
+  MUSE_ONLY:      { n:3, label:'MUSE customer',         a:'No FACES account', b:'MUSE account exists', example:'muse.user@chalhoub.com',  name:'Omar' },
+  FACES_AND_MUSE: { n:4, label:'FACES + MUSE customer', a:'Both accounts exist', b:'', example:'connected.user@chalhoub.com',              name:'Sara' }
+};
+const LOOKUP_LABEL = {
+  NEW_CUSTOMER:'No account found → new customer',
+  FACES_ONLY:'FACES account found, no MUSE OneID',
+  MUSE_ONLY:'MUSE OneID found, not yet used on FACES',
+  FACES_AND_MUSE:'FACES account and MUSE OneID found'
+};
+const OFFER = {
+  NEW_CUSTOMER:{ title:'New here? Create your MUSE OneID', body:'Your details are verified. Create a MUSE OneID to shop at FACES and every MUSE brand with one sign in, and enjoy your MUSE benefits wherever you shop.', top:'Prefer a FACES-only account? You can choose that instead.', primary:'Create MUSE OneID', primaryBusy:'', secondary:'Create a FACES account only', legal:'' },
+  FACES_ONLY:{ title:'Upgrade your FACES account to MUSE OneID', body:'Welcome back. Turn your FACES account into a MUSE OneID to sign in to every MUSE brand with the same details, and join MUSE loyalty to earn and redeem points wherever you shop.', top:'', primary:'Upgrade to MUSE OneID', primaryBusy:'Upgrading…', secondary:'Maybe later', legal:'By upgrading, you agree to share your account details across MUSE brands, in line with our Privacy Policy and Terms and Conditions. MUSE loyalty membership is subject to the MUSE programme terms.', loyalty:true },
+  MUSE_ONLY:{ title:'Use your MUSE OneID at FACES?', body:'Your MUSE OneID is verified. Continue to shop at FACES with the same sign in, with no new account to create.', top:'Your MUSE points and benefits come with you.', primary:'Continue to FACES', primaryBusy:'Connecting…', secondary:'Not now', legal:'By continuing, you agree to share your MUSE OneID account details with FACES, in line with our Privacy Policy and Terms and Conditions.', marketing:true },
+  FACES_AND_MUSE:{ title:'Connect FACES to your MUSE OneID?', body:'We found your FACES account and your MUSE OneID. Connect them to sign in to all MUSE brands with one account.', top:'Your FACES orders and preferences stay the same.', primary:'Connect accounts', primaryBusy:'Connecting…', secondary:'Maybe later', legal:'By connecting, you agree to share your account details across MUSE brands, in line with our Privacy Policy and Terms and Conditions.' }
+};
+const STEP_LABEL = { home:'FACES page', signin:'Sign in / Register (email discovery)', otp:'OTP verification', offer:'MUSE OneID decision', reg:'Registration' };
+
+/* ===================== State ===================== */
+const S = {
+  persona:'NEW_CUSTOMER', origin:'/en/perfume', urlPath:'/en/perfume',
+  screen:'home', params:{}, history:[],
+  identity:'', idType:'email', resolved:null,
+  signedIn:false, name:'', menu:false, declined:false,
+  helpOpenSignin:true, helpOpenOtp:true, trust:false,
+  otpLeft:119, timer:null, busy:false, form:{ title:'', first:'', last:'', pass:'', news:false }
+};
+const $ = s => document.querySelector(s);
+const vp = $('#viewport');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const wait = ms => new Promise(r => setTimeout(r, ms));
+
+/* ===================== Identity rules ===================== */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function classify(v){
+  v = v.trim();
+  if (EMAIL_RE.test(v)) return 'email';
+  const digits = v.replace(/[\s()-]/g,'');
+  if (/^\+?\d{9,15}$/.test(digits)) return 'phone';
+  return null;
+}
+/* UAE mobile: 050 / 052 / 055 typed locally becomes +971 5X XXX XXXX */
+function formatUae(v){
+  const d = v.replace(/[\s()-]/g,'');
+  let n = null;
+  if (/^0(50|52|55)\d{0,7}$/.test(d)) n = d.slice(1);
+  else if (/^\+9715\d{0,8}$/.test(d)) n = d.slice(4);
+  if (n === null) return v;
+  return '+971 ' + [n.slice(0,2), n.slice(2,5), n.slice(5,9)].filter(Boolean).join(' ');
+}
+function resolve(v, type){
+  if (type === 'phone') return S.persona;
+  const domain = v.trim().toLowerCase().split('@')[1] || '';
+  if (domain === 'chalhoub.com') return S.persona;
+  return 'NEW_CUSTOMER';
+}
+
+/* ===================== Shared fragments ===================== */
+const toolbar = () => `<div class="toolbar"><button class="back" type="button" data-act="back" aria-label="Back">${ICON.chevBack}</button></div>`;
+const marquee = () => {
+  const set = `<div class="set">${A.faces}${A.tanagra}${A.swarovski}${A.lacoste}</div>`;
+  return `<div class="marquee" aria-label="Participating brands: FACES, Tanagra, Swarovski, Lacoste"><div class="track">${set}${set.replace('class="set"','class="set" aria-hidden="true"')}</div></div>`;
+};
+const usp = () => `
+<section class="usp" aria-label="About MUSE OneID">
+  <div>
+    <div class="usp-head">${A.museApp}<div><div class="t">MUSE OneID</div><p class="p-sm" style="color:var(--navy)">One account across all MUSE brands</p></div></div>
+    ${marquee()}
+  </div>
+  <div class="usp-list">
+    <div class="usp-item">${A.usp1}<div><p class="l-lg" style="color:var(--green)">One login, every brand</p><p class="p-md">Use the same login at FACES, Tanagra and more, with no new accounts to create.</p></div></div>
+    <div class="usp-rule"></div>
+    <div class="usp-item">${A.usp2}<div><p class="l-lg" style="color:var(--green)">All your MUSE points in one place</p><p class="p-md">Earn and redeem points at every MUSE brand, and see your full balance in one account.</p></div></div>
+    <div class="usp-rule"></div>
+    <div class="usp-item">${A.usp3}<div><p class="l-lg" style="color:var(--green)">Your benefits, wherever you shop</p><p class="p-md">Enjoy your MUSE perks, from complimentary alterations to birthday bonus points, at every brand you visit.</p></div></div>
+    <div class="usp-rule"></div>
+    <div class="usp-item">${A.usp4}<div><p class="l-lg" style="color:var(--green)">Manage everything in one place</p><p class="p-md">Update your details and choose which brands are connected, all from your account settings.</p></div></div>
+  </div>
+</section>`;
+const legalFoot = () => `<footer class="foot"><p><a href="#" data-act="noop">Privacy Policy</a>&nbsp; | &nbsp;<a href="#" data-act="noop">Terms of use</a>&nbsp; | &nbsp;<a href="#" data-act="noop">Help</a></p><p>Copyright © 2026 Chalhoub Group. All rights reserved.</p></footer>`;
+
+/* ===================== Screens ===================== */
+function scrHome(){
+  const p = S.persona;
+  const menu = !S.menu ? '' : (S.signedIn ? `
+    <div class="menu" role="menu">
+      <div class="greet">${S.name ? 'Hi, ' + esc(S.name) : 'You’re signed in'}</div>
+      <button role="menuitem" data-act="noop">${ICON.user}<span>My account</span></button>
+      <button role="menuitem" data-act="noop">${ICON.bag}<span>Track your order</span></button>
+      <button role="menuitem" data-act="signout">${ICON.out}<span>Sign out</span></button>
+    </div>` : `
+    <div class="menu" role="menu">
+      <button role="menuitem" data-act="open-signin">${ICON.user}<span>Sign in / Register</span></button>
+      <button role="menuitem" data-act="noop">${ICON.bag}<span>Track your order</span></button>
+      <button role="menuitem" data-act="noop">${ICON.pin}<span>Store Locator</span></button>
+    </div>`);
+  const prod = (badge2) => `<div class="prod"><span class="badge">Best Seller</span><span class="badge">${badge2}</span><div class="bottle"><i></i></div><span class="b">CHANEL</span><span class="n">Coco Mademoiselle</span><span class="pr"><span>AED600</span><span>+</span></span></div>`;
+  return `
+<div class="screen home" data-screen="home">
+  <div class="urlbar"><div class="urlpill"><span class="aa">AA</span>${ICON.lock}<span id="urlText">faces.ae${esc(S.urlPath)}</span><span class="rl">${ICON.reload}</span><span class="prog" id="prog"></span></div></div>
+  <div class="scroll">
+    <div class="topban"><span aria-hidden="true">‹</span><span>Buy Now Pay Later With Tabby &amp; Tamara</span><span aria-hidden="true">›</span></div>
+    <header class="fhead">
+      <div class="fhead-row">${A.facesLogo}
+        <div class="icons">${A.headIcons}
+          <button type="button" style="left:1px" data-act="toggle-menu" aria-haspopup="menu" aria-expanded="${S.menu}" aria-label="${S.signedIn ? 'My account' : 'Sign in or register'}"></button>
+          ${S.signedIn ? '<span class="dot" aria-hidden="true"></span>' : ''}
+          <button type="button" style="left:68px" data-act="noop" aria-label="Bag"></button>
+        </div>
+      </div>
+      <nav class="nav" aria-label="Categories"><span>Fragrance Layering</span><span>Perfume</span><span>Brands</span><span>New In</span><span>Skincare</span><span>Makeup</span><span>Hair</span><span>Body</span><span>Gifts</span><span>Men’s</span><span>Suncare</span><span>Beauty Offers</span></nav>
+      ${menu}
+    </header>
+    <section class="hero"><div class="hero-photo" role="img" aria-label="Beauty still life: peonies, a perfume bottle, lipstick and a powder compact on marble"><svg viewBox="0 0 343 287" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="hBg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f5ddd3"/><stop offset=".65" stop-color="#ecd0c5"/><stop offset="1" stop-color="#e2c2b6"/></linearGradient><radialGradient id="hLight" cx=".78" cy=".1" r=".7"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient><linearGradient id="hMarble" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbf7f3"/><stop offset="1" stop-color="#efe6df"/></linearGradient><linearGradient id="hAmber" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6d3ae"/><stop offset=".55" stop-color="#e8a978"/><stop offset="1" stop-color="#d48a58"/></linearGradient><linearGradient id="hGold" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#b8904f"/><stop offset=".45" stop-color="#ecd29a"/><stop offset="1" stop-color="#a9813f"/></linearGradient><linearGradient id="hVase" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f4f6f6" stop-opacity=".55"/><stop offset=".5" stop-color="#ffffff" stop-opacity=".85"/><stop offset="1" stop-color="#dfe5e6" stop-opacity=".6"/></linearGradient></defs><rect width="343" height="287" fill="url(#hBg)"/><rect width="343" height="287" fill="url(#hLight)"/><path d="M232 0h30L196 210h-30z" fill="#fff" opacity=".18"/><path d="M276 0h18L230 210h-18z" fill="#fff" opacity=".14"/><rect y="204" width="343" height="83" fill="url(#hMarble)"/><rect y="204" width="343" height="2" fill="#e4d7ce"/><path d="M0 236c40-8 70 6 110-4s70-18 120-6 80 4 113-2M30 287c30-24 60-20 96-30s58-4 90-14M200 287c20-14 52-22 90-22s40-8 53-14" stroke="#d9ccc3" stroke-width="1" fill="none" opacity=".7"/><ellipse cx="62" cy="210" rx="30" ry="5" fill="#b89b8d" opacity=".3"/><ellipse cx="160" cy="210" rx="42" ry="6" fill="#b0897a" opacity=".32"/><ellipse cx="228" cy="210" rx="24" ry="4" fill="#a88878" opacity=".3"/><ellipse cx="292" cy="217" rx="40" ry="7" fill="#b0897a" opacity=".3"/><g stroke="#7f9b7a" stroke-width="1.6" fill="none"><path d="M62 160C58 130 46 112 38 98"/><path d="M62 160c2-32 8-56 20-72"/><path d="M62 160c-2-26-2-46 2-62"/></g><ellipse cx="44" cy="128" rx="11" ry="5" transform="rotate(-35 44 128)" fill="#9db497"/><ellipse cx="80" cy="124" rx="12" ry="5" transform="rotate(30 80 124)" fill="#8fa889"/><g><circle cx="38" cy="94" r="19" fill="#f4b9c2"/><circle cx="34" cy="90" r="12" fill="#f7cad1"/><circle cx="40" cy="96" r="7" fill="#ee9fae"/></g><g><circle cx="84" cy="84" r="22" fill="#efa3b1"/><circle cx="80" cy="80" r="14" fill="#f5bcc6"/><circle cx="86" cy="86" r="8" fill="#e58799"/></g><g><circle cx="63" cy="98" r="14" fill="#fbe3e3"/><circle cx="61" cy="96" r="8" fill="#fff2f0"/><circle cx="64" cy="99" r="4" fill="#f3c6c9"/></g><rect x="44" y="150" width="36" height="60" rx="15" fill="url(#hVase)" stroke="#d9dfe0" stroke-width="1"/><rect x="50" y="160" width="4" height="40" rx="2" fill="#fff" opacity=".7"/><rect x="129" y="118" width="62" height="92" rx="9" fill="url(#hAmber)" opacity=".95"/><rect x="136" y="126" width="6" height="74" rx="3" fill="#fff" opacity=".45"/><rect x="145" y="156" width="34" height="18" rx="1" fill="#fff8f0" opacity=".92"/><rect x="151" y="162" width="22" height="2" fill="#b08a5a"/><rect x="155" y="167" width="14" height="1.5" fill="#c9a97d"/><rect x="151" y="106" width="18" height="14" fill="#d6b07a"/><rect x="144" y="78" width="32" height="30" rx="3" fill="url(#hGold)"/><rect x="150" y="80" width="3" height="26" fill="#fff" opacity=".4"/><path d="M214 168l14-6v-10l-14 4z" fill="#b3233d"/><path d="M214 156l14-4v4l-14 6z" fill="#c93a52" opacity=".6"/><rect x="213" y="166" width="16" height="10" fill="url(#hGold)"/><rect x="212" y="175" width="18" height="34" rx="2" fill="#232323"/><rect x="214" y="177" width="2" height="30" fill="#fff" opacity=".15"/><rect x="236" y="178" width="17" height="31" rx="2" fill="#232323"/><rect x="236" y="178" width="17" height="4" fill="url(#hGold)"/><ellipse cx="292" cy="212" rx="36" ry="9" fill="#c69a6c"/><rect x="256" y="205" width="72" height="7" fill="#c69a6c"/><ellipse cx="292" cy="205" rx="36" ry="9" fill="#f1dbbd" stroke="#c9a466" stroke-width="1.5"/><ellipse cx="292" cy="205" rx="25" ry="6" fill="#e7b29d"/><ellipse cx="285" cy="204" rx="8" ry="2" fill="#f3cdbd"/><rect x="96" y="222" width="70" height="4" rx="2" transform="rotate(-8 96 222)" fill="#d8b98e"/><path d="M164 212c8-2 16-2 22 2-6 4-14 5-22 4z" transform="rotate(-8 164 212)" fill="#efd6c4"/></svg></div><div class="hero-body"><h3>Beauty in full bloom</h3><p>Step into spring with the newest trends in fragrance, makeup and skincare.</p><button class="obtn" type="button" data-act="noop">DISCOVER NOW</button></div></section>
+    <div class="chips"><span>CHANEL</span><span>Guerlain</span><span>YSL</span><span>Tom Ford</span><span>Gucci</span><span>Givenchy</span><span>Prada</span><span>Dior</span></div>
+    <div class="shead"><h4>New Arrivals</h4><a href="#" data-act="noop">View All</a></div>
+    <div class="prods">${prod('Online Exclusive')}${prod('Online Exclusive')}${prod('Free Delivery')}</div>
+    <div class="shead"><h4>Spring Trends</h4></div>
+    <div class="spring"><small>New in Fragrances</small><b>A breath of spring luxury</b></div>
+    <footer class="ffoot"><div class="row"><span>Top Categories</span><span>–</span></div><div class="row"><span>Top Brands</span><span>+</span></div><div class="row"><span>Help &amp; FAQs</span><span>+</span></div><div class="row"><span>About Us</span><span>+</span></div><small>© 2026 Tanagra. All Rights Reserved.</small></footer>
+  </div>
+</div>`;
+}
+
+function scrSignin(){
+  const err = S.params.err;
+  return `
+<div class="screen" data-screen="signin">
+  <div class="scroll" id="scroll">
+    ${toolbar()}
+    <div class="sec">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div><h1 class="t-title" style="color:var(--green)">Enter your email or phone number</h1><p class="p-md">We’ll find your account or help you register.</p></div>
+        <p class="p-md"><span style="font:500 16px/24px Geist,Inter">MUSE OneID:</span> Enter your MUSE details once and stay signed in across all MUSE brands.</p>
+      </div>
+      <div class="igroup">
+        <label for="idInput" class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Email or phone number</label>
+        <input id="idInput" class="field ${err ? 'err' : ''}" type="text" inputmode="email" autocomplete="username" placeholder="Email or phone number" value="${esc(S.identity)}" aria-invalid="${!!err}" ${err ? 'aria-describedby="idErr"' : ''}>
+        ${err ? `<p class="field-msg" id="idErr" role="alert">${esc(err)}</p>` : ''}
+        <button class="btn" type="button" data-act="continue" id="continueBtn">Continue</button>
+      </div>
+      <div class="divider"><span>or</span></div>
+      <div class="social">${A.social}
+        <button type="button" style="left:91px" data-act="noop" aria-label="Continue with Google"></button>
+        <button type="button" style="left:155px" data-act="noop" aria-label="Continue with Apple"></button>
+        <button type="button" style="left:219px" data-act="noop" aria-label="Continue with Facebook"></button>
+      </div>
+      <div class="help">
+        <button class="help-toggle" type="button" data-act="help-signin" aria-expanded="${S.helpOpenSignin}">Need help? ${ICON.chevUp}</button>
+        ${S.helpOpenSignin ? `<button class="help-link" data-act="noop">Forgot which email you used?</button><button class="help-link" data-act="noop">About your MUSE OneID account</button><button class="help-link" data-act="noop">Privacy &amp; security</button>` : ''}
+        <div class="recap"><p class="cap-sm">This page is protected by Google reCAPTCHA to ensure you’re not a bot.</p></div>
+      </div>
+    </div>
+    ${usp()}
+    ${legalFoot()}
+  </div>
+  <div class="sticky-cta" id="stickyCta"><button class="btn" type="button" data-act="continue">Continue</button></div>
+</div>`;
+}
+
+function fmt(t){ const m = Math.floor(t/60), s = t%60; return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'); }
+function scrOtp(){
+  const where = S.idType === 'phone' ? 'phone' : 'email';
+  return `
+<div class="screen" data-screen="otp">
+  <div class="scroll">
+    ${toolbar()}
+    <div class="sec">
+      <div><h1 class="t-title" style="color:var(--navy)">Enter your code</h1><p class="p-md" style="color:var(--ink2)">Sent to your ${where} &amp; will expire in the next <span id="otpTime" style="font:400 16px/24px Geist,Inter">${fmt(S.otpLeft)}</span></p></div>
+      <div class="detail"><span class="who">${esc(S.identity)}</span><button class="link-u" type="button" data-act="change">Change</button></div>
+    </div>
+    <div class="sec otp" id="otpSec">
+      <div class="otp-row" role="group" aria-label="6-digit code">
+        ${[0,1,2,3,4,5].map(i => `<input class="otp-box" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" ${i===0?'autocomplete="one-time-code"':'autocomplete="off"'} aria-label="Digit ${i+1}">`).join('')}
+      </div>
+      <div class="resend" id="resend"><span>Didn’t get the code?</span><button type="button" data-act="resend">Resend</button></div>
+      <button class="btn" type="button" data-act="verify" id="verifyBtn">Verify</button>
+      <label class="check"><input type="checkbox" id="trust" ${S.trust ? 'checked' : ''}><span class="box"><i></i></span><span>Trust this device in the future</span></label>
+    </div>
+    <div class="sec">
+      <div class="help" id="otpHelp">
+        <button class="help-toggle" type="button" data-act="help-otp" aria-expanded="${S.helpOpenOtp}">Need help? ${ICON.chevUp}</button>
+        ${S.helpOpenOtp ? `<button class="help-link" data-act="noop">I can’t access this ${where}</button><button class="help-link" data-act="noop">Use password instead</button><button class="help-link" data-act="noop">Privacy &amp; security</button><div class="recap"><p class="cap-sm">This page is protected by Google reCAPTCHA to ensure you’re not a bot.</p></div>` : ''}
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
+function scrOffer(){
+  const o = OFFER[S.resolved];
+  return `
+<div class="screen" data-screen="offer">
+  <div class="scroll">
+    ${toolbar()}
+    <div class="picto">${A.picto}</div>
+    <div style="padding:24px 16px;display:flex;flex-direction:column;gap:8px"><h1 class="t-title" style="color:var(--navy)">${o.title}</h1><p class="p-md" style="color:var(--ink2)">${o.body}</p></div>
+    ${usp()}
+    <div class="cta-foot">
+      ${o.top ? `<p class="cap-md">${o.top}</p>` : ''}
+      ${o.marketing ? `<label class="check"><input type="checkbox" id="offerNews"><span class="box"><i></i></span><span>Send me news and offers from FACES (optional)</span></label>` : ''}
+      ${o.loyalty ? `<label class="check"><input type="checkbox" id="offerLoyalty"><span class="box"><i></i></span><span>Also enroll me in MUSE loyalty to earn and redeem points at every MUSE brand (optional)</span></label>` : ''}
+      <button class="btn" type="button" data-act="offer-primary" id="offerPrimary">${o.primary}</button>
+      <button class="btn ghost" type="button" data-act="offer-secondary">${o.secondary}</button>
+      ${o.legal ? `<p class="cap-md">${o.legal}</p>` : ''}
+    </div>
+  </div>
+</div>`;
+}
+
+function scrReg(){
+  const oneid = S.params.kind === 'oneid';
+  const f = S.form;
+  const cta = oneid ? 'Create MUSE OneID' : 'Finish setup';
+  const legal = oneid
+    ? 'By selecting Create MUSE OneID, you agree to share your account details across MUSE brands, in line with our Privacy Policy and Terms and Conditions.'
+    : 'By selecting Finish setup, you agree to the Terms and acknowledge the Privacy Policy.';
+  const titles = ['Mr','Ms','Mrs','Mx'].map(t => `<option ${f.title===t?'selected':''}>${t}</option>`).join('');
+  return `
+<div class="screen" data-screen="reg">
+  <div class="scroll">
+    ${toolbar()}
+    <div class="sec">
+      <div><h1 class="t-title" style="color:var(--navy)">${oneid ? 'Create your MUSE OneID' : 'Complete your FACES account'}</h1><p class="p-md" style="color:var(--ink2)">Just a few details to finish.</p></div>
+      <div class="detail beige"><span class="who">${esc(S.identity)}</span><button class="link-u" type="button" data-act="change">Change</button></div>
+      <div class="row2">
+        <div class="fwrap"><select class="field ${f.title?'':'empty'}" id="fTitle" aria-label="Title" aria-describedby="fTitleErr"><option value="" ${f.title?'':'selected'} disabled>Title</option>${titles}</select><p class="field-msg" id="fTitleErr" role="alert" hidden></p></div>
+        <div class="fwrap"><input class="field" id="fFirst" placeholder="First name" aria-label="First name" aria-describedby="fFirstErr" autocomplete="given-name" value="${esc(f.first)}"><p class="field-msg" id="fFirstErr" role="alert" hidden></p></div>
+      </div>
+      <div class="fwrap"><input class="field" id="fLast" placeholder="Last name" aria-label="Last name" aria-describedby="fLastErr" autocomplete="family-name" value="${esc(f.last)}"><p class="field-msg" id="fLastErr" role="alert" hidden></p></div>
+      <div class="fwrap"><input class="field" id="fPass" type="password" placeholder="Password" aria-label="Password" aria-describedby="fPassErr" autocomplete="new-password" value="${esc(f.pass)}"><p class="field-msg" id="fPassErr" role="alert" hidden></p></div>
+      <label class="check"><input type="checkbox" id="fNews" ${f.news?'checked':''}><span class="box"><i></i></span><span>Send me news and offers from FACES (optional)</span></label>
+    </div>
+    <div style="flex:1;min-height:40px"></div>
+    <div class="cta-foot left" style="padding-top:16px">
+      <button class="btn" type="button" data-act="reg-submit" id="regBtn">${cta}</button>
+      <p class="cap-md">${legal}</p>
+    </div>
+  </div>
+</div>`;
+}
+
+const SCREENS = { home:scrHome, signin:scrSignin, otp:scrOtp, offer:scrOffer, reg:scrReg };
+
+/* ===================== Rendering & navigation ===================== */
+function render(animate = true){
+  vp.querySelectorAll('.screen.leaving').forEach(n => n.remove());
+  const old = vp.querySelector('.screen');
+  const wrap = document.createElement('div');
+  wrap.innerHTML = SCREENS[S.screen]().trim();
+  const el = wrap.firstElementChild;
+  if (!animate) el.style.animation = 'none';
+  if (old){ if (animate){ old.classList.add('leaving'); setTimeout(() => old.remove(), 170); } else old.remove(); }
+  vp.insertBefore(el, $('#toast'));
+  $('#statusbar').classList.toggle('on-home', S.screen === 'home');
+  bindScreen(el);
+  updatePanel();
+}
+function go(screen, params = {}, push = true){
+  if (push) S.history.push({ screen:S.screen, params:S.params });
+  S.screen = screen; S.params = params; S.menu = false;
+  if (screen !== 'otp') stopTimer();
+  render();
+}
+function back(){
+  if (S.busy) return;
+  const prev = S.history.pop();
+  if (!prev) return;
+  S.screen = prev.screen; S.params = { ...prev.params, err:false }; S.menu = false;
+  if (S.screen !== 'otp') stopTimer();
+  if (S.screen === 'otp') startTimer();
+  render();
+}
+
+function bindScreen(el){
+  const scr = el.dataset.screen;
+  if (scr === 'signin'){
+    const input = el.querySelector('#idInput');
+    const sync = () => {
+      const f = formatUae(input.value);
+      if (f !== input.value){ input.value = f; input.setSelectionRange(f.length, f.length); }
+      S.identity = input.value;
+      const ok = !!classify(input.value);
+      if (S.params.err && ok){ S.params.err = false; input.classList.remove('err'); input.removeAttribute('aria-invalid'); el.querySelector('#idErr')?.remove(); }
+    };
+    input.addEventListener('input', sync);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); doContinue(); } });
+    const scroller = el.querySelector('#scroll'), sticky = el.querySelector('#stickyCta'), inline = el.querySelector('#continueBtn');
+    const io = new IntersectionObserver(([en]) => {
+      const above = en.boundingClientRect.top < en.rootBounds.top + 60;
+      sticky.classList.toggle('show', !en.isIntersecting && above);
+    }, { root: scroller, threshold: 0 });
+    io.observe(inline);
+  }
+  if (scr === 'otp') bindOtp(el);
+  if (scr === 'reg'){
+    const map = { fFirst:'first', fLast:'last', fPass:'pass' };
+    Object.entries(map).forEach(([id,k]) => el.querySelector('#'+id).addEventListener('input', e => { S.form[k] = e.target.value; setErr(id, ''); }));
+    el.querySelector('#fTitle').addEventListener('change', e => { S.form.title = e.target.value; e.target.classList.remove('empty'); setErr('fTitle', ''); });
+    el.querySelector('#fNews').addEventListener('change', e => S.form.news = e.target.checked);
+  }
+}
+
+/* ===================== Sign in / discovery ===================== */
+function setBusy(btns, label){
+  btns.forEach(b => {
+    b.dataset.label = b.dataset.label || b.textContent;
+    b.style.minWidth = b.offsetWidth + 'px';
+    b.classList.add('loading'); b.disabled = true;
+    b.innerHTML = `<span class="spin" aria-hidden="true"></span><span>${label}</span>`;
+    b.setAttribute('aria-busy','true');
+  });
+}
+async function doContinue(){
+  if (S.busy) return;
+  const input = $('#idInput'); if (!input) return;
+  const v = input.value.trim(); const type = classify(v);
+  if (!type){
+    S.params.err = v ? 'Enter a valid email address or mobile number.' : 'Enter your email or phone number.';
+    render(false); $('#idInput').focus(); return;
+  }
+  S.busy = true;
+  S.identity = v; S.idType = type;
+  setBusy([...document.querySelectorAll('[data-act="continue"]')], 'Checking…');
+  updatePanel('Identity lookup…');
+  await wait(850);
+  S.resolved = resolve(v, type); S.declined = false;
+  S.busy = false;
+  go('otp');
+  startTimer();
+  setTimeout(() => document.querySelector('.otp-box')?.focus({ preventScroll:true }), 260);
+}
+
+/* ===================== OTP ===================== */
+function startTimer(){
+  stopTimer(); S.otpLeft = 119;
+  S.timer = setInterval(() => { S.otpLeft = Math.max(0, S.otpLeft - 1); const t = $('#otpTime'); if (t) t.textContent = fmt(S.otpLeft); if (!S.otpLeft) stopTimer(); }, 1000);
+}
+function stopTimer(){ if (S.timer){ clearInterval(S.timer); S.timer = null; } }
+function otpBoxes(){ return [...document.querySelectorAll('.otp-box')]; }
+function otpValue(){ return otpBoxes().map(b => b.value).join(''); }
+function updateVerify(){
+  otpBoxes().forEach(b => { if (b.value) b.classList.remove('err'); });
+  if (/^\d{6}$/.test(otpValue())) $('#otpErr')?.remove();
+}
+function otpError(){
+  const boxes = otpBoxes();
+  boxes.forEach(b => b.classList.toggle('err', !b.value));
+  if (!$('#otpErr')) document.querySelector('.otp-row').insertAdjacentHTML('afterend', '<p class="field-msg" id="otpErr" role="alert">Enter all 6 digits of your code.</p>');
+  (boxes.find(b => !b.value) || boxes[0]).focus();
+}
+function fillFrom(i, digits){
+  const boxes = otpBoxes(); let k = i;
+  for (const d of digits){ if (k > 5) break; boxes[k++].value = d; }
+  (boxes[Math.min(k, 5)]).focus(); updateVerify();
+}
+function bindOtp(el){
+  const boxes = otpBoxes();
+  boxes.forEach((b, i) => {
+    b.addEventListener('input', () => {
+      const v = b.value.replace(/\D/g,'');
+      if (v.length > 1){ b.value = ''; fillFrom(i, v); return; }
+      b.value = v; if (v && i < 5) boxes[i+1].focus(); updateVerify();
+    });
+    b.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !b.value && i > 0){ e.preventDefault(); boxes[i-1].value = ''; boxes[i-1].focus(); updateVerify(); }
+      else if (e.key === 'ArrowLeft' && i > 0){ e.preventDefault(); boxes[i-1].focus(); }
+      else if (e.key === 'ArrowRight' && i < 5){ e.preventDefault(); boxes[i+1].focus(); }
+      else if (e.key === 'Enter'){ e.preventDefault(); doVerify(); }
+    });
+    b.addEventListener('paste', e => { e.preventDefault(); fillFrom(i, (e.clipboardData.getData('text') || '').replace(/\D/g,'')); });
+    b.addEventListener('focus', () => b.select());
+  });
+  el.querySelector('#trust').addEventListener('change', e => S.trust = e.target.checked);
+}
+async function doVerify(){
+  if (S.busy) return;
+  if (!/^\d{6}$/.test(otpValue())){ otpError(); return; }
+  S.busy = true;
+  const sec = $('#otpSec'); sec.classList.add('verifying');
+  otpBoxes().forEach(b => b.readOnly = true);
+  S.helpOpenOtp = false;
+  const help = $('#otpHelp'); if (help){ help.querySelectorAll('.help-link,.recap').forEach(n => n.remove()); help.querySelector('.help-toggle').setAttribute('aria-expanded','false'); }
+  const btn = $('#verifyBtn'); setBusy([btn], 'Verifying…');
+  updatePanel('Verifying code…');
+  await wait(1000);
+  btn.classList.remove('loading'); btn.classList.add('ok');
+  btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Verified</span>`;
+  await wait(380);
+  S.busy = false; S.helpOpenOtp = true;
+  stopTimer();
+  go('offer');
+}
+
+/* ===================== Decision & registration ===================== */
+async function offerPrimary(){
+  if (S.busy) return;
+  if (S.resolved === 'NEW_CUSTOMER'){ go('reg', { kind:'oneid' }); return; }
+  S.busy = true;
+  setBusy([$('#offerPrimary')], OFFER[S.resolved].primaryBusy);
+  await wait(950);
+  S.busy = false;
+  S.name = PERSONAS[S.resolved].name;
+  complete();
+}
+function offerSecondary(){
+  if (S.busy) return;
+  if (S.resolved === 'NEW_CUSTOMER'){ go('reg', { kind:'faces' }); return; }
+  if (S.resolved === 'MUSE_ONLY'){
+    S.declined = true; S.history = []; S.signedIn = false; S.urlPath = S.origin;
+    go('home', {}, false); updatePanel(); return;
+  }
+  S.name = PERSONAS[S.resolved].name;
+  complete();
+}
+function setErr(id, msg){
+  const n = $('#'+id), m = $('#'+id+'Err'); if (!n || !m) return;
+  n.classList.toggle('err', !!msg); n.setAttribute('aria-invalid', msg ? 'true' : 'false');
+  m.textContent = msg || ''; m.hidden = !msg;
+}
+async function regSubmit(){
+  if (S.busy) return;
+  const f = S.form;
+  const checks = [
+    ['fTitle', f.title ? '' : 'Select a title.'],
+    ['fFirst', f.first.trim() ? '' : 'Enter your first name.'],
+    ['fLast', f.last.trim() ? '' : 'Enter your last name.'],
+    ['fPass', !f.pass ? 'Create a password.' : (f.pass.length < 8 ? 'Use at least 8 characters.' : '')]
+  ];
+  let firstBad = null;
+  checks.forEach(([id, msg]) => { setErr(id, msg); if (msg && !firstBad) firstBad = $('#'+id); });
+  if (firstBad){ firstBad.focus(); return; }
+  S.busy = true;
+  setBusy([$('#regBtn')], S.params.kind === 'oneid' ? 'Creating…' : 'Finishing…');
+  await wait(1000);
+  S.busy = false; S.name = f.first.trim();
+  complete();
+}
+function complete(){
+  S.signedIn = true; S.urlPath = S.origin; S.history = [];
+  go('home', {}, false);
+  const prog = $('#prog'); if (prog){ void prog.offsetWidth; prog.classList.add('run'); }
+  setTimeout(showToast, 450);
+}
+
+/* ===================== Toast ===================== */
+let toastTimer = null;
+function showToast(){
+  const t = $('#toast'); t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(hideToast, 4000);
+}
+function hideToast(){ $('#toast').classList.remove('show'); }
+
+/* ===================== Presenter ===================== */
+function buildPanel(){
+  $('#plist').innerHTML = Object.entries(PERSONAS).map(([k,p]) => `
+    <li><button class="pbtn" type="button" data-act="persona" data-p="${k}" aria-pressed="${S.persona===k}">
+      <span class="pnum">${p.n}</span>
+      <span><span class="pname">${p.label}</span><br><span class="pmeta">${p.a}${p.b ? '<br>' + p.b : ''}</span></span>
+    </button></li>`).join('');
+  $('#exEmail').textContent = PERSONAS[S.persona].example;
+}
+function updatePanel(stepOverride){
+  document.querySelectorAll('.pbtn').forEach(b => b.setAttribute('aria-pressed', b.dataset.p === S.persona));
+  $('#exEmail').textContent = PERSONAS[S.persona].example;
+  let step = stepOverride || STEP_LABEL[S.screen];
+  if (!stepOverride && S.screen === 'home') step = S.signedIn ? 'Signed in, returned to ' + S.urlPath : (S.declined ? 'Declined: no FACES association (fallback pending Tech)' : 'FACES page, signed out');
+  if (!stepOverride && S.screen === 'reg') step = S.params.kind === 'oneid' ? 'Registration: MUSE OneID' : 'Registration: FACES only';
+  $('#nowStep').textContent = step;
+  $('#nowLookup').textContent = S.resolved ? LOOKUP_LABEL[S.resolved] : 'Not checked yet';
+  $('#pBack').disabled = !S.history.length;
+  $('#fabText').textContent = PERSONAS[S.persona].n + ' · ' + PERSONAS[S.persona].label;
+}
+function restart(){
+  stopTimer(); hideToast();
+  Object.assign(S, { screen:'home', params:{}, history:[], identity:'', idType:'email', resolved:null, signedIn:false, name:'', menu:false, declined:false, busy:false, trust:false, helpOpenOtp:true, form:{ title:'', first:'', last:'', pass:'', news:false } });
+  S.urlPath = S.origin;
+  render();
+}
+function openSignin(){ S.menu = false; go('signin', {}); }
+function fillIdentity(v){
+  const doFill = () => { const i = $('#idInput'); i.value = v; i.dispatchEvent(new Event('input')); i.focus(); };
+  if (S.screen !== 'signin'){ if (S.signedIn) restart(); openSignin(); setTimeout(doFill, 60); } else doFill();
+}
+async function next(){
+  if (S.busy) return;
+  switch (S.screen){
+    case 'home':
+      if (S.signedIn || S.declined){ restart(); return; }
+      if (!S.menu){ S.menu = true; render(false); return; }
+      openSignin(); return;
+    case 'signin':
+      if (!classify($('#idInput').value)) fillIdentity(PERSONAS[S.persona].example);
+      await wait(150); doContinue(); return;
+    case 'otp':
+      fillFrom(0, '123456'); await wait(200); doVerify(); return;
+    case 'offer': offerPrimary(); return;
+    case 'reg':
+      Object.assign(S.form, { title:S.form.title || 'Ms', first:S.form.first || 'Sara', last:S.form.last || 'Haddad', pass:S.form.pass.length >= 8 ? S.form.pass : 'demo-pass-1' });
+      render(false); await wait(250); regSubmit(); return;
+  }
+}
+
+/* ===================== Events ===================== */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]');
+  if (!t){
+    if (S.menu && !e.target.closest('.menu')){ S.menu = false; render(false); }
+    return;
+  }
+  const act = t.dataset.act;
+  if (t.tagName === 'A') e.preventDefault();
+  switch (act){
+    case 'toggle-menu': S.menu = !S.menu; render(false); break;
+    case 'open-signin': openSignin(); break;
+    case 'signout': restart(); break;
+    case 'back': back(); break;
+    case 'continue': doContinue(); break;
+    case 'help-signin': S.helpOpenSignin = !S.helpOpenSignin; render(false); break;
+    case 'help-otp': if (!S.busy){ const vals = otpValue(); S.helpOpenOtp = !S.helpOpenOtp; render(false); fillFrom(0, vals); } break;
+    case 'change': S.history = S.history.filter(h => h.screen === 'home'); go('signin', {}, false); setTimeout(() => $('#idInput')?.focus(), 50); break;
+    case 'resend': {
+      startTimer(); const r = $('#resend');
+      r.querySelector('button').outerHTML = '<span class="sent">Code sent</span>';
+      setTimeout(() => { const s = r.querySelector('.sent'); if (s) s.outerHTML = '<button type="button" data-act="resend">Resend</button>'; }, 2500);
+      break; }
+    case 'verify': doVerify(); break;
+    case 'offer-primary': offerPrimary(); break;
+    case 'offer-secondary': offerSecondary(); break;
+    case 'reg-submit': regSubmit(); break;
+    case 'toast-close': hideToast(); break;
+    case 'persona': S.persona = t.dataset.p; restart(); closePanelMobile(); break;
+    case 'fill-email': fillIdentity(PERSONAS[S.persona].example); closePanelMobile(); break;
+    case 'fill-phone': fillIdentity('+971 50 123 4567'); closePanelMobile(); break;
+    case 'p-back': back(); break;
+    case 'p-restart': restart(); break;
+    case 'p-next': next(); break;
+    case 'panel-open': $('#panel').classList.add('open'); break;
+    case 'panel-close': $('#panel').classList.remove('open'); break;
+  }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if (S.menu){ S.menu = false; render(false); } $('#panel').classList.remove('open'); } });
+function closePanelMobile(){ if (window.matchMedia('(max-width: 960px)').matches) $('#panel').classList.remove('open'); }
+
+/* ===================== Frame scaling ===================== */
+function fit(){
+  const holder = $('#holder'), frame = $('#frame');
+  if (window.innerWidth <= 500){ holder.style.width = ''; holder.style.height = ''; frame.style.transform = ''; return; }
+  const stage = $('#stage');
+  const s = Math.min(1, (stage.clientHeight - 48) / 844, (stage.clientWidth - 48) / 390);
+  frame.style.transform = `scale(${s})`;
+  holder.style.width = (390 * s) + 'px'; holder.style.height = (844 * s) + 'px';
+}
+window.addEventListener('resize', fit);
+
+buildPanel();
+render(false);
+fit();
+</script>
+</body>
+</html>
