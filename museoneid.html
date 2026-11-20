@@ -78,6 +78,8 @@ button{ font:inherit; color:inherit; }
 .l-lg{ font:500 16px/24px Inter, sans-serif; margin:0; }
 .cap-md{ font:300 12px/14px Inter, sans-serif; margin:0; color:var(--navy); }
 .cap-sm{ font:300 10px/12px Inter, sans-serif; margin:0; color:var(--muted); }
+.cap-md a{ color:inherit; text-decoration:underline; text-underline-offset:2px; }
+.cap-md a:hover{ color:var(--green); }
 
 /* toolbar */
 .toolbar{ position:sticky; top:0; z-index:3; padding:8px 16px; background:linear-gradient(0deg, rgba(251,251,249,0) 0%, rgba(251,251,249,.46) 46%, #fbfbf9 100%); }
@@ -356,10 +358,10 @@ const LOOKUP_LABEL = {
   FACES_AND_MUSE:'FACES account and MUSE OneID found'
 };
 const OFFER = {
-  NEW_CUSTOMER:{ title:'New here? Create your MUSE OneID', body:'Your details are verified. Create a MUSE OneID to shop at FACES and every MUSE brand with one sign in, and enjoy your MUSE benefits wherever you shop.', top:'Prefer a FACES-only account? You can choose that instead.', primary:'Create MUSE OneID', primaryBusy:'', secondary:'Create a FACES account only', legal:'' },
-  FACES_ONLY:{ title:'Upgrade your FACES account to MUSE OneID', body:'Welcome back. Turn your FACES account into a MUSE OneID to sign in to every MUSE brand with the same details, and join MUSE loyalty to earn and redeem points wherever you shop.', top:'', primary:'Upgrade to MUSE OneID', primaryBusy:'Upgrading…', secondary:'Maybe later', legal:'By upgrading, you agree to share your account details across MUSE brands, in line with our Privacy Policy and Terms and Conditions. MUSE loyalty membership is subject to the MUSE programme terms.', loyalty:true },
-  MUSE_ONLY:{ title:'Use your MUSE OneID at FACES?', body:'Your MUSE OneID is verified. Continue to shop at FACES with the same sign in, with no new account to create.', top:'Your MUSE points and benefits come with you.', primary:'Continue to FACES', primaryBusy:'Connecting…', secondary:'Not now', legal:'By continuing, you agree to share your MUSE OneID account details with FACES, in line with our Privacy Policy and Terms and Conditions.', marketing:true },
-  FACES_AND_MUSE:{ title:'Connect FACES to your MUSE OneID?', body:'We found your FACES account and your MUSE OneID. Connect them to sign in to all MUSE brands with one account.', top:'Your FACES orders and preferences stay the same.', primary:'Connect accounts', primaryBusy:'Connecting…', secondary:'Maybe later', legal:'By connecting, you agree to share your account details across MUSE brands, in line with our Privacy Policy and Terms and Conditions.' }
+  NEW_CUSTOMER:{ title:'New here? Create your MUSE OneID', body:'Your details are verified. Create a MUSE OneID to shop at FACES and every MUSE brand with one sign in, and enjoy your MUSE benefits wherever you shop.', top:'', primary:'Create MUSE OneID', primaryBusy:'', secondary:'Create a FACES account only', legal:'By continuing, you agree to our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' },
+  FACES_ONLY:{ title:'Upgrade your FACES account to MUSE OneID', body:'Welcome back. Turn your FACES account into a MUSE OneID to sign in to every MUSE brand with the same details, and join MUSE loyalty to earn and redeem points wherever you shop.', top:'', primary:'Upgrade to MUSE OneID', primaryBusy:'Upgrading…', secondary:'Maybe later', legal:'By upgrading, you agree to share your details across MUSE brands under our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' },
+  MUSE_ONLY:{ title:'Use your MUSE OneID at FACES?', body:'Your MUSE OneID is verified. Continue to shop at FACES with the same sign in, with no new account to create.', top:'', primary:'Continue to FACES', primaryBusy:'Connecting…', secondary:'Not now', legal:'By continuing, you agree to share your MUSE OneID details with FACES under our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' },
+  FACES_AND_MUSE:{ title:'Connect FACES to your MUSE OneID?', body:'We found your FACES account and your MUSE OneID. Connect them to sign in to all MUSE brands with one account.', top:'', primary:'Connect accounts', primaryBusy:'Connecting…', secondary:'Maybe later', legal:'By connecting, you agree to share your details across MUSE brands under our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.' }
 };
 const STEP_LABEL = { home:'FACES page', signin:'Sign in / Register (email discovery)', otp:'OTP verification', offer:'MUSE OneID decision', reg:'Registration' };
 
@@ -560,8 +562,8 @@ function scrReg(){
   const f = S.form;
   const cta = oneid ? 'Create MUSE OneID' : 'Finish setup';
   const legal = oneid
-    ? 'By selecting Create MUSE OneID, you agree to share your account details across MUSE brands, in line with our Privacy Policy and Terms and Conditions.'
-    : 'By selecting Finish setup, you agree to the Terms and acknowledge the Privacy Policy.';
+    ? 'By selecting Create MUSE OneID, you agree to share your details across MUSE brands under our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.'
+    : 'By selecting Finish setup, you agree to our <a href="#" data-act="noop">Privacy Policy</a> and <a href="#" data-act="noop">Terms</a>.';
   const titles = ['Mr','Ms','Mrs','Mx'].map(t => `<option ${f.title===t?'selected':''}>${t}</option>`).join('');
   return `
 <div class="screen" data-screen="reg">
